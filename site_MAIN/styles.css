@@ -94,7 +94,7 @@ body::before {
 .page.active {
   display: flex;
   min-height: 100vh;
-  padding-top: 48px;
+  padding-top: 70px;
   animation: pageFadeIn 0.35s ease forwards;
 }
 @keyframes pageFadeIn {
@@ -106,8 +106,8 @@ body::before {
 .topnav {
   position: fixed; top: 0; left: 0; right: 0; z-index: 100;
   display: flex; align-items: center; justify-content: space-between;
-  padding: 0 24px;
-  height: 48px;
+  padding: 12px 32px;
+  height: 70px;
   background: var(--cream);
   border-bottom: 1px solid var(--border);
 }
@@ -115,9 +115,12 @@ body::before {
   font-family: 'IBM Plex Mono', monospace;
   font-weight: 500; font-size: 13px; letter-spacing: 0.04em;
   color: var(--black); text-decoration: none;
+  z-index: 2;
 }
 .topnav-links {
-  display: flex; gap: 28px; list-style: none;
+  display: flex; gap: 32px; list-style: none;
+  position: absolute; left: 50%; transform: translateX(-50%);
+  z-index: 1;
 }
 .topnav-links a {
   font-size: 12px; font-weight: 400; letter-spacing: 0.03em;
@@ -148,9 +151,9 @@ body::before {
 .sidebar {
   width: var(--sidebar-w);
   flex-shrink: 0;
-  padding: 20px 16px;
+  padding: 24px 16px;
   border-right: 1px solid var(--border);
-  position: sticky; top: 48px; height: calc(100vh - 48px);
+  position: sticky; top: 70px; height: calc(100vh - 70px);
   overflow-y: auto; display: flex; flex-direction: column;
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE/Edge */
@@ -349,7 +352,7 @@ body::before {
 .ticker-sep { color: rgba(255,255,255,0.2); margin: 0 10px; }
 
 /* ── FOOTER ── */
-footer { padding: 40px; border-top: 1px solid var(--border); display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 16px; flex-wrap: wrap; text-align: center; }
+footer { padding: 40px; border-top: 1px solid var(--border); display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 16px; flex-wrap: wrap; text-align: center; background: var(--cream); width: 100%; position: relative; z-index: 10; margin-top: auto; }
 .footer-brand { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; font-weight: 600; text-transform: uppercase; }
 .footer-brand span { font-weight: 400; color: var(--muted); display: block; margin-top: 4px; font-size: 9px; }
 .footer-links { display: flex; gap: 24px; flex-wrap: wrap; justify-content: center; margin-top: 8px; }
@@ -647,8 +650,8 @@ footer { padding: 40px; border-top: 1px solid var(--border); display: flex; flex
 .arms-card:hover { transform: translateY(-4px); border-top-color: var(--red); box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
 .arms-card-source { font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--amber); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
 .arms-card-source::before { content: '■'; color: var(--red); font-size: 10px; }
-.arms-card-title { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 800; margin-bottom: 12px; line-height: 1.2; }
-.arms-card-text { font-size: 13px; color: rgba(255,255,255,0.6); line-height: 1.7; margin-bottom: 24px; }
+.arms-card-title { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 800; margin-bottom: 12px; line-height: 1.2; color: var(--cream); }
+.arms-card-text { font-size: 13px; color: rgba(255,255,255,0.7); line-height: 1.7; margin-bottom: 24px; }
 .arms-card-stat { font-family: 'IBM Plex Mono', monospace; font-size: 28px; font-weight: 600; color: var(--red); margin-top: auto; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; align-items: baseline; gap: 8px; }
 .arms-card-stat span { font-size: 10px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; }
 
@@ -861,6 +864,7 @@ footer { padding: 40px; border-top: 1px solid var(--border); display: flex; flex
 
 /* Imperial Archive Viewer (British.html) */
 .bm-viewer { background: #fff; border: 1px solid var(--border); padding: 60px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); position: relative; min-height: 400px; display: flex; flex-direction: column; background-image: radial-gradient(#d0ccc4 1px, transparent 1px); background-size: 20px 20px; }
+.bm-viewer:not(:has(*)) { display: none !important; min-height: 0; padding: 0; border: none; }
 .bm-viewer-meta { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 32px; display: flex; gap: 24px; border-bottom: 2px solid var(--border); padding-bottom: 16px; }
 .bm-viewer-title { font-family: 'Playfair Display', serif; font-size: 40px; font-weight: 900; margin-bottom: 24px; color: var(--black); line-height: 1.1; }
 .bm-viewer-body p { font-size: 15px; line-height: 1.9; color: var(--text); margin-bottom: 24px; max-width: 720px; }
