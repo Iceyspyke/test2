@@ -142,15 +142,17 @@ body::before {
 .mobile-menu-btn svg { width: 20px; height: 20px; }
 
 @media (max-width: 768px) {
-  .mobile-menu-btn { display: block; }
+  .mobile-menu-btn { display: block; color: var(--text); }
   .topnav-links {
     display: none; flex-direction: column;
-    position: fixed; top: 48px; left: 0; right: 0;
+    position: fixed; top: 70px; left: 0; right: 0;
     background: var(--cream); border-bottom: 1px solid var(--border);
-    padding: 16px 24px; gap: 16px; z-index: 99;
+    padding: 20px 24px; gap: 16px; z-index: 99;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.05);
   }
   .topnav-links.active { display: flex; }
   .topnav-icons .system-clock { display: none; }
+  .topnav-icons svg { flex-shrink: 0; }
 }
 
 /* ── LAYOUT ── */
@@ -963,23 +965,26 @@ footer { padding: 40px; border-top: 1px solid var(--border); display: flex; flex
   
   /* 1. Global Spacing & Layout */
   .sidebar { display: none !important; } /* Hide sidebar completely */
-  .main, #page-legal .main { padding: 24px 16px !important; }
+  .main, #page-legal .main { padding: 20px 16px !important; min-width: 0 !important; }
   .section, .icj-header, .case-header, .case-body, .case-evidence, .verdicts-section { padding: 32px 16px !important; }
   .hero { padding: 0 16px 40px !important; min-height: 400px !important; }
   .icj-divider { margin: 16px 16px !important; }
-  .bm-viewer { padding: 24px !important; }
+  .bm-viewer { padding: 24px 16px !important; }
   footer { padding: 32px 16px !important; }
 
   /* 2. Grid Collapse (Force 1 column) */
+  .folder-grid, .bm-grid, .icj-exhibits, .icj-exhibits-bottom, .case-body,
   .siege-grid, .media-grid, .arms-grid, .med-grid, .geneva-grid, .infra-grid, 
   .warrant-grid, .cult-person-grid, .evidence-row, .forensic-grid, 
   .folder-card-bottom, .detention-stats-grid, .counts-grid {
     grid-template-columns: 1fr !important;
+    gap: 16px !important;
   }
 
   /* 3. Typography Adjustments */
   .page-header-title, .icj-title, .case-title, .bm-viewer-title {
     font-size: clamp(28px, 8vw, 36px) !important;
+    word-break: break-word;
   }
   .page-header-text, .icj-scope-text {
     font-size: 13px !important;
@@ -987,10 +992,13 @@ footer { padding: 40px; border-top: 1px solid var(--border); display: flex; flex
   }
 
   /* 4. Table-to-Card Conversion */
-  /* Transforms traditional unreadable tables into mobile-friendly stacked cards */
+  .hr-table, .detention-table, .compliance-table, .checkpoint-table, .census-table, #registry-master-table,
+  .hr-table tbody, .detention-table tbody, .compliance-table tbody, .checkpoint-table tbody, .census-table tbody, #registry-master-table tbody {
+    display: block !important; width: 100% !important; overflow: hidden !important;
+  }
   .hr-table thead, .detention-table thead, .compliance-table thead, 
   .checkpoint-table thead, .census-table thead, #registry-master-table thead {
-    display: none !important; /* Hide column headers */
+    display: none !important;
   }
   .hr-table tr, .detention-table tr, .compliance-table tr, 
   .checkpoint-table tr, .census-table tr, #registry-master-table tr {
@@ -1000,6 +1008,7 @@ footer { padding: 40px; border-top: 1px solid var(--border); display: flex; flex
     margin-bottom: 16px !important;
     background: #fff !important;
     box-shadow: 0 4px 12px rgba(0,0,0,0.04) !important;
+    width: 100% !important;
   }
   .hr-table td, .detention-table td, .compliance-table td, 
   .checkpoint-table td, .census-table td, #registry-master-table td {
@@ -1007,6 +1016,7 @@ footer { padding: 40px; border-top: 1px solid var(--border); display: flex; flex
     padding: 12px 16px !important;
     border-bottom: 1px solid var(--border) !important;
     text-align: left !important;
+    word-break: break-word !important;
   }
   .hr-table td:last-child, .detention-table td:last-child, .compliance-table td:last-child, 
   .checkpoint-table td:last-child, .census-table td:last-child, #registry-master-table td:last-child {
@@ -1016,7 +1026,7 @@ footer { padding: 40px; border-top: 1px solid var(--border); display: flex; flex
   /* 5. Specific Element Fixes */
   .timeline-item { grid-template-columns: 1fr !important; margin-bottom: 32px !important; }
   .tl-content-left { text-align: left !important; padding-right: 0 !important; }
-  .tl-center { display: none !important; } /* Hide timeline diamond/line on mobile */
+  .tl-center { display: none !important; }
   
   .bm-viewer-meta { flex-direction: column !important; gap: 8px !important; }
   
@@ -1026,12 +1036,20 @@ footer { padding: 40px; border-top: 1px solid var(--border); display: flex; flex
     width: calc(100% - 24px) !important; 
     height: auto !important; 
   }
+
+  .modal-box { max-width: 90% !important; padding: 24px 16px !important; margin: 0 auto; }
   
   /* Search Overlay Adjustments */
   .search-overlay { padding: 20% 5% !important; }
-  .search-input { font-size: 18px !important; }
-  .search-prompt { font-size: 18px !important; margin-right: 8px !important; }
+  .search-input { font-size: 16px !important; }
+  .search-prompt { font-size: 16px !important; margin-right: 8px !important; }
   .search-close { top: 16px !important; right: 16px !important; }
+  
+  /* Overflow Protections */
+  body, html { overflow-x: hidden !important; width: 100% !important; }
+  .data-block, .terminal-alert { word-break: break-word !important; }
+  .census-filter-wrap { flex-direction: column; align-items: stretch; width: 100%; }
+  .census-search-input { width: 100%; }
 }
 >>>>
 @media (max-width: 1024px) {
