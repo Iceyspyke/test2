@@ -28,21 +28,8 @@ const NAV_MAP = {
   case: 'nav-icj', icc: 'nav-icc'
 };
 
-let pageSwitchTimeout = null;
-
 function showPage(id) {
-  if (pageSwitchTimeout) clearTimeout(pageSwitchTimeout);
-  const data = FORENSIC_DATA[id];
-  if (data) {
-    openModal(data.lines, data.color);
-    pageSwitchTimeout = setTimeout(() => {
-      closeModal();
-      executeSwitch(id);
-      pageSwitchTimeout = null;
-    }, data.lines.length * 900 + 400);
-  } else {
-    executeSwitch(id);
-  }
+  executeSwitch(id);
 }
 
 function executeSwitch(id) {
@@ -65,7 +52,6 @@ function executeSwitch(id) {
   document.querySelector('.topnav-links')?.classList.remove('active');
 
   document.title = `ARCHIVE.PS — ${id.toUpperCase()}_NODE`;
-  updateSystemStatus(id);
   syncSidebarHighlight(id);
 }
 
@@ -136,7 +122,6 @@ function handleGlobalClicks(e) {
   e.preventDefault();
 
   if (btn.classList.contains('btn-request')) {
-    openModal(['> INITIATING SECURE HANDSHAKE...', '> VERIFYING NODE IDENTIFICATION...', '> NODE_ID: 0x' + Math.floor(Math.random() * 1000000).toString(16), '> ERROR: PERMISSION_SCOPE_INSUFFICIENT', '> ACCESS DENIED. ATTEMPT LOGGED.'], 'var(--red)');
     return;
   }
 
@@ -146,25 +131,8 @@ function handleGlobalClicks(e) {
     const imgEl = btn.querySelector('.evidence-img');
     const imgSrc = imgEl ? imgEl.src : null;
     
-    const exScan = EXHIBIT_DATA[exId] || ['> INITIATING FORENSIC SCAN...', `> EXHIBIT_ID: ${exId}`, '> MATCH_FOUND: SOURCE_MEDIA_AUTHENTIC', '> DECRYPTING GEOSPATIAL MARKERS...'];
-    btn.classList.add('scanning');
-    openModal(exScan, 'var(--green-light)');
-    setTimeout(() => {
-      btn.classList.remove('scanning');
-      closeModal();
-      openLightbox(exId, exTitle, imgSrc);
-    }, exScan.length * 900 + 200);
+    openLightbox(exId, exTitle, imgSrc);
     return;
-  }
-
-  const reportId = btn.getAttribute('data-report-id');
-  const currentPageId = document.querySelector('.page.active')?.id?.replace('page-', '') || 'mandate';
-  const contextData = FORENSIC_DATA[reportId] || FORENSIC_DATA[currentPageId];
-
-  if (contextData) {
-    openModal(contextData.lines, contextData.color);
-  } else {
-    openModal(['> ESTABLISHING ENCRYPTED TUNNEL...', '> APPLYING DECRYPTION CIPHER...', '> WARNING: SOURCE_FILE REDACTED AT ORIGIN.', '> PARTIAL DATA RETRIEVED.']);
   }
 }
 
@@ -253,56 +221,6 @@ function executeSearchRoute(pageId) {
   showPage(pageId);
 }
 
-// ── SYSTEM CLOCK ──
-function initSystemClock() {
-  const update = () => {
-    const now = new Date();
-    const time = now.toISOString().split('T')[1].split('.')[0] + '_UTC';
-    const el = document.getElementById('utc-clock');
-    if (el) el.innerText = time;
-  };
-  update();
-  setInterval(update, 1000);
-}
-
-// ── DATA STREAM ──
-function initLandingDataStream() {
-  const stream = document.getElementById('landing-data-stream');
-  if (!stream) return;
-  const logs = [
-    '> PACKET_REC: GAZA_NORTH_FORENSICS', '> AUTH_SUCCESS: UN_OCHA_TRANSFER',
-    '> ALERT: BUFFER_ZONE_INCREMENT +120m', '> SYNC: ICJ_EVIDENTIARY_DOCKET',
-    '> PING: SATELLITE_NODE_7_ONLINE', '> LOG: EXIT_PERMIT_DENIAL_v99',
-    '> UPLOAD: TESTIMONY_ID_8814...', '> DECRYPTING: COGAT_MEMO_88B...'
-  ];
-  setInterval(() => {
-    const line = document.createElement('div');
-    line.className = 'stream-line' + (Math.random() > 0.8 ? ' alert' : '');
-    line.innerText = logs[Math.floor(Math.random() * logs.length)];
-    stream.appendChild(line);
-    if (stream.children.length > 8) stream.removeChild(stream.firstChild);
-  }, 3000);
-}
-
-// ── INTEL FEED ──
-function initIntelligenceFeed() {
-  const intelLines = [
-    '> SYNCING: ICJ_DOCKET_2024...', '> PACKET_REC: GAZA_NORTH_TLM...',
-    '> UPLOAD: TESTIMONY_ID_8812...', '> SCANNING: AREA_C_SATELLITE...',
-    '> WARNING: NODE_LATENCY...', '> SYNCING: GENEVA_PROTOCOL_V...',
-    '> AUTH_SUCCESS: NGO_PIPE...', '> SEARCH_LOG: QUERIED_VILLAGE_044...'
-  ];
-  setInterval(() => {
-    const scroll = document.getElementById('sidebar-intel');
-    if (!scroll) return;
-    const newLine = intelLines[Math.floor(Math.random() * intelLines.length)];
-    const lines = scroll.innerHTML.split('<br>').filter(Boolean);
-    lines.push(newLine);
-    if (lines.length > 8) lines.shift();
-    scroll.innerHTML = lines.join('<br>');
-  }, 4000);
-}
-
 // ── SIDEBAR SYNC ──
 // Injects template content into all .sidebar elements that are still empty
 function syncSidebars() {
@@ -312,18 +230,6 @@ function syncSidebars() {
     if (!sb.children.length) {
       sb.appendChild(tmpl.content.cloneNode(true));
     }
-  });
-}
-
-// ── STATUS BAR ──
-function updateSystemStatus(id = 'mandate') {
-  const entropy = (Math.random() * 100).toFixed(2);
-  document.querySelectorAll('.sidebar-status').forEach(status => {
-    status.innerHTML = `
-      <div class="status-item"><div class="status-dot declassified"></div>Node: ${id.toUpperCase()}</div>
-      <div class="status-item"><div class="status-dot"></div>Entropy: ${entropy}%</div>
-      <div class="status-item" style="color:var(--amber); font-family:monospace; font-size:7px; margin-top:8px;">SIGNAL_STRENGTH: ▮▮▮▮▯</div>
-    `;
   });
 }
 
@@ -500,15 +406,11 @@ function pingMapSite(type, siteId) {
 
 // ── INIT ──
 document.addEventListener('DOMContentLoaded', () => {
-  initSystemClock();
-  initLandingDataStream();
-  initIntelligenceFeed();
   syncSidebars();
   initTimelineFilter();
   initSearch();
   initMapTooltips();
   injectRealImages();
-  updateSystemStatus('mandate');
   document.body.addEventListener('click', handleGlobalClicks);
 
   // Select Balfour Declaration by default on initialization

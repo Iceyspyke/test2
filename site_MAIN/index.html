@@ -22,7 +22,6 @@
     <li><a id="nav-icc"     onclick="showPage('icc'); return false;">The ICC Warrants</a></li>
   </ul>
   <div class="topnav-icons">
-    <div class="system-clock" id="utc-clock">00:00:00_UTC</div>
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" onclick="openSearch()" title="Search"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
   </div>
@@ -69,11 +68,6 @@
   </ul>
   <div class="sidebar-bottom">
     <button class="btn-request">Request Access</button>
-    <div class="intel-feed">
-      <span class="intel-feed-title">LIVE_INTEL_FEED</span>
-      <div class="intel-scroll" id="sidebar-intel">&gt; SYNCING: ICJ_DOCKET_2024...<br>&gt; PACKET_REC: GAZA_NORTH_TLM...<br>&gt; UPLOAD: TESTIMONY_ID_8812...<br>&gt; SCANNING: AREA_C_SATELLITE...</div>
-    </div>
-    <div class="sidebar-status"></div>
   </div>
 </template>
 
@@ -90,7 +84,7 @@
       <div class="hero-landscape"></div>
       <div class="hero-content">
         <div class="hero-file-tag">File: Forensic_General_001</div>
-        <h1 class="hero-title glitch" data-text="The Indictment of History.">The Indictment<br>of History.</h1>
+        
         <p class="hero-subtitle">A definitive repository of documented war crimes, occupation records, and international human rights reports.</p>
         <div class="hero-actions">
           <button class="btn-primary" onclick="showPage('icj')">Open ICJ Docket</button>
@@ -216,16 +210,6 @@
         </div>
       </div>
     </section>
-
-    <!-- Live Data Stream -->
-    <section style="padding: 40px 40px 0;">
-      <div class="stream-label">LIVE ARCHIVE TELEMETRY</div>
-      <div class="stream-box" id="landing-data-stream">
-        <div class="stream-line">&gt; SYSTEM_BOOT: ARCHIVE.PS_v4.2</div>
-        <div class="stream-line">&gt; LOADING FORENSIC_DATABASE...</div>
-      </div>
-    </section>
-
     <!-- Recent Uploads -->
     <section class="section">
       <h2 class="section-title">Recent Uploads</h2>
@@ -283,7 +267,6 @@
 <div id="forensic-lightbox" class="lightbox-overlay" onclick="closeLightbox()">
   <div class="lightbox-container" onclick="event.stopPropagation()">
     <button class="modal-close" onclick="closeLightbox()" style="right:-40px;top:0;font-size:40px;">×</button>
-    <div class="scan-line" style="opacity:1;animation:scanningLine 4s infinite;"></div>
     <img id="lb-img" class="lightbox-img" src="https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=800&q=70&fit=crop" alt="Evidence exhibit" style="display:block;">
     <div class="lightbox-meta">
       <div id="lb-id" class="lightbox-id"></div>
@@ -467,20 +450,9 @@ window.showPage = async function(id) {
       });
     }
   }
-  // 2. Show modal if forensic data exists, then switch
-  if (window.pageSwitchTimeout) clearTimeout(window.pageSwitchTimeout);
-  const data = window.FORENSIC_DATA && window.FORENSIC_DATA[id];
-  if (data) {
-    openModal(data.lines, data.color);
-    window.pageSwitchTimeout = setTimeout(() => { 
-      closeModal(); 
-      executeSwitch(id); 
-      window.pageSwitchTimeout = null;
-    }, data.lines.length * 900 + 400);
-  } else {
+    
     executeSwitch(id);
-  }
-};
+  };
 
 function showFallbackPage(id) {
   // Generate a stub page if file not found
