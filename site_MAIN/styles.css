@@ -812,6 +812,17 @@ footer { padding: 40px; border-top: 1px solid var(--border); display: flex; flex
 
 /* ── BRITISH MANDATE ── */
 #page-british .main { padding: 40px; }
+.bm-header-title { font-family: 'Playfair Display', serif; font-size: clamp(36px, 5vw, 56px); font-weight: 900; line-height: 1.05; margin-bottom: 16px; color: var(--black); }
+.bm-header-text { font-size: 14px; font-style: italic; font-weight: 300; color: var(--muted); line-height: 1.7; max-width: 640px; margin-bottom: 40px; border-left: 3px solid var(--amber); padding-left: 16px; }
+.bm-grid { display: grid; grid-template-columns: 280px 1fr; gap: 32px; align-items: start; margin-bottom: 60px; }
+
+/* British Sidebar List Enhancements */
+.bm-grid .bm-list-item { font-family: inherit; font-size: inherit; text-transform: none; letter-spacing: normal; padding: 16px; background: #fff; border: 1px solid var(--border); margin-bottom: 8px; border-left: 3px solid transparent; }
+.bm-grid .bm-list-item:hover { background: rgba(0,0,0,0.02); border-left-color: var(--amber); }
+.bm-grid .bm-list-item.active { background: rgba(0,0,0,0.04); border-left-color: var(--red); }
+.bm-item-year { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--amber); margin-bottom: 4px; font-weight: 600; letter-spacing: 0.1em; }
+.bm-item-title { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 800; color: var(--black); margin-bottom: 4px; }
+.bm-item-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
 
 /* ── TERMINAL MODAL ── */
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 1000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s; backdrop-filter: blur(4px); }
@@ -902,6 +913,7 @@ footer { padding: 40px; border-top: 1px solid var(--border); display: flex; flex
 /* ── LARGE SCREENS ONLY ── */
 @media (max-width: 1024px) {
   .folder-grid { grid-template-columns: 1fr; }
+  .bm-grid { grid-template-columns: 1fr; }
   .folder-card-bottom { grid-template-columns: 1fr 1fr; }
   .icj-exhibits, .icj-exhibits-bottom { grid-template-columns: 1fr; }
   .evidence-row { grid-template-columns: repeat(2, 1fr); }
