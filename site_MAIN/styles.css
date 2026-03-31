@@ -967,3 +967,160 @@ footer { padding: 40px; border-top: 1px solid var(--border); display: flex; flex
   .data-point::before { display: none !important; }
   a { text-decoration: underline !important; color: #000 !important; }
 }
+
+/* ══════════════════════════════════════════
+   ENFORCED DESIGN CONSISTENCY LAYER
+   Applies strict uniformity across all pages
+════════════════════════════════════════════ */
+
+/* 1. Page Titles */
+.page-header-title, .icj-title, .case-title, .siege-header-title, .testimony-header-title, 
+.hr-header-title, .media-header-title, .arms-header-title, .med-header-title, .cult-header-title, 
+.census-header-title, .geneva-title, .infra-title, .compliance-title, .movement-title, 
+.registry-title, .detention-header-title, .bm-header-title, .legal-title, .un-title {
+  font-family: 'Playfair Display', serif !important;
+  font-size: clamp(32px, 5vw, 52px) !important;
+  font-weight: 900 !important;
+  line-height: 1.05 !important;
+  margin-bottom: 16px !important;
+  color: var(--black);
+}
+
+/* 2. Page Subtitles / Descriptions */
+.page-header-text, .siege-header-text, .testimony-header-text, .hr-header-text, 
+.media-header-text, .arms-header-text, .med-header-text, .census-header-text, 
+.detention-header-text, .bm-header-text, .icj-scope-text {
+  font-size: 14px !important;
+  font-style: italic !important;
+  font-weight: 300 !important;
+  color: var(--muted) !important;
+  line-height: 1.7 !important;
+  max-width: 640px !important;
+  margin-bottom: 40px !important;
+  border-left: 3px solid var(--red) !important;
+  padding-left: 16px !important;
+}
+
+/* 3. Tables */
+.hr-table, .detention-table, .compliance-table, .checkpoint-table, .census-table, #registry-master-table {
+  width: 100% !important; 
+  border-collapse: collapse !important; 
+  margin-bottom: 60px !important; 
+  background: #fff !important; 
+  border: 1px solid var(--border) !important; 
+  font-size: 13px !important;
+}
+.hr-table th, .detention-table th, .compliance-table th, .checkpoint-table th, .census-table th, #registry-master-table th {
+  font-family: 'IBM Plex Mono', monospace !important; 
+  font-size: 10px !important; 
+  letter-spacing: 0.1em !important; 
+  text-transform: uppercase !important; 
+  color: var(--muted) !important; 
+  padding: 16px !important; 
+  border-bottom: 2px solid var(--border) !important; 
+  text-align: left !important; 
+  background: #FAFAFA !important;
+}
+.hr-table td, .detention-table td, .compliance-table td, .checkpoint-table td, .census-table td, #registry-master-table td {
+  padding: 16px !important; 
+  border-bottom: 1px solid var(--border) !important; 
+  transition: background var(--transition-fast) !important; 
+  color: var(--text) !important;
+}
+.hr-table tr:hover td, .detention-table tr:hover td, .compliance-table tr:hover td, .checkpoint-table tr:hover td, .census-table tr:hover td, #registry-master-table tr:hover td {
+  background: rgba(0,0,0,0.02) !important;
+}
+
+/* 4. Action Buttons (Inline) */
+.detention-btn, .hr-btn, .cyber-log-btn, .un-res-action, .tl-btn {
+  font-family: 'IBM Plex Mono', monospace !important; 
+  font-size: 9px !important; 
+  letter-spacing: 0.1em !important; 
+  text-transform: uppercase !important; 
+  padding: 8px 16px !important; 
+  border: 1px solid var(--border) !important; 
+  background: #fff !important; 
+  color: var(--text) !important; 
+  text-decoration: none !important; 
+  cursor: pointer !important; 
+  transition: all var(--transition-fast) !important; 
+  display: inline-block !important;
+}
+.detention-btn:hover, .hr-btn:hover, .cyber-log-btn:hover, .un-res-action:hover, .tl-btn:hover {
+  background: var(--black) !important; 
+  color: var(--cream) !important; 
+  border-color: var(--black) !important; 
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1) !important; 
+  transform: translateY(-1px) !important;
+}
+
+/* 5. Action Buttons (Block) */
+.btn-view-register, .proc-download {
+  display: block !important; 
+  width: 100% !important; 
+  text-align: center !important; 
+  border: 1px solid var(--border) !important; 
+  padding: 12px !important; 
+  font-family: 'IBM Plex Mono', monospace !important; 
+  font-size: 9px !important; 
+  letter-spacing: 0.1em !important; 
+  text-transform: uppercase !important; 
+  color: var(--text) !important; 
+  text-decoration: none !important; 
+  cursor: pointer !important; 
+  background: transparent !important;
+  transition: all var(--transition-fast) !important;
+}
+.btn-view-register:hover, .proc-download:hover {
+  background: var(--black) !important; 
+  color: var(--cream) !important; 
+  border-color: var(--black) !important;
+}
+
+/* Fix dark-themed card buttons */
+.arms-card .btn-view-register, .arms-card .proc-download, 
+.media-card.blackout .btn-view-register, .media-card.blackout .proc-download,
+.cult-item .btn-view-register, .cult-item .proc-download {
+  border-color: rgba(255,255,255,0.2) !important; 
+  color: var(--cream) !important; 
+}
+.arms-card .btn-view-register:hover, .arms-card .proc-download:hover, 
+.media-card.blackout .btn-view-register:hover, .media-card.blackout .proc-download:hover,
+.cult-item .btn-view-register:hover, .cult-item .proc-download:hover {
+  background: var(--cream) !important; 
+  color: var(--black) !important;
+}
+
+/* 6. Tags & Badges */
+.exhibit-tag, .detention-tag, .census-status, .warrant-status, .med-badge, .icj-badge {
+  font-family: 'IBM Plex Mono', monospace !important; 
+  font-size: 9px !important; 
+  letter-spacing: 0.1em !important; 
+  text-transform: uppercase !important; 
+  padding: 4px 8px !important; 
+  display: inline-block !important; 
+  border-radius: 2px !important;
+}
+
+/* 7. Card Grids Consistency */
+.siege-grid, .media-grid, .arms-grid, .med-grid, .geneva-grid, .infra-grid, .warrant-grid {
+  display: grid !important; 
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)) !important; 
+  gap: 24px !important; 
+  margin-bottom: 60px !important; 
+  align-items: stretch !important;
+}
+
+/* 8. Card Typography */
+.siege-card-title, .media-card-title, .arms-card-title, .med-title, .geneva-card-title, .infra-card-title, .cult-title, .cult-archive-title, .casualty-title {
+  font-family: 'Playfair Display', serif !important;
+  font-size: 20px !important;
+  font-weight: 800 !important;
+  margin-bottom: 12px !important;
+  line-height: 1.2 !important;
+}
+.siege-card-desc, .media-card-text, .arms-card-text, .med-desc, .geneva-card-text, .infra-card-text, .cult-desc, .cult-archive-text {
+  font-size: 13px !important;
+  line-height: 1.7 !important;
+  margin-bottom: 24px !important;
+}
