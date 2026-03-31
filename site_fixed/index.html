@@ -266,89 +266,6 @@
 <!-- For multi-file split, each page lives in pages/ and is fetched dynamically -->
 <!-- The pages below are the inline versions for single-file compatibility -->
 
-<script>
-// ── DYNAMIC PAGE LOADER ──
-// Loads page HTML from pages/*.html if available, otherwise uses inline pages
-const PAGE_FILES = {
-  nakba: 'nakba.html',
-  icj: 'icj.html',
-  hr: 'hr.html',
-  icc: 'icc.html',
-};
-
-const loadedPages = new Set(['mandate']);
-
-async function ensurePageLoaded(id) {
-  if (loadedPages.has(id)) return true;
-  const file = PAGE_FILES[id];
-  if (!file) return false;
-  try {
-    const resp = await fetch(file);
-    if (!resp.ok) return false;
-    const html = await resp.text();
-    const temp = document.createElement('div');
-    temp.innerHTML = html;
-    const pageEl = temp.querySelector('.page');
-    if (pageEl) {
-      document.body.insertBefore(pageEl, document.getElementById('access-modal'));
-      loadedPages.add(id);
-      return true;
-    }
-  } catch (e) {
-    console.warn('Could not load page file:', file, e);
-  }
-  return false;
-}
-
-// Override showPage to ensure dynamic loading before switching
-window.showPage = async function(id) {
-  // 1. Try to load the page fragment if not already in DOM
-  if (!document.getElementById('page-' + id)) {
-    const loaded = await ensurePageLoaded(id);
-    if (!loaded) {
-      showFallbackPage(id);
-      return;
-    }
-    // Inject sidebar into any newly added data-autosidebar elements
-    const tmpl = document.getElementById('sidebar-template');
-    if (tmpl) {
-      document.querySelectorAll('.sidebar[data-autosidebar]').forEach(sb => {
-        if (!sb.children.length) sb.appendChild(tmpl.content.cloneNode(true));
-      });
-    }
-  }
-  // 2. Show modal if forensic data exists, then switch
-  const data = window.FORENSIC_DATA && window.FORENSIC_DATA[id];
-  if (data) {
-    openModal(data.lines, data.color);
-    setTimeout(() => { closeModal(); executeSwitch(id); }, data.lines.length * 900 + 400);
-  } else {
-    executeSwitch(id);
-  }
-};
-
-function showFallbackPage(id) {
-  // Generate a stub page if file not found
-  const existing = document.getElementById('page-' + id);
-  if (existing) { executeSwitch(id); return; }
-  const stub = document.createElement('div');
-  stub.id = 'page-' + id;
-  stub.className = 'page';
-  stub.innerHTML = `
-    <aside class="sidebar" data-autosidebar></aside>
-    <div class="main" style="padding:40px;">
-      <div class="page-header-label">Loading Node</div>
-      <h1 class="page-header-title" style="font-family:'Playfair Display',serif;font-size:36px;font-weight:900;">${id.toUpperCase().replace(/-/g,' ')}</h1>
-      <p style="font-size:13px;color:var(--muted);font-style:italic;">This section's data files are loading or not yet available in standalone mode. In the full deployment, content is served from <code>pages/${id}.html</code>.</p>
-      <div class="cyber-log" style="margin-top:32px;">&gt; NODE: ${id.toUpperCase()}<br>&gt; STATUS: INITIALIZING...<br>&gt; AWAITING: DATA_FEED</div>
-      <footer style="margin-top:40px;padding-top:24px;border-top:1px solid var(--border);"><div class="footer-brand">ARCHIVE.PS <span>Stub Page — Full Content in pages/${id}.html</span></div></footer>
-    </div>
-  `;
-  document.body.insertBefore(stub, document.getElementById('access-modal'));
-  loadedPages.add(id);
-  executeSwitch(id);
-}
-</script>
 
 <!-- ══════════════════════════════════════════
      GLOBAL OVERLAYS
@@ -481,6 +398,88 @@ function showFallbackPage(id) {
 <script src="data.js"></script>
 <script src="app.js"></script>
 <script>
+// ── DYNAMIC PAGE LOADER ──
+// Loads page HTML from pages/*.html if available, otherwise uses inline pages
+const PAGE_FILES = {
+  nakba: 'nakba.html',
+  icj: 'icj.html',
+  hr: 'hr.html',
+  icc: 'icc.html',
+};
+
+const loadedPages = new Set(['mandate']);
+
+async function ensurePageLoaded(id) {
+  if (loadedPages.has(id)) return true;
+  const file = PAGE_FILES[id];
+  if (!file) return false;
+  try {
+    const resp = await fetch(file);
+    if (!resp.ok) return false;
+    const html = await resp.text();
+    const temp = document.createElement('div');
+    temp.innerHTML = html;
+    const pageEl = temp.querySelector('.page');
+    if (pageEl) {
+      document.body.insertBefore(pageEl, document.getElementById('access-modal'));
+      loadedPages.add(id);
+      return true;
+    }
+  } catch (e) {
+    console.warn('Could not load page file:', file, e);
+  }
+  return false;
+}
+
+// Override showPage to ensure dynamic loading before switching
+window.showPage = async function(id) {
+  // 1. Try to load the page fragment if not already in DOM
+  if (!document.getElementById('page-' + id)) {
+    const loaded = await ensurePageLoaded(id);
+    if (!loaded) {
+      showFallbackPage(id);
+      return;
+    }
+    // Inject sidebar into any newly added data-autosidebar elements
+    const tmpl = document.getElementById('sidebar-template');
+    if (tmpl) {
+      document.querySelectorAll('.sidebar[data-autosidebar]').forEach(sb => {
+        if (!sb.children.length) sb.appendChild(tmpl.content.cloneNode(true));
+      });
+    }
+  }
+  // 2. Show modal if forensic data exists, then switch
+  const data = window.FORENSIC_DATA && window.FORENSIC_DATA[id];
+  if (data) {
+    openModal(data.lines, data.color);
+    setTimeout(() => { closeModal(); executeSwitch(id); }, data.lines.length * 900 + 400);
+  } else {
+    executeSwitch(id);
+  }
+};
+
+function showFallbackPage(id) {
+  // Generate a stub page if file not found
+  const existing = document.getElementById('page-' + id);
+  if (existing) { executeSwitch(id); return; }
+  const stub = document.createElement('div');
+  stub.id = 'page-' + id;
+  stub.className = 'page';
+  stub.innerHTML = `
+    <aside class="sidebar" data-autosidebar></aside>
+    <div class="main" style="padding:40px;">
+      <div class="page-header-label">Loading Node</div>
+      <h1 class="page-header-title" style="font-family:'Playfair Display',serif;font-size:36px;font-weight:900;">${id.toUpperCase().replace(/-/g,' ')}</h1>
+      <p style="font-size:13px;color:var(--muted);font-style:italic;">This section's data files are loading or not yet available in standalone mode. In the full deployment, content is served from <code>pages/${id}.html</code>.</p>
+      <div class="cyber-log" style="margin-top:32px;">&gt; NODE: ${id.toUpperCase()}<br>&gt; STATUS: INITIALIZING...<br>&gt; AWAITING: DATA_FEED</div>
+      <footer style="margin-top:40px;padding-top:24px;border-top:1px solid var(--border);"><div class="footer-brand">ARCHIVE.PS <span>Stub Page — Full Content in pages/${id}.html</span></div></footer>
+    </div>
+  `;
+  document.body.insertBefore(stub, document.getElementById('access-modal'));
+  loadedPages.add(id);
+  executeSwitch(id);
+}
+
 // ── SIDEBAR AUTO-INJECT ──
 // Populate all sidebars from template on load
 document.addEventListener('DOMContentLoaded', () => {

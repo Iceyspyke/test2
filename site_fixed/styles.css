@@ -546,13 +546,13 @@ footer { padding: 40px; border-top: 1px solid var(--border); display: flex; just
 
 /* ── CASUALTY / ICJ EXHIBITS BOTTOM ── */
 .icj-exhibits-bottom { padding: 0 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
-.casuality-card { border: 1px solid var(--border); padding: 24px; position: relative; border-left: 3px solid var(--red); }
-.casuality-title { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 800; margin-bottom: 20px; }
-.casuality-stats { display: flex; flex-direction: column; gap: 0; margin-bottom: 20px; }
-.casuality-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); }
-.casuality-row-label { font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
-.casuality-row-val { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 900; }
-.casuality-row-val.red { color: var(--red); }
+.casualty-card { border: 1px solid var(--border); padding: 24px; position: relative; border-left: 3px solid var(--red); }
+.casualty-title { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 800; margin-bottom: 20px; }
+.casualty-stats { display: flex; flex-direction: column; gap: 0; margin-bottom: 20px; }
+.casualty-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.casualty-row-label { font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.casualty-row-val { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 900; }
+.casualty-row-val.red { color: var(--red); }
 .btn-view-register { display: block; width: 100%; text-align: center; border: 1px solid var(--border); padding: 12px; font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text); text-decoration: none; cursor: pointer; background: transparent; }
 .btn-view-register:hover { background: var(--black); color: var(--cream); }
 .urgent-card { background: var(--red); color: #fff; padding: 20px; }

@@ -120,13 +120,16 @@ function handleGlobalClicks(e) {
   if (btn.classList.contains('evidence-item')) {
     const exId = btn.querySelector('.evidence-ex-id')?.innerText.replace('Exhibit ', '').trim() || 'NULL';
     const exTitle = btn.querySelector('.evidence-ex-title')?.innerText || '';
+    const imgEl = btn.querySelector('.evidence-img');
+    const imgSrc = imgEl ? imgEl.src : null;
+    
     const exScan = EXHIBIT_DATA[exId] || ['> INITIATING FORENSIC SCAN...', `> EXHIBIT_ID: ${exId}`, '> MATCH_FOUND: SOURCE_MEDIA_AUTHENTIC', '> DECRYPTING GEOSPATIAL MARKERS...'];
     btn.classList.add('scanning');
     openModal(exScan, 'var(--green-light)');
     setTimeout(() => {
       btn.classList.remove('scanning');
       closeModal();
-      openLightbox(exId, exTitle);
+      openLightbox(exId, exTitle, imgSrc);
     }, exScan.length * 900 + 200);
     return;
   }
@@ -153,12 +156,16 @@ function initMapTooltips() {
 }
 
 // ── LIGHTBOX ──
-function openLightbox(id, title) {
+function openLightbox(id, title, imgSrc) {
   const lb = document.getElementById('forensic-lightbox');
   const idEl = document.getElementById('lb-id');
   const descEl = document.getElementById('lb-desc');
+  const imgEl = document.getElementById('lb-img');
+  
   if (idEl) idEl.innerText = `EXHIBIT_ID: ${id}`;
   if (descEl) descEl.innerText = title;
+  if (imgEl && imgSrc) imgEl.src = imgSrc;
+  
   if (lb) lb.classList.add('active');
 }
 
@@ -202,8 +209,7 @@ function closeSearch() {
 
 function executeSearchRoute(pageId) {
   closeSearch();
-  openModal([`> ANALYZING NODE: ${pageId.toUpperCase()}...`, '> PERMISSION GRANTED.'], 'var(--green-light)');
-  setTimeout(() => { closeModal(); executeSwitch(pageId); }, 1800);
+  showPage(pageId);
 }
 
 // ── SYSTEM CLOCK ──
