@@ -511,6 +511,10 @@ document.addEventListener('DOMContentLoaded', () => {
   updateSystemStatus('mandate');
   document.body.addEventListener('click', handleGlobalClicks);
 
+  // Select Balfour Declaration by default on initialization
+  const firstMandate = document.querySelector('.bm-list-item');
+  if (firstMandate) firstMandate.click();
+
   // ESC closes modals/search
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
