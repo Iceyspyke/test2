@@ -16,10 +16,35 @@
   --muted: #6B6B6B;
   --border: #D0CCC4;
   --sidebar-w: 180px;
+  --transition-fast: 0.15s ease;
+  --transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
+
+/* Custom Text Selection */
+::selection {
+  background: var(--red);
+  color: var(--cream);
+}
+
+/* Custom Scrollbar for Monolith Theme */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--cream);
+  border-left: 1px solid var(--border);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--muted);
+  border-radius: 0;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--black);
+}
 
 body {
   font-family: 'IBM Plex Sans', sans-serif;
@@ -211,19 +236,35 @@ body::before {
   background: var(--red); color: #fff;
   font-family: 'IBM Plex Mono', monospace;
   font-size: 10px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase;
-  padding: 12px 20px; border: none; cursor: pointer; transition: background 0.15s;
+  padding: 12px 20px; border: 1px solid transparent; cursor: pointer; 
+  transition: all var(--transition-fast);
   text-decoration: none; display: inline-block;
 }
-.btn-primary:hover { background: var(--coral); }
+.btn-primary:hover { 
+  background: var(--coral); 
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(200, 55, 58, 0.2);
+}
+.btn-primary:active {
+  transform: translateY(0);
+}
 .btn-outline {
   background: transparent; color: #fff;
   border: 1px solid rgba(255,255,255,0.5);
   font-family: 'IBM Plex Mono', monospace;
   font-size: 10px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase;
-  padding: 12px 20px; cursor: pointer; transition: border-color 0.15s;
+  padding: 12px 20px; cursor: pointer; 
+  transition: all var(--transition-fast);
   text-decoration: none; display: inline-block;
 }
-.btn-outline:hover { border-color: #fff; }
+.btn-outline:hover { 
+  border-color: #fff; 
+  background: rgba(255,255,255,0.05);
+  transform: translateY(-1px);
+}
+.btn-outline:active {
+  transform: translateY(0);
+}
 .hero-ticker {
   position: absolute; bottom: 0; left: 0; right: 0;
   background: rgba(0,0,0,0.7);
@@ -782,4 +823,33 @@ footer { padding: 40px; border-top: 1px solid var(--border); display: flex; just
   .tl-center { display: none; }
   .icj-exhibits, .evidence-row { grid-template-columns: 1fr; }
   .folder-card-bottom { grid-template-columns: 1fr; }
+}
+
+/* ── PRINT STYLES FOR DOCUMENT EXPORT ── */
+@media print {
+  body::before { display: none; } /* Remove CRT overlay */
+  .topnav, .sidebar, .hero, .modal-overlay, .search-overlay, footer {
+    display: none !important;
+  }
+  .page.active {
+    display: block !important;
+    padding-top: 0 !important;
+    animation: none !important;
+  }
+  .main {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+  .folder-card, .testimony-item, .un-card, .warrant-card, .med-card {
+    page-break-inside: avoid;
+    border: 1px solid #ccc !important;
+    background: #fff !important;
+    color: #000 !important;
+  }
+  .data-point::before { display: none !important; }
+  a { text-decoration: underline !important; color: #000 !important; }
 }
