@@ -28,13 +28,17 @@ const NAV_MAP = {
   case: 'nav-icj', icc: 'nav-icc'
 };
 
+let pageSwitchTimeout = null;
+
 function showPage(id) {
+  if (pageSwitchTimeout) clearTimeout(pageSwitchTimeout);
   const data = FORENSIC_DATA[id];
   if (data) {
     openModal(data.lines, data.color);
-    setTimeout(() => {
+    pageSwitchTimeout = setTimeout(() => {
       closeModal();
       executeSwitch(id);
+      pageSwitchTimeout = null;
     }, data.lines.length * 900 + 400);
   } else {
     executeSwitch(id);
@@ -48,7 +52,7 @@ function executeSwitch(id) {
   });
   document.querySelectorAll('.topnav-links a').forEach(a => a.classList.remove('active'));
 
-  const pageEl = document.getElementById(PAGE_MAP[id]);
+  const pageEl = document.getElementById(PAGE_MAP[id] || 'page-' + id);
   const navEl  = document.getElementById(NAV_MAP[id] || 'nav-mandate');
 
   if (pageEl) {
@@ -56,6 +60,9 @@ function executeSwitch(id) {
     window.scrollTo(0, 0);
   }
   if (navEl) navEl.classList.add('active');
+
+  // FIX: Close mobile menu if open upon navigation
+  document.querySelector('.topnav-links')?.classList.remove('active');
 
   document.title = `ARCHIVE.PS — ${id.toUpperCase()}_NODE`;
   updateSystemStatus(id);
@@ -78,13 +85,21 @@ function showLoader(id) {
 }
 
 // ── MODAL ENGINE ──
+let modalTimeouts = [];
+
 function openModal(lines, color) {
   const modal = document.getElementById('access-modal');
   const content = document.getElementById('modal-content');
+  
+  // FIX: Clear pending line animations to prevent overlap on rapid clicks
+  modalTimeouts.forEach(clearTimeout);
+  modalTimeouts = [];
+  
   content.innerHTML = '';
   modal.classList.add('active');
+  
   lines.forEach((lineText, index) => {
-    setTimeout(() => {
+    const t = setTimeout(() => {
       const prevLine = content.lastElementChild;
       if (prevLine) prevLine.classList.add('done');
       const div = document.createElement('div');
@@ -99,6 +114,7 @@ function openModal(lines, color) {
       }
       content.appendChild(div);
     }, index * 900);
+    modalTimeouts.push(t);
   });
 }
 
@@ -110,6 +126,13 @@ function closeModal() {
 function handleGlobalClicks(e) {
   const btn = e.target.closest('.btn-request, .siege-card-action, .btn-view-register, .urgent-link, .proc-download, .tl-btn, .hr-btn, .evidence-item, .un-res-action, .detention-btn, .cyber-log-btn');
   if (!btn) return;
+
+  // FIX: Prevent generic modal from overriding explicit routing clicks
+  if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes('showPage')) {
+    if (btn.tagName === 'A' && btn.getAttribute('href') === '#') e.preventDefault();
+    return;
+  }
+
   e.preventDefault();
 
   if (btn.classList.contains('btn-request')) {
@@ -218,6 +241,11 @@ function openSearch() {
 
 function closeSearch() {
   document.getElementById('search-overlay').classList.remove('active');
+  const input = document.getElementById('global-search-input');
+  if (input) {
+    input.value = '';
+    input.dispatchEvent(new Event('input')); // Reset results list
+  }
 }
 
 function executeSearchRoute(pageId) {

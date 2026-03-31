@@ -463,10 +463,15 @@ window.showPage = async function(id) {
     }
   }
   // 2. Show modal if forensic data exists, then switch
+  if (window.pageSwitchTimeout) clearTimeout(window.pageSwitchTimeout);
   const data = window.FORENSIC_DATA && window.FORENSIC_DATA[id];
   if (data) {
     openModal(data.lines, data.color);
-    setTimeout(() => { closeModal(); executeSwitch(id); }, data.lines.length * 900 + 400);
+    window.pageSwitchTimeout = setTimeout(() => { 
+      closeModal(); 
+      executeSwitch(id); 
+      window.pageSwitchTimeout = null;
+    }, data.lines.length * 900 + 400);
   } else {
     executeSwitch(id);
   }
