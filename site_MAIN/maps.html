@@ -1,0 +1,74 @@
+<div id="page-maps" class="page">
+  <aside class="sidebar" data-autosidebar></aside>
+  <div class="main">
+	<div class="map-header">
+	  <h1 class="map-title">Geospatial Forensics</h1>
+	  <div class="map-subtitle">Tracking Annexation &amp; Architectural Fragmentation</div>
+	</div>
+	
+	<div class="map-viewer">
+	  <div class="map-grid-bg"></div>
+	  
+	  <svg viewBox="0 0 800 600" style="width:100%; height:100%; opacity: 0.8;">
+		<path d="M300 100 Q400 50 450 150 Q550 200 500 350 Q480 500 400 550 Q300 500 250 400 Q200 250 300 100Z" fill="#152015" stroke="#2D6B4F" stroke-width="2"/>
+		
+		<g class="map-ping" style="cursor:crosshair;">
+		  <circle cx="420" cy="180" r="6" fill="var(--red)" opacity="0.8">
+			<animate attributeName="r" values="6;9;6" dur="2s" repeatCount="indefinite" />
+		  </circle>
+		  <text x="430" y="175" fill="white" font-family="monospace" font-size="8" opacity="0">ID: OUTPOST_ALPHA</text>
+		</g>
+		
+		<g class="map-ping" style="cursor:crosshair;">
+		  <circle cx="480" cy="220" r="4" fill="var(--red)" opacity="0.8"/>
+		  <text x="490" y="215" fill="white" font-family="monospace" font-size="8" opacity="0">ID: SITE_HEBRON_9</text>
+		</g>
+		<circle cx="450" cy="280" r="8" fill="var(--red)"/>
+		<circle cx="380" cy="320" r="5" fill="var(--red)"/>
+		<circle cx="410" cy="400" r="7" fill="var(--red)"/>
+		<circle cx="320" cy="450" r="4" fill="var(--red)"/>
+		
+		<path d="M420 180 L480 220 L450 280 L410 400 L320 450" fill="none" stroke="#555" stroke-width="3" stroke-dasharray="4,4"/>
+		<path d="M450 280 L380 320 L410 400" fill="none" stroke="#555" stroke-width="3" stroke-dasharray="4,4"/>
+
+		<pattern id="stripes" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+		  <line x1="0" y1="0" x2="0" y2="10" stroke="var(--amber)" stroke-width="2" opacity="0.3"/>
+		</pattern>
+		<circle cx="350" cy="200" r="40" fill="url(#stripes)"/>
+		<circle cx="460" cy="450" r="35" fill="url(#stripes)"/>
+	  </svg>
+
+	  <div class="map-ui-overlay">
+		<div class="map-ui-title">Sector Analysis: Area C</div>
+		<div class="map-data-row">
+		  <span class="map-data-label">Total Outposts</span>
+		  <span class="map-data-val">144+</span>
+		</div>
+		<div class="map-data-row">
+		  <span class="map-data-label">Demolitions (2023)</span>
+		  <span class="map-data-val red">1,128</span>
+		</div>
+		<div class="map-data-row">
+		  <span class="map-data-label">Bypass Roads</span>
+		  <span class="map-data-val">790 km</span>
+		</div>
+		<div class="map-data-row">
+		  <span class="map-data-label">Annexation Wall</span>
+		  <span class="map-data-val">712 km</span>
+		</div>
+		<div class="map-data-row" style="margin-top: 8px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 12px;">
+		  <span class="map-data-label">Restricted Access Zones</span>
+		  <span class="map-data-val">60% of Area C</span>
+		</div>
+		<div class="map-data-row">
+		  <span class="map-data-label">Agricultural Dispossession</span>
+		  <span class="map-data-val red">40,000+ Dunams</span>
+		</div>
+		<div style="margin-top: 20px; font-family: 'IBM Plex Mono', monospace; font-size: 8px; color: rgba(255,255,255,0.4); text-transform: uppercase;">
+		  Data sourced from UN OCHA &amp; Peace Now satellite telemetry.
+		</div>
+		<button class="btn-view-register proc-download" style="border-color:rgba(255,255,255,0.2); color:var(--cream); margin-top:16px;">Decrypt Geospatial Ledger</button>
+	  </div>
+	</div>
+  </div>
+</div>

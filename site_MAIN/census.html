@@ -1,0 +1,49 @@
+<div id="page-census" class="page">
+  <aside class="sidebar" data-autosidebar></aside>
+  <div class="main">
+	<div class="census-header-title">1948 Depopulation Ledger</div>
+	<p class="census-header-text">Archival census data documenting the systematic erasure of over 500 Palestinian towns and villages. Data cross-referenced with British Mandate records and UN Conciliation Commission files.</p>
+
+	<div class="census-filter-wrap">
+	  <span style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--red);">QUERY_VILLAGE ></span>
+	  <input type="text" id="census-search" class="census-search-input" placeholder="Enter Village or District Name..." oninput="filterCensusTable()">
+	</div>
+
+	<table class="census-table" id="census-master-table">
+	  <thead>
+		<tr>
+		  <th>Village Name</th>
+		  <th>District</th>
+		  <th>Est. Pop (1945)</th>
+		  <th>Date of Depopulation</th>
+		  <th>Status</th>
+		</tr>
+	  </thead>
+	  <tbody>
+		<tr><td style="font-weight:600; font-size:12px;">Deir Yassin</td><td>Jerusalem</td><td>610</td><td>April 9, 1948</td><td><span class="census-status destroyed">Destroyed / Mass Casualty</span></td></tr>
+		<tr><td style="font-weight:600; font-size:12px;">Tantura</td><td>Haifa</td><td>1,490</td><td>May 23, 1948</td><td><span class="census-status destroyed">Depopulated & Demolished</span></td></tr>
+		<tr><td style="font-weight:600; font-size:12px;">Al-Majdal</td><td>Gaza</td><td>9,910</td><td>November 4, 1948</td><td><span class="census-status destroyed">Forced Expulsion</span></td></tr>
+		<tr><td style="font-weight:600; font-size:12px;">Lifta</td><td>Jerusalem</td><td>2,550</td><td>February 1948</td><td><span class="census-status">Depopulated (Ruins Remain)</span></td></tr>
+		<tr><td style="font-weight:600; font-size:12px;">Saffuriya</td><td>Nazareth</td><td>4,330</td><td>July 15, 1948</td><td><span class="census-status destroyed">Destroyed / Replanted</span></td></tr>
+		<tr><td style="font-weight:600; font-size:12px;">Al-Dawayima</td><td>Hebron</td><td>3,710</td><td>October 29, 1948</td><td><span class="census-status destroyed">Mass Casualty / Ruins</span></td></tr>
+		<tr><td style="font-weight:600; font-size:12px;">Bayt Mahsir</td><td>Jerusalem</td><td>2,400</td><td>May 10, 1948</td><td><span class="census-status destroyed">Depopulated & Demolished</span></td></tr>
+		<tr><td style="font-weight:600; font-size:12px;">Al-Tira</td><td>Haifa</td><td>5,270</td><td>July 16, 1948</td><td><span class="census-status destroyed">Forced Expulsion</span></td></tr>
+		<tr><td style="font-weight:600; font-size:12px;">Qula</td><td>Ramle</td><td>1,010</td><td>July 10, 1948</td><td><span class="census-status">Ruins / Afforested</span></td></tr>
+		<tr><td style="font-weight:600; font-size:12px;">Ayn al-Zaytun</td><td>Safad</td><td>820</td><td>May 1, 1948</td><td><span class="census-status destroyed">Destroyed / Mass Casualty</span></td></tr>
+		<tr><td style="font-weight:600; font-size:12px;">Yibna</td><td>Ramle</td><td>5,420</td><td>June 4, 1948</td><td><span class="census-status">Depopulated & Demolished</span></td></tr>
+		<tr><td style="font-weight:600; font-size:12px;">Al-Bassa</td><td>Acre</td><td>2,950</td><td>May 14, 1948</td><td><span class="census-status destroyed">Forced Expulsion / Ruins</span></td></tr>
+		<tr><td style="font-weight:600; font-size:12px;">Qisarya (Caesarea)</td><td>Haifa</td><td>960</td><td>February 15, 1948</td><td><span class="census-status">Depopulated</span></td></tr>
+		<tr><td style="font-weight:600; font-size:12px;">Suba</td><td>Jerusalem</td><td>620</td><td>July 13, 1948</td><td><span class="census-status destroyed">Destroyed / Afforested</span></td></tr>
+		<tr><td style="font-weight:600; font-size:12px;">Al-Faluja</td><td>Gaza</td><td>5,420</td><td>February 24, 1949</td><td><span class="census-status destroyed">Demolished Post-Armistice</span></td></tr>
+		<tr><td style="font-weight:600; font-size:12px;">Innaba</td><td>Ramle</td><td>1,650</td><td>July 10, 1948</td><td><span class="census-status destroyed">Destroyed / Runway</span></td></tr>
+		<tr><td style="font-weight:600; font-size:12px;">Al-Mansura</td><td>Safad</td><td>420</td><td>May 25, 1948</td><td><span class="census-status">Ruins / Military Zone</span></td></tr>
+		<tr><td style="font-weight:600; font-size:12px;">Mijdal Yaba</td><td>Ramle</td><td>1,760</td><td>July 12, 1948</td><td><span class="census-status destroyed">Quarry Site</span></td></tr>
+		<tr><td style="font-weight:600; font-size:12px;">Lajjun</td><td>Jenin</td><td>1,100</td><td>May 30, 1948</td><td><span class="census-status destroyed">Destroyed / Replanted</span></td></tr>
+	  </tbody>
+	</table>
+
+	<footer>
+	  <div class="footer-brand">ARCHIVE.PS <span>© 2024 THE JUDICIAL MONOLITH. ALL RECORDS PERMANENT.</span></div>
+	</footer>
+  </div>
+</div>
