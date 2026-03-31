@@ -969,11 +969,11 @@ footer { padding: 40px; border-top: 1px solid var(--border); display: flex; flex
 }
 
 /* ══════════════════════════════════════════
-   ENFORCED DESIGN CONSISTENCY LAYER
-   Applies strict uniformity across all pages
+   MONOLITH_OS: ENFORCED CONSISTENCY & UI KIT
+   Applies strict uniformity and introduces new elements
 ════════════════════════════════════════════ */
 
-/* 1. Page Titles */
+/* --- 1. TYPOGRAPHY ALIGNMENT --- */
 .page-header-title, .icj-title, .case-title, .siege-header-title, .testimony-header-title, 
 .hr-header-title, .media-header-title, .arms-header-title, .med-header-title, .cult-header-title, 
 .census-header-title, .geneva-title, .infra-title, .compliance-title, .movement-title, 
@@ -984,9 +984,9 @@ footer { padding: 40px; border-top: 1px solid var(--border); display: flex; flex
   line-height: 1.05 !important;
   margin-bottom: 16px !important;
   color: var(--black);
+  letter-spacing: -0.02em;
 }
 
-/* 2. Page Subtitles / Descriptions */
 .page-header-text, .siege-header-text, .testimony-header-text, .hr-header-text, 
 .media-header-text, .arms-header-text, .med-header-text, .census-header-text, 
 .detention-header-text, .bm-header-text, .icj-scope-text {
@@ -999,12 +999,84 @@ footer { padding: 40px; border-top: 1px solid var(--border); display: flex; flex
   margin-bottom: 40px !important;
   border-left: 3px solid var(--red) !important;
   padding-left: 16px !important;
+  background: linear-gradient(90deg, rgba(200,55,58,0.03) 0%, transparent 100%);
 }
 
-/* 3. Tables */
+/* --- 2. UNIFIED CARD SYSTEM --- */
+.siege-card, .media-card, .arms-card, .med-card, .geneva-card, .infra-card, .warrant-card, .exhibit-card {
+  border: 1px solid var(--border) !important;
+  border-top: 3px solid var(--black) !important;
+  background: #fff;
+  transition: transform var(--transition-smooth), box-shadow var(--transition-smooth), border-color var(--transition-fast) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  position: relative;
+}
+.siege-card:hover, .media-card:hover, .arms-card:hover, .med-card:hover, .geneva-card:hover, .infra-card:hover, .warrant-card:hover, .exhibit-card:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: 0 12px 24px rgba(0,0,0,0.08) !important;
+  border-top-color: var(--red) !important;
+}
+
+/* Dark variant overrides */
+.arms-card, .siege-card, .media-card.blackout {
+  background: var(--black) !important;
+  border-color: rgba(255,255,255,0.1) !important;
+  border-top: 3px solid var(--amber) !important;
+  color: var(--cream) !important;
+}
+.arms-card:hover, .siege-card:hover, .media-card.blackout:hover {
+  border-top-color: var(--red) !important;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.3) !important;
+}
+
+/* --- 3. UNIFIED BUTTONS & INTERACTIONS --- */
+.btn-primary, .btn-outline, .btn-view-register, .proc-download, .detention-btn, .hr-btn, .cyber-log-btn, .un-res-action {
+  font-family: 'IBM Plex Mono', monospace !important; 
+  font-size: 9px !important; 
+  letter-spacing: 0.12em !important; 
+  text-transform: uppercase !important; 
+  padding: 12px 20px !important; 
+  cursor: pointer !important; 
+  transition: all var(--transition-fast) !important;
+  text-decoration: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-weight: 500 !important;
+  box-sizing: border-box !important;
+}
+
+.btn-view-register, .proc-download {
+  width: 100% !important;
+  background: transparent !important;
+  border: 1px solid var(--border) !important;
+  color: var(--black) !important;
+  margin-top: auto !important; /* Forces button to the bottom of flex cards */
+}
+.btn-view-register:hover, .proc-download:hover {
+  background: var(--black) !important;
+  color: var(--cream) !important;
+}
+
+/* Dark mode button overrides */
+.arms-card .btn-view-register, .siege-card .btn-view-register, .media-card.blackout .btn-view-register,
+.arms-card .proc-download, .siege-card .proc-download, .media-card.blackout .proc-download, .cult-item .proc-download {
+  border-color: rgba(255,255,255,0.2) !important;
+  color: var(--cream) !important;
+}
+.arms-card .btn-view-register:hover, .siege-card .btn-view-register:hover, .media-card.blackout .btn-view-register:hover,
+.arms-card .proc-download:hover, .siege-card .proc-download:hover, .media-card.blackout .proc-download:hover, .cult-item .proc-download:hover {
+  background: var(--cream) !important;
+  color: var(--black) !important;
+  box-shadow: 0 0 15px rgba(255,255,255,0.1) !important;
+}
+
+/* --- 4. DATA TABLES --- */
 .hr-table, .detention-table, .compliance-table, .checkpoint-table, .census-table, #registry-master-table {
   width: 100% !important; 
-  border-collapse: collapse !important; 
+  border-collapse: separate !important; 
+  border-spacing: 0 !important;
   margin-bottom: 60px !important; 
   background: #fff !important; 
   border: 1px solid var(--border) !important; 
@@ -1024,103 +1096,96 @@ footer { padding: 40px; border-top: 1px solid var(--border); display: flex; flex
 .hr-table td, .detention-table td, .compliance-table td, .checkpoint-table td, .census-table td, #registry-master-table td {
   padding: 16px !important; 
   border-bottom: 1px solid var(--border) !important; 
-  transition: background var(--transition-fast) !important; 
   color: var(--text) !important;
 }
 .hr-table tr:hover td, .detention-table tr:hover td, .compliance-table tr:hover td, .checkpoint-table tr:hover td, .census-table tr:hover td, #registry-master-table tr:hover td {
   background: rgba(0,0,0,0.02) !important;
 }
-
-/* 4. Action Buttons (Inline) */
-.detention-btn, .hr-btn, .cyber-log-btn, .un-res-action, .tl-btn {
-  font-family: 'IBM Plex Mono', monospace !important; 
-  font-size: 9px !important; 
-  letter-spacing: 0.1em !important; 
-  text-transform: uppercase !important; 
-  padding: 8px 16px !important; 
-  border: 1px solid var(--border) !important; 
-  background: #fff !important; 
-  color: var(--text) !important; 
-  text-decoration: none !important; 
-  cursor: pointer !important; 
-  transition: all var(--transition-fast) !important; 
-  display: inline-block !important;
-}
-.detention-btn:hover, .hr-btn:hover, .cyber-log-btn:hover, .un-res-action:hover, .tl-btn:hover {
-  background: var(--black) !important; 
-  color: var(--cream) !important; 
-  border-color: var(--black) !important; 
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1) !important; 
-  transform: translateY(-1px) !important;
+.hr-table tr:last-child td, .detention-table tr:last-child td, .compliance-table tr:last-child td, .checkpoint-table tr:last-child td, .census-table tr:last-child td, #registry-master-table tr:last-child td {
+  border-bottom: none !important;
 }
 
-/* 5. Action Buttons (Block) */
-.btn-view-register, .proc-download {
-  display: block !important; 
-  width: 100% !important; 
-  text-align: center !important; 
-  border: 1px solid var(--border) !important; 
-  padding: 12px !important; 
-  font-family: 'IBM Plex Mono', monospace !important; 
-  font-size: 9px !important; 
-  letter-spacing: 0.1em !important; 
-  text-transform: uppercase !important; 
-  color: var(--text) !important; 
-  text-decoration: none !important; 
-  cursor: pointer !important; 
-  background: transparent !important;
-  transition: all var(--transition-fast) !important;
+/* --- 5. NEW UI ELEMENTS (Ready to deploy) --- */
+
+/* Element: Terminal Alert Box 
+   Usage: <div class="terminal-alert">Your warning text here</div> */
+.terminal-alert {
+  background: repeating-linear-gradient(45deg, rgba(200,55,58,0.05), rgba(200,55,58,0.05) 10px, transparent 10px, transparent 20px), var(--black);
+  border: 1px solid var(--red);
+  border-left: 4px solid var(--red);
+  padding: 20px;
+  color: var(--cream);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  line-height: 1.6;
+  margin-bottom: 24px;
+  position: relative;
+  overflow: hidden;
 }
-.btn-view-register:hover, .proc-download:hover {
-  background: var(--black) !important; 
-  color: var(--cream) !important; 
-  border-color: var(--black) !important;
+.terminal-alert::before {
+  content: '⚠ SECURITY OVERRIDE';
+  display: block;
+  color: var(--red);
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  margin-bottom: 8px;
+  font-weight: bold;
 }
 
-/* Fix dark-themed card buttons */
-.arms-card .btn-view-register, .arms-card .proc-download, 
-.media-card.blackout .btn-view-register, .media-card.blackout .proc-download,
-.cult-item .btn-view-register, .cult-item .proc-download {
-  border-color: rgba(255,255,255,0.2) !important; 
-  color: var(--cream) !important; 
+/* Element: Decrypted Data Block 
+   Usage: <div class="data-block"><div class="data-block-header">Hash 0x99</div><div class="data-block-content">Raw data</div></div> */
+.data-block {
+  background: #111;
+  border: 1px solid #333;
+  padding: 20px;
+  border-radius: 2px;
+  position: relative;
+  margin-bottom: 24px;
 }
-.arms-card .btn-view-register:hover, .arms-card .proc-download:hover, 
-.media-card.blackout .btn-view-register:hover, .media-card.blackout .proc-download:hover,
-.cult-item .btn-view-register:hover, .cult-item .proc-download:hover {
-  background: var(--cream) !important; 
-  color: var(--black) !important;
+.data-block-header {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #333;
+  padding-bottom: 10px;
+  margin-bottom: 15px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  color: var(--green-light);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
 }
-
-/* 6. Tags & Badges */
-.exhibit-tag, .detention-tag, .census-status, .warrant-status, .med-badge, .icj-badge {
-  font-family: 'IBM Plex Mono', monospace !important; 
-  font-size: 9px !important; 
-  letter-spacing: 0.1em !important; 
-  text-transform: uppercase !important; 
-  padding: 4px 8px !important; 
-  display: inline-block !important; 
-  border-radius: 2px !important;
-}
-
-/* 7. Card Grids Consistency */
-.siege-grid, .media-grid, .arms-grid, .med-grid, .geneva-grid, .infra-grid, .warrant-grid {
-  display: grid !important; 
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)) !important; 
-  gap: 24px !important; 
-  margin-bottom: 60px !important; 
-  align-items: stretch !important;
+.data-block-content {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: rgba(255,255,255,0.7);
+  white-space: pre-wrap;
+  line-height: 1.5;
 }
 
-/* 8. Card Typography */
-.siege-card-title, .media-card-title, .arms-card-title, .med-title, .geneva-card-title, .infra-card-title, .cult-title, .cult-archive-title, .casualty-title {
-  font-family: 'Playfair Display', serif !important;
-  font-size: 20px !important;
-  font-weight: 800 !important;
-  margin-bottom: 12px !important;
-  line-height: 1.2 !important;
+/* Element: Status Pulse Indicator
+   Usage: <div class="status-pulse red"></div> or <div class="status-pulse green"></div> */
+.status-pulse {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--red);
+  box-shadow: 0 0 0 0 rgba(200,55,58,0.7);
+  animation: pulse-red 2s infinite;
+  margin-right: 8px;
 }
-.siege-card-desc, .media-card-text, .arms-card-text, .med-desc, .geneva-card-text, .infra-card-text, .cult-desc, .cult-archive-text {
-  font-size: 13px !important;
-  line-height: 1.7 !important;
-  margin-bottom: 24px !important;
+.status-pulse.green {
+  background: var(--green-light);
+  box-shadow: 0 0 0 0 rgba(45,107,79,0.7);
+  animation: pulse-green 2s infinite;
+}
+@keyframes pulse-red {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(200,55,58,0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(200,55,58,0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(200,55,58,0); }
+}
+@keyframes pulse-green {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(45,107,79,0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(45,107,79,0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(45,107,79,0); }
 }
