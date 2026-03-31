@@ -186,7 +186,10 @@ function initSearch() {
     let found = false;
     if (term.length > 1) {
       results.forEach(item => {
-        const visible = item.innerText.toLowerCase().includes(term);
+        const textToSearch = item.innerText.toLowerCase();
+        // Improve search feature: matching against route keywords as well
+        const routeAttr = item.getAttribute('onclick') || '';
+        const visible = textToSearch.includes(term) || routeAttr.toLowerCase().includes(term);
         item.style.display = visible ? 'block' : 'none';
         if (visible) found = true;
       });
@@ -194,6 +197,16 @@ function initSearch() {
     } else {
       resultsBlock.classList.remove('active');
       results.forEach(item => item.style.display = 'block');
+    }
+  });
+
+  // Feature: Press Enter to select the first visible search result
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      const firstVisible = Array.from(resultsBlock.querySelectorAll('.search-result-item')).find(item => item.style.display === 'block');
+      if (firstVisible) {
+        firstVisible.click();
+      }
     }
   });
 }
@@ -399,7 +412,10 @@ function stopAudio(stopBtn) {
 
   // FIX: Use element property, not dataset
   if (playerUi._oscillator) {
-    try { playerUi._oscillator.stop(); } catch (e) {}
+    try { 
+      playerUi._oscillator.stop(); 
+      playerUi._oscillator.disconnect(); 
+    } catch (e) {}
     playerUi._oscillator = null;
   }
   if (playerUi._gain) {

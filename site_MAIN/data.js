@@ -75,6 +75,18 @@ const FORENSIC_DATA = {
   registry: {
     lines: ['> SCANNING ARCHIVE_NODE_REGISTRY...', '> TOTAL_DOCUMENTS: 1,402,880', '> [DATA]: DECLASSIFIED_BATCH: 98,221', '> STATUS: SYNC_OPERATIONAL'],
     color: 'var(--green-light)'
+  },
+  british: {
+    lines: ['> ACCESSING IMPERIAL_ARCHIVES...', '> CLASSIFICATION: MANDATE_ERA', '> [DATA]: BALFOUR_DECLARATION_1917', '> STATUS: HISTORICAL_ORIGIN_NODE_UNLOCKED'],
+    color: 'var(--amber)'
+  },
+  census: {
+    lines: ['> QUERYING 1948_DEMOGRAPHIC_LEDGER...', '> VILLAGES_SCANNED: 531', '> [!] ALERT: MASS_DEPOPULATION_VERIFIED', '> STATUS: ARCHIVAL_EVIDENCE_SECURED'],
+    color: 'var(--amber)'
+  },
+  legal: {
+    lines: ['> ESTABLISHING JURISDICTION...', '> PROTOCOL: UNIVERSAL_JURISDICTION_ACTIVE', '> GPG_KEY_VERIFICATION: SUCCESS', '> STATUS: SECURE_TUNNEL_ESTABLISHED'],
+    color: 'var(--green-light)'
   }
 };
 
