@@ -887,6 +887,7 @@ document.addEventListener('DOMContentLoaded', () => {
   syncSidebars();
   initQolFeatures();
   initTechForPalestineData(); // Fetch global live statistics
+  initRedditStream();        // Polling r/news
   initTimelineFilter();
   initSearch();
   initMapTooltips();
@@ -1097,5 +1098,102 @@ document.addEventListener('DOMContentLoaded', () => {
         records.forEach(rec => { html += `<tr><td><strong style="color:var(--black);">${rec.title}</strong></td><td>${rec.author || rec.director || '-'}</td><td><a href="${rec.link}" target="_blank" class="detention-btn">View</a></td></tr>`; });
       }
       container.innerHTML = html + `</tbody></table>`;
-    } catch (e) { container.innerHTML = `<div class="terminal-alert">ERR_REGISTRY_HANDSHAKE_FAILED</div>`; }
-  }
+          } catch (e) { container.innerHTML = `<div class="terminal-alert">ERR_REGISTRY_HANDSHAKE_FAILED</div>`; }
+        }
+      
+        // ── REDDIT INTELLIGENCE STREAM (12HR POLLING) ──
+        const REDDIT_POLL_MS = 12 * 60 * 60 * 1000;
+        
+        async function initRedditStream() {
+          const container = document.getElementById('reddit-uploads-container');
+          if (!container) return;
+        
+          const lastFetch = localStorage.getItem('reddit_last_fetch');
+          const cachedData = localStorage.getItem('reddit_cache');
+        
+          // Use cache if within 12-hour window
+          if (lastFetch && cachedData && (Date.now() - lastFetch < REDDIT_POLL_MS)) {
+            renderRedditCards(JSON.parse(cachedData));
+          } else {
+            fetchRedditData();
+          }
+          
+          setInterval(fetchRedditData, REDDIT_POLL_MS);
+        }
+        
+        function fetchWithTimeout(url, options = {}, timeout = 8000) {
+          return Promise.race([
+            fetch(url, options),
+            new Promise((_, reject) =>
+              setTimeout(() => reject(new Error('TIMEOUT')), timeout)
+            )
+          ]);
+        }
+        
+        async function fetchRedditData() {
+          const container = document.getElementById('reddit-uploads-container');
+          try {
+            const url = 'https://blackened-worker.hadi-nashat.workers.dev';
+            
+            // Directly fetching from the worker node which handles CORS and formatting
+            const response = await fetchWithTimeout(url, {}, 8000);
+        
+            if (!response.ok) throw new Error('NETWORK_FAILURE');
+            
+            const posts = await response.json();
+            
+            // Select only the first 3 posts for the UI grid
+            const limitedPosts = posts.slice(0, 3);
+            
+            localStorage.setItem('reddit_cache', JSON.stringify(limitedPosts));
+            localStorage.setItem('reddit_last_fetch', Date.now());
+            
+            renderRedditCards(limitedPosts);
+          } catch (err) {
+            console.warn('OS_STREAM: Intelligence node unreachable:', err);
+            if (container && !container.querySelector('.reddit-card')) {
+              const errorType = err.message === 'TIMEOUT' ? 'ERR_STREAM_TIMEOUT' : 'ERR_NEWS_STREAM_OFFLINE';
+              container.innerHTML = `<div class="terminal-alert" style="grid-column: span 3;">${errorType}: CONNECTION_FAILURE</div>`;
+            }
+          }
+        }
+        
+        function renderRedditCards(posts) {
+          const container = document.getElementById('reddit-uploads-container');
+          if (!container) return;
+        
+          let html = '';
+          const themes = ['var(--red)', 'var(--amber)', 'var(--green-light)'];
+        
+          posts.forEach((post, i) => {
+            // Worker returns ISO timestamp in 'created' field
+            const date = new Date(post.created);
+            const timeStr = `${date.getUTCHours().toString().padStart(2, '0')}:${date.getUTCMinutes().toString().padStart(2, '0')}_UTC`;
+            const color = themes[i % themes.length];
+            
+            // Thumbnails are served directly via the 'thumbnail' field
+            const thumbHtml = post.thumbnail 
+              ? `<div style="width:100%; height:220px; background:url('${post.thumbnail}') center/cover no-repeat; margin-bottom:12px; border:1px solid var(--border); opacity:0.9;"></div>`
+              : `<div style="width:100%; height:220px; background:var(--border); display:flex; align-items:center; justify-content:center; margin-bottom:12px; border:1px solid var(--border); font-family:mono; font-size:10px; color:var(--muted); opacity:0.5;">NO_VISUAL_FEED</div>`;
+        
+            html += `
+              <a href="${post.url}" target="_blank" class="reddit-card" style="text-decoration:none; color:inherit;">
+                <div style="padding:16px; border:1px solid var(--border); background:white; height:100%; transition: border-color 0.2s; cursor:pointer; display:flex; flex-direction:column; min-height:440px;" 
+                     onmouseover="this.style.borderColor='${color}'" onmouseout="this.style.borderColor='var(--border)'">
+                  <div style="font-family:'IBM Plex Mono',monospace; font-size:8px; color:${color}; margin-bottom:12px;">
+                    [ REDDIT_LOG: ${timeStr} ]
+                  </div>
+                  ${thumbHtml}
+                  <div style="font-size:12px; font-weight:600; margin-bottom:8px; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; line-height:1.3; flex-grow:1;">
+                    ${post.title}
+                  </div>
+                  <div style="display:flex; justify-content:space-between; align-items:center; font-size:9px; color:var(--muted); text-transform:uppercase; margin-top:auto; padding-top:12px; border-top:1px solid rgba(0,0,0,0.05);">
+                    <span>DATA_NODE: R_VIOLENCE</span>
+                    <span style="color:${color}; font-weight:bold;">SCORE: ${post.score}</span>
+                  </div>
+                </div>
+              </a>`;
+          });
+        
+          container.innerHTML = html;
+        }

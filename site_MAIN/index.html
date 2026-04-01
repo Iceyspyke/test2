@@ -231,24 +231,10 @@
     </section>
     <!-- Recent Uploads -->
     <section class="section">
-      <h2 class="section-title">Recent Uploads</h2>
+      <h2 class="section-title">Latest posts</h2>
       <div class="section-rule"></div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
-        <div style="padding:16px;border:1px solid var(--border);background:white;">
-          <div style="font-family:'IBM Plex Mono',monospace;font-size:8px;color:var(--red);margin-bottom:8px;">[ UPLOAD_TIMESTAMP: 04:12_UTC ]</div>
-          <div style="font-size:12px;font-weight:600;margin-bottom:4px;">Satellite_Batch_992.zip</div>
-          <div style="font-size:10px;color:var(--muted);">Forensic analysis of agricultural buffer zone expansion near Beit Hanoun.</div>
-        </div>
-        <div style="padding:16px;border:1px solid var(--border);background:white;">
-          <div style="font-family:'IBM Plex Mono',monospace;font-size:8px;color:var(--green-light);margin-bottom:8px;">[ UPLOAD_TIMESTAMP: 02:44_UTC ]</div>
-          <div style="font-size:12px;font-weight:600;margin-bottom:4px;">Affidavit_Legal_Exh_C.pdf</div>
-          <div style="font-size:10px;color:var(--muted);">Verified testimony regarding medical facility power severance protocols.</div>
-        </div>
-        <div style="padding:16px;border:1px solid var(--border);background:white;">
-          <div style="font-family:'IBM Plex Mono',monospace;font-size:8px;color:var(--amber);margin-bottom:8px;">[ UPLOAD_TIMESTAMP: 00:09_UTC ]</div>
-          <div style="font-size:12px;font-weight:600;margin-bottom:4px;">Draft_Resolution_2024_Update</div>
-          <div style="font-size:10px;color:var(--muted);">Pre-circulated GA text regarding universal jurisdiction enforcement.</div>
-        </div>
+      <div id="reddit-uploads-container" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
+        <div class="skeleton-wrap" style="height:100px; grid-column: span 3; opacity: 0.5; font-family:mono; font-size:10px; padding:20px;">[ ACCESSING NEWS_NODE... ]</div>
       </div>
     </section>
 
