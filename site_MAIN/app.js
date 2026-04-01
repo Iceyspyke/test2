@@ -584,7 +584,7 @@ async function initPresencesApi(page = 1) {
   container.innerHTML = `<div style="padding: 20px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase;"><span class="status-pulse red" style="margin-top:8px;"></span> Fetching Node Data...</div>`;
 
   try {
-    // Attempt fetch from public endpoint (use relative fallback if dealing with proxies)
+    // Strictly fetch from the exact endpoint defined in the API documentation
     const response = await fetch(`https://gazamaps.com/api/v1/presences?page=${page}`)
       .catch(() => fetch(`/api/v1/presences?page=${page}`));
 
