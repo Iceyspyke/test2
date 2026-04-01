@@ -49,8 +49,19 @@ function executeSwitch(id) {
   if (navEl) navEl.classList.add('active');
 
   // FIX: Close mobile menus if open upon navigation
-  document.querySelector('.topnav-links')?.classList.remove('active');
-  document.querySelectorAll('.sidebar').forEach(s => s.classList.remove('active'));
+  const topnav = document.querySelector('.topnav-links');
+  if (topnav) {
+    topnav.classList.remove('active');
+    topnav.style.removeProperty('display');
+  }
+  document.querySelectorAll('.sidebar').forEach(s => {
+    s.classList.remove('active');
+    s.style.removeProperty('top');
+    s.style.removeProperty('height');
+    // Remove cloned mobile navs so they regenerate with correct active states
+    const clone = s.querySelector('.mobile-topnav-clone');
+    if (clone) clone.remove();
+  });
   document.body.style.overflow = '';
   document.body.classList.remove('mobile-menu-open');
 
@@ -224,16 +235,26 @@ function executeSearchRoute(pageId) {
   showPage(pageId);
 }
 
-// ── SIDEBAR SYNC ──
-// Injects template content into all .sidebar elements that are still empty
+// ── SIDEBAR & FOOTER SYNC ──
+// Injects template content into all .sidebar elements and appends footer to .main
 function syncSidebars() {
   const tmpl = document.getElementById('sidebar-template');
-  if (!tmpl) return;
-  document.querySelectorAll('.sidebar').forEach(sb => {
-    if (!sb.children.length) {
-      sb.appendChild(tmpl.content.cloneNode(true));
-    }
-  });
+  if (tmpl) {
+    document.querySelectorAll('.sidebar').forEach(sb => {
+      if (!sb.children.length) {
+        sb.appendChild(tmpl.content.cloneNode(true));
+      }
+    });
+  }
+  
+  const footerTmpl = document.getElementById('footer-template');
+  if (footerTmpl) {
+    document.querySelectorAll('.main').forEach(main => {
+      if (!main.querySelector('footer')) {
+        main.appendChild(footerTmpl.content.cloneNode(true));
+      }
+    });
+  }
 }
 
 // ── TIMELINE FILTER ──
@@ -377,25 +398,54 @@ function stopAudio(stopBtn) {
 function toggleMobileMenu() {
   const topnav = document.querySelector('.topnav-links');
   const sidebar = document.querySelector('.page.active .sidebar');
-  const isActive = topnav?.classList.contains('active');
+  const isActive = document.body.classList.contains('mobile-menu-open');
   
   if (isActive) {
-    topnav.classList.remove('active');
-    if (sidebar) sidebar.classList.remove('active');
+    if (topnav) {
+      topnav.classList.remove('active');
+      topnav.style.removeProperty('display');
+    }
+    if (sidebar) {
+      sidebar.classList.remove('active');
+      sidebar.style.removeProperty('top');
+      sidebar.style.removeProperty('height');
+    }
     document.body.style.overflow = '';
     document.body.classList.remove('mobile-menu-open');
   } else {
-    topnav?.classList.add('active');
-    if (sidebar) {
+    if (window.innerWidth <= 768 && sidebar && topnav) {
+      // Merge topnav into sidebar to avoid "2 sidebars" issue on mobile
+      if (!sidebar.querySelector('.mobile-topnav-clone')) {
+        const clone = topnav.cloneNode(true);
+        clone.className = 'mobile-topnav-clone';
+        clone.style.display = 'flex';
+        clone.style.flexDirection = 'column';
+        clone.style.position = 'static';
+        clone.style.width = '100%';
+        clone.style.height = 'auto';
+        clone.style.borderRight = 'none';
+        clone.style.borderBottom = '1px solid var(--border)';
+        clone.style.padding = '0 0 20px 0';
+        clone.style.marginBottom = '20px';
+        clone.style.boxShadow = 'none';
+        clone.style.gap = '20px';
+        
+        // Remove duplicate IDs
+        clone.querySelectorAll('*').forEach(el => {
+          if (el.id) el.removeAttribute('id');
+        });
+        
+        sidebar.insertBefore(clone, sidebar.firstChild);
+      }
+      topnav.style.setProperty('display', 'none', 'important');
       sidebar.classList.add('active');
-      // Dynamically align the sidebar right below the topnav to prevent overlapping
-      setTimeout(() => {
-        const rect = topnav.getBoundingClientRect();
-        sidebar.style.setProperty('top', rect.bottom + 'px', 'important');
-        sidebar.style.setProperty('height', `calc(100vh - ${rect.bottom}px)`, 'important');
-      }, 10);
+      sidebar.style.setProperty('top', '70px', 'important');
+      sidebar.style.setProperty('height', 'calc(100vh - 70px)', 'important');
+    } else {
+      if (topnav) topnav.classList.add('active');
+      if (sidebar) sidebar.classList.add('active');
     }
-    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    document.body.style.overflow = 'hidden';
     document.body.classList.add('mobile-menu-open');
   }
 }

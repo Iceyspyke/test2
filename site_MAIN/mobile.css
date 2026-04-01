@@ -5,13 +5,65 @@
 
 /* ── 1. GLOBAL LAYOUT OVERRIDES ── */
 .main, #page-legal .main { 
-  padding: 80px 16px 32px !important; /* Account for fixed topnav */
+  padding: 70px 0 0 0 !important; /* Account for fixed topnav ONLY. Let inner sections handle horizontal padding */
   width: 100% !important; 
   overflow-x: hidden !important;
 }
 
+/* Standardize horizontal padding for mobile screens */
+.section, .icj-header, .icj-meta, .icj-exhibits, .icj-exhibits-bottom,
+.case-header, .case-body, .case-evidence, .verdicts-section,
+.map-header, .forensic-section,
+#page-siege .main, #page-testimonies .main, #page-hr .main, 
+#page-un .main, #page-geneva .main, #page-icc .main, #page-detention .main, 
+#page-media .main, #page-arms .main, #page-medical .main, #page-culture .main, 
+#page-census .main, #page-infrastructure .main, #page-compliance .main, 
+#page-surveillance .main, #page-movement .main, #page-registry .main, 
+#page-british .main {
+  padding-left: 16px !important;
+  padding-right: 16px !important;
+  box-sizing: border-box !important;
+}
+
+.hero {
+  padding: 0 16px 40px !important;
+}
+
+.verdicts-inner, .bm-viewer {
+  padding: 24px 16px !important;
+}
+
+/* Prevent text overflows & properly scale heavy headings */
+p, .cyber-log, .data-block-content, .case-indictment-text, .hero-subtitle {
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+  max-width: 100% !important;
+}
+
+.page-header-title, .icj-title, .case-title, .siege-header-title, .testimony-header-title, 
+.hr-header-title, .media-header-title, .arms-header-title, .med-header-title, .cult-header-title, 
+.census-header-title, .geneva-title, .infra-title, .compliance-title, .movement-title, 
+.registry-title, .detention-header-title, .bm-header-title, .legal-title, .un-title {
+  font-size: clamp(28px, 10vw, 40px) !important;
+  word-wrap: break-word !important;
+}
+
 .sidebar {
-  display: none !important; /* Hide standard sidebar natively */
+  display: flex !important;
+  position: fixed !important;
+  left: -100% !important;
+  width: 280px !important;
+  background: var(--cream) !important;
+  border-right: 1px solid var(--border) !important;
+  z-index: 1002 !important;
+  transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  padding: 24px 16px !important;
+  margin: 0 !important;
+}
+
+.sidebar.active {
+  left: 0 !important;
+  box-shadow: 4px 10px 24px rgba(0,0,0,0.15) !important;
 }
 
 /* ── 2. MOBILE NAVIGATION (SLIDE-OUT) ── */
@@ -31,9 +83,12 @@
   top: 70px; 
   left: -100%; 
   width: 280px;
-  height: calc(100vh - 70px);
+  height: auto !important;
+  max-height: 55vh;
+  overflow-y: auto;
   background: var(--cream); 
   border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
   padding: 24px 20px; 
   gap: 20px; 
   z-index: 1002;
@@ -51,10 +106,35 @@
 .folder-grid, .bm-grid, .icj-exhibits, .icj-exhibits-bottom, .case-body,
 .siege-grid, .media-grid, .arms-grid, .med-grid, .geneva-grid, .infra-grid, 
 .warrant-grid, .cult-person-grid, .evidence-row, .forensic-grid, 
-.folder-card-bottom, .detention-stats-grid, .counts-grid, .timeline-item {
+.folder-card-bottom, .detention-stats-grid, .counts-grid, .timeline-item,
+.case-title-block, .un-card, .cult-item, .timeline-filters {
   grid-template-columns: 1fr !important;
   gap: 16px !important;
 }
+
+/* Convert Flex rows to columns to prevent squishing text side-by-side */
+.icj-meta, .exhibit-meta, .testimony-meta, .bm-doc-meta, .bm-viewer-meta,
+.icj-stats, .case-evidence-header {
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 12px !important;
+}
+
+.case-no-block { text-align: left !important; }
+
+/* Keep search forms contained */
+.census-filter-wrap {
+  flex-direction: column;
+  align-items: stretch;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+.census-search-input { width: 100% !important; }
+
+/* Fix Global Search Overlay */
+.search-overlay { padding: 70px 16px 16px !important; }
+.search-input { font-size: 16px !important; }
+.search-prompt { font-size: 16px !important; margin-right: 8px !important; }
 
 /* ── 4. TABLE TO CARD CONVERSION ── */
 .hr-table thead, .detention-table thead, .compliance-table thead, 
@@ -70,6 +150,7 @@
   margin-bottom: 16px !important;
   background: #fff !important;
   width: 100% !important;
+  box-sizing: border-box !important;
 }
 
 .hr-table td, .detention-table td, .compliance-table td, 
@@ -77,4 +158,15 @@
   display: block !important;
   padding: 12px 16px !important;
   border-bottom: 1px solid var(--border) !important;
+  box-sizing: border-box !important;
+  word-wrap: break-word !important;
 }
+
+.hr-table tr:last-child td, .detention-table tr:last-child td, 
+.compliance-table tr:last-child td, .checkpoint-table tr:last-child td, 
+.census-table tr:last-child td, #registry-master-table tr:last-child td {
+  border-bottom: none !important;
+}
+
+/* Enforce full width for UN buttons to prevent overflow */
+.un-res-action { width: 100% !important; text-align: center !important; }
