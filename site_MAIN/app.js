@@ -48,8 +48,11 @@ function executeSwitch(id) {
   }
   if (navEl) navEl.classList.add('active');
 
-  // FIX: Close mobile menu if open upon navigation
+  // FIX: Close mobile menus if open upon navigation
   document.querySelector('.topnav-links')?.classList.remove('active');
+  document.querySelectorAll('.sidebar').forEach(s => s.classList.remove('active'));
+  document.body.style.overflow = '';
+  document.body.classList.remove('mobile-menu-open');
 
   document.title = `ARCHIVE.PS — ${id.toUpperCase()}_NODE`;
   syncSidebarHighlight(id);
@@ -278,11 +281,17 @@ function filterCensusTable() {
 
 // ── MANDATE DOC SWITCHER ──
 function switchMandateDoc(docId, element) {
-  document.querySelectorAll('.bm-doc').forEach(doc => doc.classList.remove('active'));
-  document.querySelectorAll('.bm-list-item').forEach(item => item.classList.remove('active'));
-  const target = document.getElementById('doc-' + docId);
+  // Isolate the search strictly to the currently active page to prevent ID collisions
+  const activePage = document.querySelector('.page.active') || document;
+  
+  activePage.querySelectorAll('.bm-doc').forEach(doc => doc.classList.remove('active'));
+  activePage.querySelectorAll('.bm-list-item').forEach(item => item.classList.remove('active'));
+  
+  let target = activePage.querySelector('#doc-' + docId);
+  if (!target) target = document.getElementById('doc-' + docId); // Fallback
+  
   if (target) target.classList.add('active');
-  element.classList.add('active');
+  if (element) element.classList.add('active');
 }
 
 // ── AUDIO ENGINE (FIXED) ──
@@ -364,7 +373,29 @@ function stopAudio(stopBtn) {
 
 // ── MOBILE MENU ──
 function toggleMobileMenu() {
-  document.querySelector('.topnav-links')?.classList.toggle('active');
+  const topnav = document.querySelector('.topnav-links');
+  const sidebar = document.querySelector('.page.active .sidebar');
+  const isActive = topnav?.classList.contains('active');
+  
+  if (isActive) {
+    topnav.classList.remove('active');
+    if (sidebar) sidebar.classList.remove('active');
+    document.body.style.overflow = '';
+    document.body.classList.remove('mobile-menu-open');
+  } else {
+    topnav?.classList.add('active');
+    if (sidebar) {
+      sidebar.classList.add('active');
+      // Dynamically align the sidebar right below the topnav to prevent overlapping
+      setTimeout(() => {
+        const rect = topnav.getBoundingClientRect();
+        sidebar.style.top = rect.bottom + 'px';
+        sidebar.style.height = `calc(100vh - ${rect.bottom}px)`;
+      }, 10);
+    }
+    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    document.body.classList.add('mobile-menu-open');
+  }
 }
 
 // ── LOAD REAL IMAGES ──
@@ -416,6 +447,16 @@ document.addEventListener('DOMContentLoaded', () => {
   // Select Balfour Declaration by default on initialization
   const firstMandate = document.querySelector('.bm-list-item');
   if (firstMandate) firstMandate.click();
+
+  // Click outside mobile menu to close
+  document.addEventListener('click', (e) => {
+    if (document.body.classList.contains('mobile-menu-open')) {
+      const isClickInsideMenu = e.target.closest('.topnav-links') || e.target.closest('.sidebar') || e.target.closest('.mobile-menu-btn');
+      if (!isClickInsideMenu) {
+        toggleMobileMenu();
+      }
+    }
+  });
 
   // ESC closes modals/search
   document.addEventListener('keydown', (e) => {

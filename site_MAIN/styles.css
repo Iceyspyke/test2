@@ -133,14 +133,13 @@ li { margin-bottom: 0.5em; }
 @media (max-width: 768px) {
   .mobile-menu-btn { display: block; color: var(--text); }
   .topnav-links {
-    display: none; flex-direction: column;
-    position: fixed; top: 70px; left: 0; right: 0;
-    background: var(--cream); border-bottom: 1px solid var(--border);
-    padding: 20px 24px; gap: 16px; z-index: 99;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+    display: flex !important; flex-direction: column;
+    position: fixed; top: 70px; left: -100%; width: 280px;
+    background: var(--cream); border-right: 1px solid var(--border);
+    padding: 24px 20px 16px; gap: 16px; z-index: 1002;
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
-  .topnav-links.active { display: flex; }
-  .topnav-icons .system-clock { display: none; }
+  .topnav-links.active { left: 0; box-shadow: 4px 0 24px rgba(0,0,0,0.15); }
   .topnav-icons svg { flex-shrink: 0; }
 }
 
@@ -915,8 +914,22 @@ footer { padding: 40px; border-top: 1px solid var(--border); display: flex; flex
   /* Small Screens (Mobile Phones) */
   
   /* 1. Global Spacing & Layout */
-  .sidebar { display: none !important; } /* Hide sidebar completely */
-  .main, #page-legal .main { padding: 20px 16px !important; min-width: 0 !important; }
+  .sidebar { 
+    display: flex !important; position: fixed !important;
+    top: 250px !important; left: -100% !important; width: 280px !important;
+    background: var(--cream) !important; z-index: 1001 !important;
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    border-right: 1px solid var(--border) !important;
+  }
+  .sidebar.active { left: 0 !important; box-shadow: 4px 10px 24px rgba(0,0,0,0.15) !important; }
+  .main, #page-legal .main { padding: 20px 16px !important; min-width: 0 !important; width: 100% !important; }
+  
+  /* Dim overlay when menu is open */
+  body::after {
+    content: ''; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+    z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.3s;
+  }
+  body.mobile-menu-open::after { opacity: 1; pointer-events: auto; }
   .section, .icj-header, .case-header, .case-body, .case-evidence, .verdicts-section { padding: 32px 16px !important; }
   .hero { padding: 0 16px 40px !important; min-height: 400px !important; }
   .icj-divider { margin: 16px 16px !important; }
