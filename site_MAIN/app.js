@@ -971,3 +971,83 @@ async function fetchRegistryData(category, btnEl) {
     container.innerHTML = `<div class="terminal-alert" style="border-color:var(--red);">ERR_CONNECTION_FAILED: Unable to reach Registry Node.</div>`;
   }
 }
+// --- Inside executeSwitch(id) ---
+  // Trigger Infrastructure API
+  if (id === 'infrastructure') {
+    setTimeout(initInfrastructureApi, 100);
+  }
+
+  // Trigger Martyrs Names Registry
+  if (id === 'census') {
+    setTimeout(() => initKilledNamesApi(1), 100);
+    setTimeout(initChildNamesApi, 100);
+  }
+
+  // Trigger Daily Logs
+  if (id === 'hr') {
+    setTimeout(initDailyCasualtiesApi, 100);
+  }
+// ------------------------------
+
+// ── INFRASTRUCTURE DAMAGE API ──
+async function initInfrastructureApi() {
+  const container = document.getElementById('infra-api-container');
+  if (!container) return;
+  container.innerHTML = `<div class="status-pulse red">SYNCING INFRASTRUCTURE DATA...</div>`;
+  try {
+    const response = await fetch('https://data.techforpalestine.org/api/v3/infrastructure-damaged.json');
+    const data = await response.json();
+    const latest = data[data.length - 1];
+    
+    let html = `<div class="detention-stats-grid" style="margin-bottom:40px;">
+      <div class="detention-stat-box"><div class="detention-stat-label">Homes Destroyed</div><div class="detention-stat-val">${latest.residential.destroyed.toLocaleString()}</div></div>
+      <div class="detention-stat-box"><div class="detention-stat-label">Schools Damaged</div><div class="detention-stat-val">${latest.educational_buildings.damaged.toLocaleString()}</div></div>
+      <div class="detention-stat-box"><div class="detention-stat-label">Mosques Destroyed</div><div class="detention-stat-val">${latest.places_of_worship.mosques_destroyed.toLocaleString()}</div></div>
+      <div class="detention-stat-box"><div class="detention-stat-label">Civic Buildings</div><div class="detention-stat-val">${latest.civic_buildings.destroyed.toLocaleString()}</div></div>
+    </div>`;
+    container.innerHTML = html;
+  } catch (e) { console.error(e); }
+}
+
+// ── MARTYRS NAMES REGISTRY (Killed in Gaza) ──
+async function initKilledNamesApi(page = 1) {
+  const container = document.getElementById('names-registry-container');
+  const pagination = document.getElementById('names-pagination');
+  if (!container) return;
+  container.innerHTML = `<div class="status-pulse red">ACCESSING ARCHIVAL NAMES LIST...</div>`;
+  try {
+    const response = await fetch(`https://data.techforpalestine.org/api/v2/killed-in-gaza/page-${page}.json`);
+    const records = await response.json();
+    
+    let html = `<table class="census-table"><thead><tr><th>Name (Arabic)</th><th>English Name</th><th>Age</th><th>Sex</th></tr></thead><tbody>`;
+    records.forEach(rec => {
+      html += `<tr><td>${rec.name}</td><td><strong>${rec.en_name}</strong></td><td>${rec.age || 'N/A'}</td><td>${rec.sex.toUpperCase()}</td></tr>`;
+    });
+    html += `</tbody></table>`;
+    container.innerHTML = html;
+
+    pagination.innerHTML = `
+      <button class="btn-outline" onclick="initKilledNamesApi(${page - 1})" ${page <= 1 ? 'disabled' : ''}>PREV</button>
+      <span style="font-family:mono; font-size:10px;">PAGE ${page}</span>
+      <button class="btn-outline" onclick="initKilledNamesApi(${page + 1})">NEXT</button>
+    `;
+  } catch (e) { console.error(e); }
+}
+
+// ── DAILY CASUALTY LOGS ──
+async function initDailyCasualtiesApi() {
+  const container = document.getElementById('daily-log-container');
+  if (!container) return;
+  try {
+    const response = await fetch('https://data.techforpalestine.org/api/v2/casualties_daily.json');
+    const data = await response.json();
+    const recent = data.slice(-15).reverse(); // Last 15 days
+
+    let html = `<table class="census-table"><thead><tr><th>Report Date</th><th>Killed (Cum)</th><th>Injured (Cum)</th><th>Children</th></tr></thead><tbody>`;
+    recent.forEach(day => {
+      html += `<tr><td>${day.report_date}</td><td class="red">${day.killed_cum.toLocaleString()}</td><td>${day.injured_cum.toLocaleString()}</td><td>${day.killed_children_cum?.toLocaleString() || '--'}</td></tr>`;
+    });
+    html += `</tbody></table>`;
+    container.innerHTML = html;
+  } catch (e) { console.error(e); }
+}
