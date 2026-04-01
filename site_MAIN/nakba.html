@@ -1,13 +1,22 @@
 <div id="page-nakba" class="page">
-  <aside class="sidebar" data-autosidebar></aside>
-  <div class="main" style="padding:40px 40px 0;">
-    <div class="page-header">
-      <div class="page-header-label">Compilation</div>
-      <h1 class="page-header-title">The Chronology of<br>Occupation &amp; Resistance</h1>
-      <p class="page-header-text">An unyielding ledger of the historical process. This document maps the displacement and the enduring resilience of the Palestinian people from the early 20th century to the present.</p>
-    </div>
+<aside class="sidebar" data-autosidebar></aside>
+<div class="main" style="padding:40px 40px 0;">
+  <div class="page-header">
+    <div class="page-header-label">Compilation</div>
+    <h1 class="page-header-title">The Chronology of<br>Occupation &amp; Resistance</h1>
+    <p class="page-header-text">An unyielding ledger of the historical process. This document maps the displacement and the enduring resilience of the Palestinian people from the early 20th century to the present.</p>
+  </div>
 
-    <div class="timeline-filters">
+  <div class="terminal-alert">
+    ARCHIVE SYNC COMPLETED: HISTORICAL CONTINUUM VERIFIED. ISOLATED EVENTS RECLASSIFIED AS A SYSTEMIC, ONGOING STRUCTURE OF DISPOSSESSION.
+  </div>
+
+  <div class="data-block" style="margin-bottom: 40px;">
+    <div class="data-block-header"><span>METHODOLOGY</span><span>TIMELINE PARAMETERS</span></div>
+    <div class="data-block-content">The following chronological ledger cross-references British imperial documents, UN mandates, declassified military directives, and verified oral histories. It establishes the legal and physical mechanisms used to alter the demographic and territorial reality of Palestine over the course of a century.</div>
+  </div>
+
+  <div class="timeline-filters">
       <div class="filter-group">
         <label class="filter-label">Search Archive</label>
         <input type="text" id="tl-search" class="filter-input" placeholder="Keyword (e.g., Resolution, Military)...">
@@ -19,9 +28,13 @@
           <option value="1910">1910s — Imperial Era</option>
           <option value="1930">1930s — Great Revolt</option>
           <option value="1940">1940s — The Nakba</option>
-          <option value="1960">1960s — Occupation</option>
-          <option value="1980">1980s — First Intifada</option>
+          <option value="1950">1950s — Post-Nakba</option>
+          <option value="1960">1960s — Military Occupation</option>
+          <option value="1970">1970s — Land Appropriations</option>
+          <option value="1980">1980s — Regional Conflict</option>
+          <option value="1990">1990s — Oslo Accords</option>
           <option value="2000">2000s — Second Intifada</option>
+          <option value="2010">2010s — Blockade Era</option>
           <option value="2020">2020s — Current Era</option>
         </select>
       </div>
@@ -40,18 +53,30 @@
     <div class="timeline" id="timeline-container">
       <div class="timeline-line"></div>
       <div class="no-results" id="tl-no-results">No records match the current operational parameters.</div>
-
-      <!-- 1917 -->
+      
       <div class="timeline-item" data-decade="1910" data-type="diplomatic">
         <div class="tl-content-left">
-          <div class="tl-exhibit">Exhibit 001</div>
-          <h3 class="tl-title">Balfour Declaration</h3>
-          <p class="tl-text">A 67-word letter from the British government promising a national home for the Jewish people in Palestine, without consent of the Arab majority population.</p>
+          <div class="tl-exhibit">Exhibit 000-A</div>
+          <h3 class="tl-title">Sykes-Picot Agreement</h3>
+          <p class="tl-text">A secret treaty between the UK and France detailing the dissection and carving up of the Ottoman Empire, establishing the geopolitical architecture for a century of regional instability.</p>
           <a class="tl-btn">View Documented Evidence ↗</a>
         </div>
-        <div class="tl-center"><div class="tl-diamond green"><div class="tl-diamond-inner"></div></div></div>
+        <div class="tl-center"><div class="tl-diamond black"><div class="tl-diamond-inner" style="font-family:'IBM Plex Mono',monospace;font-size:6px;color:rgba(255,255,255,0.6);">16</div></div></div>
         <div class="tl-content-right" style="padding-top:4px;">
-          <img class="tl-img" src="https://images.unsplash.com/photo-1569937756447-121bb8e7a083?w=260&h=140&fit=crop&q=60" alt="Historical document" loading="lazy">
+          <img class="tl-img" src="https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=260&h=140&fit=crop&q=60" alt="Diplomats" loading="lazy">
+        </div>
+      </div>
+      
+      <div class="timeline-item" data-decade="1910" data-type="diplomatic">
+        <div class="tl-content-left" style="padding-top:4px;">
+          <img class="tl-img" src="https://images.unsplash.com/photo-1569937756447-121bb8e7a083?w=260&h=140&fit=crop&q=60" alt="Historical document" loading="lazy" style="margin-left:auto;">
+        </div>
+        <div class="tl-center"><div class="tl-diamond green"><div class="tl-diamond-inner"></div></div></div>
+        <div class="tl-content-right">
+          <div class="tl-exhibit">Exhibit 001</div>
+          <h3 class="tl-title">Balfour Declaration</h3>
+          <p class="tl-text">A 67-word letter from the British government promising a national home for the Jewish people in Palestine, entirely bypassing the consent of the native Arab majority population.</p>
+          <a class="tl-btn">View Documented Evidence ↗</a>
         </div>
       </div>
 
@@ -84,16 +109,29 @@
       </div>
 
       <!-- 1948 Nakba -->
-      <div class="timeline-item" data-decade="1940" data-type="displacement">
+      <div class="timeline-item" data-decade="1940" data-type="military">
         <div class="tl-content-left" style="padding-top:4px;">
-          <img class="tl-img" src="https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=260&h=140&fit=crop&q=60" alt="Displacement" loading="lazy" style="margin-left:auto;">
+          <img class="tl-img" src="https://images.unsplash.com/photo-1580191947416-62d35a55e71d?w=260&h=140&fit=crop&q=60" alt="Ruins" loading="lazy" style="margin-left:auto;">
         </div>
-        <div class="tl-center"><div class="tl-diamond red"><div class="tl-diamond-inner" style="background:var(--red);border-radius:1px;"></div></div></div>
+        <div class="tl-center"><div class="tl-diamond red"><div class="tl-diamond-inner"></div></div></div>
         <div class="tl-content-right">
+          <div class="tl-exhibit">Exhibit 042-A</div>
+          <h3 class="tl-title">Deir Yassin Massacre</h3>
+          <p class="tl-text">Paramilitary Zionist groups (Irgun and Lehi) attacked the village of Deir Yassin near Jerusalem, killing over 100 civilians including women and children, accelerating the mass exodus of Palestinians.</p>
+          <a class="tl-btn">View Documented Evidence ↗</a>
+        </div>
+      </div>
+
+      <div class="timeline-item" data-decade="1940" data-type="displacement">
+        <div class="tl-content-left">
           <div class="tl-exhibit" style="color:var(--red);">Exhibit 046</div>
           <h3 class="tl-title">The Nakba (The Catastrophe)</h3>
-          <p class="tl-text">Over 700,000 Palestinians fled or were expelled from their homes. 531 villages were depopulated and destroyed. 15,000+ killed in verified massacres including Deir Yassin.</p>
+          <p class="tl-text">Over 700,000 Palestinians fled or were forcibly expelled from their homes by advancing militias. 530+ villages were depopulated, bulldozed, and erased from the map to prevent return.</p>
           <a class="tl-btn">View Documented Evidence ↗</a>
+        </div>
+        <div class="tl-center"><div class="tl-diamond red"><div class="tl-diamond-inner" style="background:var(--red);border-radius:1px;"></div></div></div>
+        <div class="tl-content-right" style="padding-top:4px;">
+          <img class="tl-img" src="https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=260&h=140&fit=crop&q=60" alt="Displacement" loading="lazy">
         </div>
       </div>
 
@@ -112,6 +150,19 @@
       </div>
 
       <!-- 1967 -->
+      <div class="timeline-item" data-decade="1950" data-type="military">
+        <div class="tl-content-left">
+          <div class="tl-exhibit">Exhibit 052</div>
+          <h3 class="tl-title">Kafr Qasim Massacre</h3>
+          <p class="tl-text">Israeli border police executed 48 unarmed Palestinian citizens of Israel (including 23 children) returning from work, enforcing a curfew the villagers were completely unaware of.</p>
+          <a class="tl-btn">View Documented Evidence ↗</a>
+        </div>
+        <div class="tl-center"><div class="tl-diamond black"><div class="tl-diamond-inner" style="font-family:'IBM Plex Mono',monospace;font-size:6px;color:rgba(255,255,255,0.6);">56</div></div></div>
+        <div class="tl-content-right" style="padding-top:4px;">
+          <img class="tl-img" src="https://images.unsplash.com/photo-1519677584237-752f8853252e?w=260&h=140&fit=crop&q=60" alt="Border" loading="lazy">
+        </div>
+      </div>
+
       <div class="timeline-item" data-decade="1960" data-type="military">
         <div class="tl-content-left" style="padding-top:4px;">
           <img class="tl-img" src="https://images.unsplash.com/photo-1508739773434-c26b3d09e071?w=260&h=140&fit=crop&q=60" alt="Territory" loading="lazy" style="margin-left:auto;">
@@ -119,8 +170,34 @@
         <div class="tl-center"><div class="tl-diamond black"><div class="tl-diamond-inner" style="font-family:'IBM Plex Mono',monospace;font-size:6px;color:rgba(255,255,255,0.6);">67</div></div></div>
         <div class="tl-content-right">
           <div class="tl-exhibit">Exhibit 077</div>
-          <h3 class="tl-title">The Six-Day War &amp; Military Occupation</h3>
-          <p class="tl-text">Israel occupies the West Bank, Gaza Strip, Sinai Peninsula, and Golan Heights. UN Resolution 242 demands withdrawal from occupied territories. Occupation of the West Bank and Gaza continues to this day.</p>
+          <h3 class="tl-title">The Six-Day War (Al-Naksa)</h3>
+          <p class="tl-text">Israel occupies the West Bank, Gaza Strip, East Jerusalem, and the Golan Heights. Another 300,000 Palestinians are displaced. The military occupation of the territories officially begins.</p>
+          <a class="tl-btn">View Documented Evidence ↗</a>
+        </div>
+      </div>
+
+      <div class="timeline-item" data-decade="1970" data-type="systemic">
+        <div class="tl-content-left">
+          <div class="tl-exhibit">Exhibit 091</div>
+          <h3 class="tl-title">Land Day Protests</h3>
+          <p class="tl-text">Following the state announcement to expropriate thousands of dunams of Palestinian land for Jewish settlements in the Galilee, strikes erupted. Six unarmed Palestinians were killed by security forces.</p>
+          <a class="tl-btn">View Documented Evidence ↗</a>
+        </div>
+        <div class="tl-center"><div class="tl-diamond black"><div class="tl-diamond-inner" style="font-family:'IBM Plex Mono',monospace;font-size:6px;color:rgba(255,255,255,0.6);">76</div></div></div>
+        <div class="tl-content-right" style="padding-top:4px;">
+          <img class="tl-img" src="https://images.unsplash.com/photo-1539635278303-d4002c07eae3?w=260&h=140&fit=crop&q=60" alt="Protest" loading="lazy">
+        </div>
+      </div>
+
+      <div class="timeline-item" data-decade="1980" data-type="military">
+        <div class="tl-content-left" style="padding-top:4px;">
+          <img class="tl-img" src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=260&h=140&fit=crop&q=60" alt="Refugees" loading="lazy" style="margin-left:auto;">
+        </div>
+        <div class="tl-center"><div class="tl-diamond red"><div class="tl-diamond-inner"></div></div></div>
+        <div class="tl-content-right">
+          <div class="tl-exhibit">Exhibit 104</div>
+          <h3 class="tl-title">Sabra and Shatila Massacre</h3>
+          <p class="tl-text">Following the invasion of Lebanon, the IDF cordoned off two Palestinian refugee camps and illuminated them with flares while allied Phalangist militias massacred between 2,000 and 3,500 civilians over two days.</p>
           <a class="tl-btn">View Documented Evidence ↗</a>
         </div>
       </div>
@@ -140,39 +217,62 @@
       </div>
 
       <!-- 2000 Second Intifada -->
-      <div class="timeline-item" data-decade="2000" data-type="military">
+      <div class="timeline-item" data-decade="1990" data-type="diplomatic">
         <div class="tl-content-left" style="padding-top:4px;">
-          <img class="tl-img" src="https://images.unsplash.com/photo-1519677584237-752f8853252e?w=260&h=140&fit=crop&q=60" alt="Checkpoint" loading="lazy" style="margin-left:auto;">
+          <img class="tl-img" src="https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=260&h=140&fit=crop&q=60" alt="Diplomatic" loading="lazy" style="margin-left:auto;">
         </div>
-        <div class="tl-center"><div class="tl-diamond black"><div class="tl-diamond-inner" style="font-family:'IBM Plex Mono',monospace;font-size:6px;color:rgba(255,255,255,0.6);">00</div></div></div>
+        <div class="tl-center"><div class="tl-diamond green"><div class="tl-diamond-inner"></div></div></div>
         <div class="tl-content-right">
+          <div class="tl-exhibit">Exhibit 150</div>
+          <h3 class="tl-title">The Oslo Accords</h3>
+          <p class="tl-text">A peace process establishing the Palestinian Authority with limited self-rule. The West Bank is partitioned into Areas A, B, and C, entrenching a deeply fragmented territorial matrix and failing to halt settlement expansion.</p>
+          <a class="tl-btn">View Documented Evidence ↗</a>
+        </div>
+      </div>
+
+      <div class="timeline-item" data-decade="2000" data-type="military">
+        <div class="tl-content-left">
           <div class="tl-exhibit">Exhibit 188</div>
           <h3 class="tl-title">Second Intifada &amp; Wall Construction</h3>
-          <p class="tl-text">Construction of the Separation Wall begins, cutting deep into West Bank territory. In 2004, the International Court of Justice ruled the wall's route in occupied territory is contrary to international law. Israel refused compliance.</p>
+          <p class="tl-text">Following the collapse of Camp David, a second uprising begins. Construction of the 700km Separation Wall commences, effectively annexing 9.4% of the West Bank. The ICJ later rules the wall illegal.</p>
+          <a class="tl-btn">View Documented Evidence ↗</a>
+        </div>
+        <div class="tl-center"><div class="tl-diamond black"><div class="tl-diamond-inner" style="font-family:'IBM Plex Mono',monospace;font-size:6px;color:rgba(255,255,255,0.6);">00</div></div></div>
+        <div class="tl-content-right" style="padding-top:4px;">
+          <img class="tl-img" src="https://images.unsplash.com/photo-1519677584237-752f8853252e?w=260&h=140&fit=crop&q=60" alt="Checkpoint" loading="lazy">
+        </div>
+      </div>
+
+      <div class="timeline-item" data-decade="2010" data-type="military">
+        <div class="tl-content-left" style="padding-top:4px;">
+          <img class="tl-img" src="https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=260&h=140&fit=crop&q=60" alt="Rubble" loading="lazy" style="margin-left:auto;">
+        </div>
+        <div class="tl-center"><div class="tl-diamond black"><div class="tl-diamond-inner" style="font-family:'IBM Plex Mono',monospace;font-size:6px;color:rgba(255,255,255,0.6);">14</div></div></div>
+        <div class="tl-content-right">
+          <div class="tl-exhibit">Exhibit 212</div>
+          <h3 class="tl-title">Operation Protective Edge</h3>
+          <p class="tl-text">A 50-day military assault on the blockaded Gaza Strip resulting in over 2,200 Palestinian deaths, including 551 children. UN reports document widespread targeting of civilian infrastructure and hospitals.</p>
           <a class="tl-btn">View Documented Evidence ↗</a>
         </div>
       </div>
 
       <!-- 2023 -->
       <div class="timeline-item" data-decade="2020" data-type="military">
-        <div class="tl-content-left">
-          <div class="tl-exhibit" style="color:var(--red);">Exhibit 891-CURRENT</div>
-          <h3 class="tl-title">Operation Al-Aqsa Flood &amp; Israeli Response</h3>
-          <p class="tl-text">Hamas-led attack on October 7, 2023 kills approximately 1,200 Israelis and takes 253 hostages. Israeli military campaign results in over 45,000 Palestinian deaths as of 2024. South Africa files genocide case at ICJ.</p>
-          <a class="tl-btn">View Current ICJ Proceedings ↗</a>
+          <div class="tl-content-left">
+            <div class="tl-exhibit" style="color:var(--red);">Exhibit 891-CURRENT</div>
+            <h3 class="tl-title">Escalation & ICJ Proceedings</h3>
+            <p class="tl-text">Following an attack on Oct 7 killing 1,139 Israelis, a devastating military assault on Gaza is launched. The bombardment displaces 1.9 million people and triggers formal ICC arrest warrants and a plausible genocide ruling by the ICJ.</p>
+            <a class="tl-btn" onclick="showPage('icj')">View Current ICJ Proceedings ↗</a>
+          </div>
+          <div class="tl-center"><div class="tl-diamond red"><div class="tl-diamond-inner" style="background:var(--red);"></div></div></div>
+          <div class="tl-content-right" style="padding-top:4px;">
+            <img class="tl-img" src="https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=260&h=140&fit=crop&q=60" alt="Destruction" loading="lazy">
+          </div>
         </div>
-        <div class="tl-center"><div class="tl-diamond red"><div class="tl-diamond-inner" style="background:var(--red);"></div></div></div>
-        <div class="tl-content-right" style="padding-top:4px;">
-          <img class="tl-img" src="https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=260&h=140&fit=crop&q=60" alt="Destruction" loading="lazy">
-        </div>
+      </div><div style="padding:0 0 40px;display:flex;flex-wrap:wrap;gap:12px;">
+        <button class="btn-primary" onclick="showPage('census')">Open 1948 Depopulation Ledger</button>
+        <button class="btn-outline" style="color:var(--black);border-color:var(--border);" onclick="showPage('british')">British Mandate Records</button>
       </div>
-    </div><!-- /timeline -->
-
-    <!-- Census Link -->
-    <div style="padding:0 0 40px;display:flex;gap:12px;">
-      <button class="btn-primary" onclick="showPage('census')">Open 1948 Census Ledger</button>
-      <button class="btn-outline" style="color:var(--black);border-color:var(--border);" onclick="showPage('british')">British Mandate Records</button>
-    </div>
 
     <footer>
       <div class="footer-brand">ARCHIVE.PS <span>© 2024 THE JUDICIAL MONOLITH. ALL RECORDS PERMANENT.</span></div>

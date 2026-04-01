@@ -11,6 +11,10 @@
     </div>
     <div class="icj-divider"></div>
 
+    <div class="terminal-alert" style="margin-top: 24px;">
+      ICJ DOCKET ACTIVE: PROVISIONAL MEASURES ARE LEGALLY BINDING. THIRD-STATE INTERVENTION PROTOCOLS INITIATED.
+    </div>
+
     <div class="icj-meta">
       <div>
         <div class="icj-scope-label">Docket Scope</div>
@@ -28,13 +32,17 @@
         </div>
         <div class="icj-stat">
           <span class="icj-stat-label">Juridical Status</span>
-          <span class="icj-stat-val active">ACTIVE</span>
+          <span class="icj-stat-val active"><div class="status-pulse red"></div>ACTIVE</span>
         </div>
       </div>
     </div>
 
+    <div class="data-block" style="margin-bottom: 40px;">
+      <div class="data-block-header"><span>LEGAL THRESHOLD MET</span><span>THE PLAUSIBILITY RULING</span></div>
+      <div class="data-block-content">On January 26, 2024, the ICJ ruled that South Africa had standing to bring the case, and determined that the right of Palestinians in Gaza to be protected from acts of genocide is "plausible." The Court recognized a real and imminent risk of irreparable prejudice to these rights, triggering binding Provisional Measures under international law.</div>
+    </div>
+
     <div class="icj-exhibits">
-      <!-- Satellite Analysis -->
       <div class="exhibit-card">
         <div class="exhibit-id">EXH.001-P</div>
         <div class="exhibit-verified">
@@ -46,7 +54,6 @@
         <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;">Classified Level III &nbsp; →</div>
       </div>
 
-      <!-- Military Directive -->
       <div>
         <div class="exhibit-card" style="border-top:none;">
           <div class="exhibit-id">EXH.042-W</div>
@@ -70,10 +77,29 @@
           <div style="font-size:9px;color:rgba(255,255,255,0.35);line-height:1.5;text-align:center;">International Court of Justice<br>Peace Palace, The Hague</div>
         </div>
       </div>
-    </div><!-- /icj-exhibits -->
 
-    <!-- Casualty + Zone Cards -->
-    <div class="icj-exhibits-bottom">
+      <div class="exhibit-card">
+        <div class="exhibit-id">EXH.108-D</div>
+        <div class="exhibit-verified">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--green-light)" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+        </div>
+        <img class="exhibit-img" src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=160&fit=crop&q=60" alt="Data streams" loading="lazy">
+        <h4 class="exhibit-title">AI Targeting Algorithms: Lavender & The Gospel</h4>
+        <p class="exhibit-text">Whistleblower telemetry verifying the deployment of automated machine-learning systems to generate human kill-lists with virtually no human oversight, resulting in massive civilian casualties.</p>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;">Classified Level I &nbsp; →</div>
+      </div>
+
+      <div class="exhibit-card">
+        <div class="exhibit-id">EXH.440-S</div>
+        <div class="exhibit-verified">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <img class="exhibit-img" src="https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=600&h=160&fit=crop&q=60" alt="Documents" loading="lazy">
+        <h4 class="exhibit-title">State-Sponsored Incitement Ledger</h4>
+        <p class="exhibit-text">A compiled database of over 500 public statements from senior cabinet ministers and military commanders explicitly advocating for the total destruction and starvation of the civilian population.</p>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;">Pending Review &nbsp; →</div>
+      </div>
+    </div><div class="icj-exhibits-bottom">
       <div class="casualty-card">
         <div class="casualty-title">Verified Casualty Register</div>
         <div class="casualty-stats">
@@ -97,6 +123,14 @@
             <span class="casualty-row-label">Displaced Persons</span>
             <span class="casualty-row-val">1,900,000</span>
           </div>
+          <div class="casualty-row" style="border-top: 1px solid rgba(200,55,58,0.2); padding-top: 12px; margin-top: 12px;">
+            <span class="casualty-row-label">UN Facilities Hit</span>
+            <span class="casualty-row-val red">160+</span>
+          </div>
+          <div class="casualty-row">
+            <span class="casualty-row-label">Universities Destroyed</span>
+            <span class="casualty-row-val">100%</span>
+          </div>
         </div>
         <button class="btn-view-register">⤓ Access Full Register</button>
       </div>
@@ -111,6 +145,15 @@
             <div class="zone-title">Northern Gaza — 3km Buffer</div>
           </div>
         </div>
+        <div class="zone-card" style="margin-bottom:16px;">
+          <div class="zone-map">
+            <img src="https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=400&h=160&fit=crop&q=60" alt="Aerial territory" loading="lazy" style="width:100%;height:100%;object-fit:cover;filter:grayscale(0.6);">
+          </div>
+          <div class="zone-overlay">
+            <div class="zone-label" style="background: var(--amber); color: var(--black);">MILITARY CORRIDOR</div>
+            <div class="zone-title">Netzarim Axis — Severing the North</div>
+          </div>
+        </div>
         <div class="urgent-card">
           <div class="urgent-label">⚠ Urgent Order</div>
           <p class="urgent-text">"The Court indicates that Israel must immediately halt its military offensive in Rafah."</p>
@@ -119,10 +162,9 @@
       </div>
     </div>
 
-    <!-- Forensic Grid -->
     <div class="forensic-section">
-      <span class="forensic-label">Automated Forensic Analysis</span>
-      <span class="forensic-auto" id="forensic-auto-ts">AUTO-GENERATED: --:--:-- UTC</span>
+      <span class="forensic-label">Distributed Evidence Ledger</span>
+      <span class="forensic-auto" style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase;">IMMUTABLE RECORD VERIFIED</span>
       <div class="forensic-rule"></div>
       <div class="forensic-grid">
         <div class="forensic-item">
@@ -140,6 +182,22 @@
         <div class="forensic-item">
           <span class="forensic-item-label">Confidence</span>
           <span class="forensic-item-val" style="color:var(--green-light);">98.7%</span>
+        </div>
+        <div class="forensic-item">
+          <span class="forensic-item-label">Chain of Custody</span>
+          <span class="forensic-item-val">MAINTAINED</span>
+        </div>
+        <div class="forensic-item">
+          <span class="forensic-item-label">Encryption</span>
+          <span class="forensic-item-val">AES-256</span>
+        </div>
+        <div class="forensic-item">
+          <span class="forensic-item-label">Metadata Scrubber</span>
+          <span class="forensic-item-val">ACTIVE</span>
+        </div>
+        <div class="forensic-item">
+          <span class="forensic-item-label">Witness Protection</span>
+          <span class="forensic-item-val" style="color:var(--green-light);">ANONYMIZED</span>
         </div>
       </div>
     </div>

@@ -1,106 +1,197 @@
 <div id="page-british" class="page">
   <aside class="sidebar" data-autosidebar></aside>
+  
   <div class="main">
-	<div class="bm-header-title">The Imperial Architecture</div>
-	<p class="bm-header-text">Original texts, declarations, and diplomatic accords enacted between 1916 and 1947 that established the legal and administrative framework for the displacement of the native population.</p>
+	<div class="un-header">
+	  <h1 class="un-title">British Mandate Records</h1>
+	  <div class="un-subtitle">Imperial Architecture // Colonial Administration</div>
+	  <p class="hr-header-text" style="margin-top: 16px;">Declassified imperial communications, commissions of inquiry, and policy white papers documenting the administrative facilitation of demographic displacement prior to 1948.</p>
+	</div>
+
+	<div class="terminal-alert">
+	  HISTORICAL ROOT IDENTIFIED: THE LEGAL AND ADMINISTRATIVE APPARATUS FOR DISPOSSESSION WAS ENGINEERED UNDER BRITISH IMPERIAL RULE BETWEEN 1917 AND 1948.
+	</div>
+
+	<div class="data-block" style="margin-bottom: 40px;">
+	  <div class="data-block-header"><span>COLONIAL POLICY METRICS</span><span>SOURCE: UK NATIONAL ARCHIVES</span></div>
+	  <div class="data-block-content">An analysis of British colonial policy reveals a systemic suppression of native Palestinian self-determination. Through emergency regulations, mass punitive demolitions, and the administrative facilitation of European immigration against the will of the indigenous majority, the Mandate authority laid the architectural foundation for the subsequent ethnic cleansing of 1948.</div>
+	</div>
 
 	<div class="bm-grid">
-	  <div class="bm-list">
-		<div class="bm-list-item" onclick="switchMandateDoc('sykes', this)">
+	  <div class="bm-sidebar">
+		<button class="bm-list-item active" onclick="switchMandateDoc('sykes', this)">
 		  <div class="bm-item-year">1916</div>
-		  <div class="bm-item-title">Sykes-Picot Agreement</div>
-		  <div class="bm-item-desc">Secret treaty dividing the Ottoman Empire's Arab provinces into British and French spheres of influence.</div>
-		</div>
-		<div class="bm-list-item active" onclick="switchMandateDoc('balfour', this)">
+		  <div class="bm-item-title">Sykes-Picot</div>
+		  <div class="bm-item-desc">Imperial Partition</div>
+		</button>
+		<button class="bm-list-item" onclick="switchMandateDoc('balfour', this)">
 		  <div class="bm-item-year">1917</div>
-		  <div class="bm-item-title">The Balfour Declaration</div>
-		  <div class="bm-item-desc">A public pledge by Britain declaring support for the establishment of a "national home for the Jewish people."</div>
-		</div>
-		<div class="bm-list-item" onclick="switchMandateDoc('mandate', this)">
+		  <div class="bm-item-title">Balfour Declaration</div>
+		  <div class="bm-item-desc">Policy Statement</div>
+		</button>
+		<button class="bm-list-item" onclick="switchMandateDoc('mandate', this)">
 		  <div class="bm-item-year">1922</div>
-		  <div class="bm-item-title">The British Mandate</div>
-		  <div class="bm-item-desc">League of Nations mandate formalizing British rule and incorporating the Balfour Declaration into international law.</div>
-		</div>
-		<div class="bm-list-item" onclick="switchMandateDoc('peel', this)">
+		  <div class="bm-item-title">League of Nations Mandate</div>
+		  <div class="bm-item-desc">Administrative Charter</div>
+		</button>
+		<button class="bm-list-item" onclick="switchMandateDoc('shaw', this)">
+		  <div class="bm-item-year">1930</div>
+		  <div class="bm-item-title">Shaw Commission</div>
+		  <div class="bm-item-desc">Uprising Inquiry</div>
+		</button>
+		<button class="bm-list-item" onclick="switchMandateDoc('passfield', this)">
+		  <div class="bm-item-year">1930</div>
+		  <div class="bm-item-title">Passfield White Paper</div>
+		  <div class="bm-item-desc">Immigration Limits</div>
+		</button>
+		<button class="bm-list-item" onclick="switchMandateDoc('peel', this)">
 		  <div class="bm-item-year">1937</div>
-		  <div class="bm-item-title">Peel Commission Report</div>
-		  <div class="bm-item-desc">The first official British proposal recommending the partition of Palestine and "compulsory population transfer."</div>
-		</div>
-		<div class="bm-list-item" onclick="switchMandateDoc('whitepaper', this)">
+		  <div class="bm-item-title">Peel Commission</div>
+		  <div class="bm-item-desc">Partition Proposal</div>
+		</button>
+		<button class="bm-list-item" onclick="switchMandateDoc('woodhead', this)">
+		  <div class="bm-item-year">1938</div>
+		  <div class="bm-item-title">Woodhead Commission</div>
+		  <div class="bm-item-desc">Partition Rejection</div>
+		</button>
+		<button class="bm-list-item" onclick="switchMandateDoc('whitepaper', this)">
 		  <div class="bm-item-year">1939</div>
 		  <div class="bm-item-title">The White Paper</div>
-		  <div class="bm-item-desc">Policy paper issued by the British government rejecting the partition plan and limiting Jewish immigration.</div>
-		</div>
+		  <div class="bm-item-desc">Policy Reversal</div>
+		</button>
+		<button class="bm-list-item" onclick="switchMandateDoc('anglo', this)">
+		  <div class="bm-item-year">1946</div>
+		  <div class="bm-item-title">Anglo-American Committee</div>
+		  <div class="bm-item-desc">Post-War Inquiry</div>
+		</button>
 	  </div>
 
-	  <div class="bm-viewer">
-		<div id="doc-sykes" class="bm-doc">
-		  <div class="bm-viewer-meta"><span>Source: Diplomatic Archives</span><span>Date: May 16, 1916</span></div>
-		  <h2 class="bm-viewer-title">Sykes-Picot Agreement</h2>
-		  <div class="bm-viewer-body">
-			<p><strong>Article 1:</strong><br>That France and Great Britain are prepared to recognize and protect an independent Arab State or a Confederation of Arab States in the areas (A) and (B) marked on the annexed map...</p>
-			<p><strong>Article 2:</strong><br>That in the blue area France, and in the red area Great Britain, shall be allowed to establish such direct or indirect administration or control as they desire and as they may think fit to arrange with the Arab State...</p>
-			<p><strong>Article 3:</strong><br><mark>That in the brown area [Palestine] there shall be established an international administration</mark>, the form of which is to be decided upon after consultation with Russia, and subsequently in consultation with the other Allies, and the representatives of the Shereef of Mecca.</p>
-			<div class="bm-stamp">Classified // Declassified 1917</div>
+	  <div class="bm-viewer" style="background:#fff; border:1px solid var(--border); padding:40px; position:relative; box-shadow: 0 10px 30px rgba(0,0,0,0.03);">
+		
+		<div id="doc-sykes" class="bm-doc active">
+		  <div class="bm-viewer-meta" style="display:flex; justify-content:space-between; margin-bottom:24px; border-bottom:2px solid var(--black); padding-bottom:12px;">
+			<span style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--red);">CAB 24/143</span>
+			<span style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--muted);">16 MAY 1916</span>
 		  </div>
+		  <h2 class="bm-viewer-title" style="font-family:'Playfair Display',serif; font-size:clamp(24px, 4vw, 36px); font-weight:900; margin-bottom:16px; color:var(--black);">The Sykes-Picot Agreement</h2>
+		  <p style="font-size:13px; line-height:1.7; color:var(--text); margin-bottom:16px;">A secret convention made during World War I between Great Britain and France, with the assent of imperial Russia, for the dismemberment of the Ottoman Empire.</p>
+		  <p style="font-size:13px; line-height:1.7; color:var(--text); margin-bottom:24px;">The agreement led to the division of the Arab provinces into areas of future British and French control or influence, entirely disregarding the promises of Arab independence made to Hussein bin Ali, Sharif of Mecca, in the Hussein-McMahon Correspondence.</p>
+		  <div style="background:var(--cream); padding:20px; border-left:3px solid var(--red); font-family:'IBM Plex Mono',monospace; font-size:11px; line-height:1.6; color:var(--text);">
+			"That France and Great Britain are prepared to recognize and protect an independent Arab State or a Confederation of Arab States... That in the blue area France, and in the red area Great Britain, shall be allowed to establish such direct or indirect administration or control as they desire."
+		  </div>
+		  <a href="#" class="btn-view-register proc-download" style="margin-top: 32px;">Decrypt Full Treaty Text</a>
 		</div>
 
-		<div id="doc-balfour" class="bm-doc active">
-		  <div class="bm-viewer-meta"><span>Source: Foreign Office Records</span><span>Date: November 2, 1917</span></div>
-		  <h2 class="bm-viewer-title">The Balfour Declaration</h2>
-		  <div class="bm-viewer-body">
-			<p>Foreign Office<br>November 2nd, 1917</p>
-			<p>Dear Lord Rothschild,</p>
-			<p>I have much pleasure in conveying to you, on behalf of His Majesty's Government, the following declaration of sympathy with Jewish Zionist aspirations which has been submitted to, and approved by, the Cabinet.</p>
-			<p>"His Majesty's Government view with favour the establishment in Palestine of a national home for the Jewish people, and will use their best endeavours to facilitate the achievement of this object, <mark>it being clearly understood that nothing shall be done which may prejudice the civil and religious rights of existing non-Jewish communities in Palestine</mark>, or the rights and political status enjoyed by Jews in any other country."</p>
-			<p>Yours sincerely,<br>Arthur James Balfour</p>
-			<div class="bm-stamp">Authenticated Record // UK National Archives</div>
+		<div id="doc-balfour" class="bm-doc" style="display:none;">
+		  <div class="bm-viewer-meta" style="display:flex; justify-content:space-between; margin-bottom:24px; border-bottom:2px solid var(--black); padding-bottom:12px;">
+			<span style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--red);">FO 371/3083</span>
+			<span style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--muted);">02 NOV 1917</span>
 		  </div>
+		  <h2 class="bm-viewer-title" style="font-family:'Playfair Display',serif; font-size:clamp(24px, 4vw, 36px); font-weight:900; margin-bottom:16px; color:var(--black);">The Balfour Declaration</h2>
+		  <p style="font-size:13px; line-height:1.7; color:var(--text); margin-bottom:16px;">A public statement issued by the British government during World War I announcing support for the establishment of a "national home for the Jewish people" in Palestine.</p>
+		  <p style="font-size:13px; line-height:1.7; color:var(--text); margin-bottom:24px;">At the time of the declaration, the native Palestinian Arab population constituted over 90% of the demographic reality. The declaration deliberately referred to this overwhelming majority merely as "existing non-Jewish communities," framing their rights solely as civil and religious, while reserving political and national rights for the Jewish people.</p>
+		  <div style="background:var(--cream); padding:20px; border-left:3px solid var(--red); font-family:'IBM Plex Mono',monospace; font-size:11px; line-height:1.6; color:var(--text);">
+			"His Majesty's Government view with favour the establishment in Palestine of a national home for the Jewish people, and will use their best endeavours to facilitate the achievement of this object, it being clearly understood that nothing shall be done which may prejudice the civil and religious rights of existing non-Jewish communities in Palestine..."
+		  </div>
+		  <a href="#" class="btn-view-register proc-download" style="margin-top: 32px;">Decrypt Archival Letter</a>
 		</div>
 
-		<div id="doc-mandate" class="bm-doc">
-		  <div class="bm-viewer-meta"><span>Source: League of Nations</span><span>Date: July 24, 1922</span></div>
-		  <h2 class="bm-viewer-title">The Mandate for Palestine</h2>
-		  <div class="bm-viewer-body">
-			<p><strong>Preamble:</strong><br>Whereas the Principal Allied Powers have also agreed that the Mandatory should be responsible for putting into effect the declaration originally made on November 2nd, 1917, by the Government of His Britannic Majesty...</p>
-			<p><strong>Article 2:</strong><br><mark>The Mandatory shall be responsible for placing the country under such political, administrative and economic conditions as will secure the establishment of the Jewish national home...</mark> and the development of self-governing institutions, and also for safeguarding the civil and religious rights of all the inhabitants of Palestine, irrespective of race and religion.</p>
-			<p><strong>Article 4:</strong><br>An appropriate Jewish agency shall be recognised as a public body for the purpose of advising and co-operating with the Administration of Palestine...</p>
-			<div class="bm-stamp">Official Ratification</div>
+		<div id="doc-mandate" class="bm-doc" style="display:none;">
+		  <div class="bm-viewer-meta" style="display:flex; justify-content:space-between; margin-bottom:24px; border-bottom:2px solid var(--black); padding-bottom:12px;">
+			<span style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--red);">C.529.M.314.1922.VI</span>
+			<span style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--muted);">24 JUL 1922</span>
 		  </div>
+		  <h2 class="bm-viewer-title" style="font-family:'Playfair Display',serif; font-size:clamp(24px, 4vw, 36px); font-weight:900; margin-bottom:16px; color:var(--black);">League of Nations Mandate</h2>
+		  <p style="font-size:13px; line-height:1.7; color:var(--text); margin-bottom:16px;">The legal instrument by which the League of Nations formalized British administrative control over Palestine, officially incorporating the text of the Balfour Declaration into international law.</p>
+		  <p style="font-size:13px; line-height:1.7; color:var(--text); margin-bottom:24px;">The Mandate specifically tasked Britain with securing the establishment of the Jewish national home and facilitating Jewish immigration, effectively creating a legal framework that prioritized a colonial-settler project over the democratic self-determination of the indigenous population.</p>
+		  <div style="background:var(--cream); padding:20px; border-left:3px solid var(--red); font-family:'IBM Plex Mono',monospace; font-size:11px; line-height:1.6; color:var(--text);">
+			"Article 2: The Mandatory shall be responsible for placing the country under such political, administrative and economic conditions as will secure the establishment of the Jewish national home...<br><br>Article 6: The Administration of Palestine... shall facilitate Jewish immigration under suitable conditions."
+		  </div>
+		  <a href="#" class="btn-view-register proc-download" style="margin-top: 32px;">Decrypt Charter Text</a>
 		</div>
 
-		<div id="doc-peel" class="bm-doc">
-		  <div class="bm-viewer-meta"><span>Source: Royal Commission</span><span>Date: July 1937</span></div>
-		  <h2 class="bm-viewer-title">Peel Commission Report</h2>
-		  <div class="bm-viewer-body">
-			<p><strong>Chapter XXII. A Plan of Partition</strong></p>
-			<p>An irrepressible conflict has arisen between two national communities within the narrow bounds of one small country... There is no common ground between them. Their national aspirations are incompatible.</p>
-			<p>We cannot—in Palestine as it now is—both concede the Arab claim to self-government and secure the establishment of the Jewish National Home...</p>
-			<p><strong>On Population Transfer:</strong><br><mark>If Partition is to be effective, a transfer of population must be carried out... It should be part of the agreement that in the last resort the exchange would be compulsory.</mark></p>
-			<div class="bm-stamp">Cmd. 5479 // HMSO</div>
+		<div id="doc-shaw" class="bm-doc" style="display:none;">
+		  <div class="bm-viewer-meta" style="display:flex; justify-content:space-between; margin-bottom:24px; border-bottom:2px solid var(--black); padding-bottom:12px;">
+			<span style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--red);">Cmd. 3530</span>
+			<span style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--muted);">MAR 1930</span>
 		  </div>
+		  <h2 class="bm-viewer-title" style="font-family:'Playfair Display',serif; font-size:clamp(24px, 4vw, 36px); font-weight:900; margin-bottom:16px; color:var(--black);">The Shaw Commission</h2>
+		  <p style="font-size:13px; line-height:1.7; color:var(--text); margin-bottom:16px;">A British commission of inquiry established to investigate the causes of the 1929 Buraq (Wailing Wall) uprising, which resulted in significant casualties on both sides.</p>
+		  <p style="font-size:13px; line-height:1.7; color:var(--text); margin-bottom:24px;">The report concluded that the fundamental cause of the unrest was the Palestinian Arabs' profound feeling of disappointment regarding their political and national aspirations, compounded by their legitimate fear for their economic future due to land purchases and unrestricted Jewish immigration.</p>
+		  <div style="background:var(--cream); padding:20px; border-left:3px solid var(--red); font-family:'IBM Plex Mono',monospace; font-size:11px; line-height:1.6; color:var(--text);">
+			"The twofold fear of the Arabs that by a disproportionate increase in Jewish immigration they would be deprived of their livelihood and in time pass under the political domination of the Jews... is the fundamental cause of the outbreak."
+		  </div>
+		  <a href="#" class="btn-view-register proc-download" style="margin-top: 32px;">Decrypt Commission Report</a>
 		</div>
 
-		<div id="doc-whitepaper" class="bm-doc">
-		  <div class="bm-viewer-meta"><span>Source: UK Parliament</span><span>Date: May 23, 1939</span></div>
-		  <h2 class="bm-viewer-title">White Paper of 1939</h2>
-		  <div class="bm-viewer-body">
-			<p><strong>Section I. The Constitution</strong></p>
-			<p>His Majesty's Government believe that the framers of the Mandate in which the Balfour Declaration was embodied could not have intended that Palestine should be converted into a Jewish State against the will of the Arab population of the country.</p>
-			<p><strong>Section II. Immigration</strong></p>
-			<p><mark>Jewish immigration during the next five years will be at a rate which, if economic absorptive capacity permits, will bring the Jewish population up to approximately one-third of the total population of the country.</mark> After the period of five years, no further Jewish immigration will be permitted unless the Arabs of Palestine are prepared to acquiesce in it.</p>
-			<div class="bm-stamp">Cmd. 6019 // Approved Policy</div>
+		<div id="doc-passfield" class="bm-doc" style="display:none;">
+		  <div class="bm-viewer-meta" style="display:flex; justify-content:space-between; margin-bottom:24px; border-bottom:2px solid var(--black); padding-bottom:12px;">
+			<span style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--red);">Cmd. 3692</span>
+			<span style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--muted);">OCT 1930</span>
 		  </div>
+		  <h2 class="bm-viewer-title" style="font-family:'Playfair Display',serif; font-size:clamp(24px, 4vw, 36px); font-weight:900; margin-bottom:16px; color:var(--black);">Passfield White Paper</h2>
+		  <p style="font-size:13px; line-height:1.7; color:var(--text); margin-bottom:16px;">Issued by Colonial Secretary Lord Passfield following the Hope Simpson Enquiry, representing a momentary shift in British policy favoring a more balanced approach to the Mandate's dual obligations.</p>
+		  <p style="font-size:13px; line-height:1.7; color:var(--text); margin-bottom:24px;">The White Paper explicitly criticized the Zionist policy of employing exclusively Jewish labor and recommended severe restrictions on Jewish immigration and land purchases to protect displaced Arab tenant farmers. Following massive political pressure from Zionist organizations in London, the policy was subsequently abandoned via the 'MacDonald Letter.'</p>
+		  <a href="#" class="btn-view-register proc-download" style="margin-top: 32px;">Decrypt White Paper</a>
 		</div>
+
+		<div id="doc-peel" class="bm-doc" style="display:none;">
+		  <div class="bm-viewer-meta" style="display:flex; justify-content:space-between; margin-bottom:24px; border-bottom:2px solid var(--black); padding-bottom:12px;">
+			<span style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--red);">Cmd. 5479</span>
+			<span style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--muted);">07 JUL 1937</span>
+		  </div>
+		  <h2 class="bm-viewer-title" style="font-family:'Playfair Display',serif; font-size:clamp(24px, 4vw, 36px); font-weight:900; margin-bottom:16px; color:var(--black);">The Peel Commission</h2>
+		  <p style="font-size:13px; line-height:1.7; color:var(--text); margin-bottom:16px;">Appointed to investigate the causes of the 1936 Great Arab Revolt. The commission famously concluded that the Mandate had become "unworkable" due to irreconcilable national aspirations.</p>
+		  <p style="font-size:13px; line-height:1.7; color:var(--text); margin-bottom:24px;">The Peel Commission was the first official body to recommend the partition of Palestine into separate Jewish and Arab states. Crucially, it recommended a "compulsory exchange of population"—effectively endorsing the forced transfer (ethnic cleansing) of hundreds of thousands of Palestinians from the proposed Jewish state to ensure demographic dominance.</p>
+		  <div style="background:var(--cream); padding:20px; border-left:3px solid var(--red); font-family:'IBM Plex Mono',monospace; font-size:11px; line-height:1.6; color:var(--text);">
+			"If Partition is to be effective, a transfer of population must be brought about... In the last resort, the exchange would be compulsory."
+		  </div>
+		  <a href="#" class="btn-view-register proc-download" style="margin-top: 32px;">Decrypt Commission Report</a>
+		</div>
+
+		<div id="doc-woodhead" class="bm-doc" style="display:none;">
+		  <div class="bm-viewer-meta" style="display:flex; justify-content:space-between; margin-bottom:24px; border-bottom:2px solid var(--black); padding-bottom:12px;">
+			<span style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--red);">Cmd. 5854</span>
+			<span style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--muted);">09 NOV 1938</span>
+		  </div>
+		  <h2 class="bm-viewer-title" style="font-family:'Playfair Display',serif; font-size:clamp(24px, 4vw, 36px); font-weight:900; margin-bottom:16px; color:var(--black);">The Woodhead Commission</h2>
+		  <p style="font-size:13px; line-height:1.7; color:var(--text); margin-bottom:16px;">A technical commission tasked with examining the practical details of the Peel Commission's partition plan.</p>
+		  <p style="font-size:13px; line-height:1.7; color:var(--text); margin-bottom:24px;">After exhaustive analysis, the Woodhead Commission concluded that the Peel partition plan was entirely unworkable, primarily because it was impossible to draw a viable Jewish state without it containing an enormous, and politically fatal, Arab majority. It determined that forced transfer was logistically and financially impossible, forcing Britain to abandon partition as a policy.</p>
+		  <a href="#" class="btn-view-register proc-download" style="margin-top: 32px;">Decrypt Commission Report</a>
+		</div>
+
+		<div id="doc-whitepaper" class="bm-doc" style="display:none;">
+		  <div class="bm-viewer-meta" style="display:flex; justify-content:space-between; margin-bottom:24px; border-bottom:2px solid var(--black); padding-bottom:12px;">
+			<span style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--red);">Cmd. 6019</span>
+			<span style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--muted);">23 MAY 1939</span>
+		  </div>
+		  <h2 class="bm-viewer-title" style="font-family:'Playfair Display',serif; font-size:clamp(24px, 4vw, 36px); font-weight:900; margin-bottom:16px; color:var(--black);">The 1939 White Paper</h2>
+		  <p style="font-size:13px; line-height:1.7; color:var(--text); margin-bottom:16px;">Following the failure of partition and the exhaustion of the Arab Revolt, Britain issued a drastic policy reversal to secure Arab loyalty on the eve of World War II.</p>
+		  <p style="font-size:13px; line-height:1.7; color:var(--text); margin-bottom:24px;">The document declared that Palestine would not become a Jewish state, limited Jewish immigration to 75,000 over five years, severely restricted land sales to Jews, and promised the establishment of an independent binational Palestinian state within 10 years. It was violently rejected by Zionist organizations, leading to an armed insurgency against British forces.</p>
+		  <div style="background:var(--cream); padding:20px; border-left:3px solid var(--red); font-family:'IBM Plex Mono',monospace; font-size:11px; line-height:1.6; color:var(--text);">
+			"His Majesty's Government therefore now declare unequivocally that it is not part of their policy that Palestine should become a Jewish State."
+		  </div>
+		  <a href="#" class="btn-view-register proc-download" style="margin-top: 32px;">Decrypt White Paper</a>
+		</div>
+
+		<div id="doc-anglo" class="bm-doc" style="display:none;">
+		  <div class="bm-viewer-meta" style="display:flex; justify-content:space-between; margin-bottom:24px; border-bottom:2px solid var(--black); padding-bottom:12px;">
+			<span style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--red);">Joint Inquiry</span>
+			<span style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--muted);">20 APR 1946</span>
+		  </div>
+		  <h2 class="bm-viewer-title" style="font-family:'Playfair Display',serif; font-size:clamp(24px, 4vw, 36px); font-weight:900; margin-bottom:16px; color:var(--black);">Anglo-American Committee of Inquiry</h2>
+		  <p style="font-size:13px; line-height:1.7; color:var(--text); margin-bottom:16px;">A joint British and American committee assembled immediately after World War II to examine political, economic, and social conditions in Palestine as they related to the problem of Jewish refugees in Europe.</p>
+		  <p style="font-size:13px; line-height:1.7; color:var(--text); margin-bottom:24px;">The committee recommended the immediate admission of 100,000 Jewish refugees and the annulment of the 1939 White Paper's land sale restrictions. However, it rejected partition, proposing instead a unitary, binational state where "Jew shall not dominate Arab and Arab shall not dominate Jew." The subsequent rejection of this report led Britain to hand the Mandate over to the United Nations in 1947.</p>
+		  <a href="#" class="btn-view-register proc-download" style="margin-top: 32px;">Decrypt Joint Report</a>
+		</div>
+
 	  </div>
 	</div>
 
 	<footer>
 	  <div class="footer-brand">ARCHIVE.PS <span>© 2024 THE JUDICIAL MONOLITH. ALL RECORDS PERMANENT.</span></div>
 	  <nav class="footer-links">
-		<a href="#" onclick="showPage('legal'); return false;">Declassification Policy</a>
-		<a href="#" onclick="showPage('legal'); return false;">Official Contact</a>
-		<a href="#" onclick="showPage('legal'); return false;">Privacy Protocol</a>
+		<a href="#" onclick="showPage('nakba'); return false;">The Nakba Archive</a>
 		<a href="#" onclick="showPage('legal'); return false;">Legal Disclaimer</a>
 	  </nav>
 	</footer>
