@@ -73,7 +73,7 @@
 </template>
 
 <template id="footer-template">
-  <footer>
+  <footer class="unified-footer">
     <div class="footer-brand">ARCHIVE.PS<span>© 2024 THE JUDICIAL MONOLITH. ALL RECORDS PERMANENT.</span></div>
     <nav class="footer-links">
       <a href="#" onclick="showPage('legal'); return false;">Declassification Policy</a>
@@ -505,7 +505,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (footerTmpl) {
           const mains = node.classList?.contains('main') ? [node] : node.querySelectorAll?.('.main') || [];
           mains.forEach(main => {
-            if (!main.querySelector('footer')) {
+            const existingFooter = main.querySelector('footer');
+            // Remove old, inconsistent footers
+            if (existingFooter && !existingFooter.classList.contains('unified-footer')) {
+              existingFooter.remove();
+            }
+            // Add the new unified footer
+            if (!main.querySelector('.unified-footer')) {
               main.appendChild(footerTmpl.content.cloneNode(true));
             }
           });

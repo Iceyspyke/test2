@@ -250,7 +250,13 @@ function syncSidebars() {
   const footerTmpl = document.getElementById('footer-template');
   if (footerTmpl) {
     document.querySelectorAll('.main').forEach(main => {
-      if (!main.querySelector('footer')) {
+      const existingFooter = main.querySelector('footer');
+      // Remove old, inconsistent footers
+      if (existingFooter && !existingFooter.classList.contains('unified-footer')) {
+        existingFooter.remove();
+      }
+      // Add the new unified footer
+      if (!main.querySelector('.unified-footer')) {
         main.appendChild(footerTmpl.content.cloneNode(true));
       }
     });
