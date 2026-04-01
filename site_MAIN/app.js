@@ -94,6 +94,11 @@ function executeSwitch(id) {
   if (id === 'media') {
     setTimeout(initMediaApi, 100);
   }
+
+  // Trigger Registry API if user opens the Registry Node
+  if (id === 'registry') {
+    setTimeout(() => fetchRegistryData('organizations'), 100);
+  }
 }
 
 function syncSidebarHighlight(id) {
@@ -116,37 +121,43 @@ let tfpSummaryData = null;
 
 async function initTechForPalestineData() {
   try {
+    // Attempt live fetch
     const response = await fetch('https://data.techforpalestine.org/api/v3/summary.json');
-    if (!response.ok) return;
+    if (!response.ok) throw new Error('API_UNREACHABLE');
     
     tfpSummaryData = await response.json();
-    bindTfpData(); // Bind to any elements currently in the DOM
+    console.log("OS_STREAM: Live telemetry synchronized.");
   } catch (error) {
-    console.error('TFP Summary fetch error:', error);
+    console.warn('OS_STREAM: Connection refused. Utilizing local archival cache.');
+    // Fallback data so the site is never blank (CORS/Offline protection)
+    tfpSummaryData = {
+      gaza: { killed: { total: 43900, children: 17400, medical: 1047, press: 188, civil_defence: 85 }, injured: { total: 103890 }, last_update: "2024-ARCHIVE-CACHE" },
+      west_bank: { killed: { total: 780 }, injured: { total: 6300 }, settler_attacks: 1500 },
+      known_press_killed_in_gaza: { records: 188 }
+    };
   }
+  bindTfpData();
 }
 
 function bindTfpData() {
-  if (!tfpSummaryData) return; // Wait until API data is ready
+  if (!tfpSummaryData) return;
   
-  // Find all elements needing data that haven't been bound yet
-  document.querySelectorAll('[data-tfp]:not([data-tfp-bound])').forEach(el => {
+  document.querySelectorAll('[data-tfp]').forEach(el => {
     const path = el.getAttribute('data-tfp').split('.');
     let val = tfpSummaryData;
     
-    // Traverse the JSON object to find the specific nested value
     for (const key of path) {
       if (val && val[key] !== undefined) val = val[key];
       else { val = null; break; }
     }
     
-    // Inject value and lock the element
     if (val !== null) {
-      el.innerText = typeof val === 'number' ? val.toLocaleString() : val;
+      // If it's the date string, don't use toLocaleString
+      el.innerText = (typeof val === 'number') ? val.toLocaleString() : val;
       el.classList.remove('status-pulse');
       el.setAttribute('data-tfp-bound', 'true'); 
     } else {
-      el.innerText = "N/A";
+      el.innerText = "REF_NOT_FOUND";
       el.classList.remove('status-pulse');
     }
   });
@@ -885,12 +896,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   console.log('ARCHIVE.PS // MONOLITH_OS: OPERATIONAL');
 });
-// --- Add to executeSwitch(id) ---
-if (id === 'registry') {
-  setTimeout(() => fetchRegistryData('organizations'), 100);
-}
 
-// --- Add to the bottom of app.js ---
+// ── ARCHIVE REGISTRY API INTEGRATION ──
 async function fetchRegistryData(category, btnEl) {
   const container = document.getElementById('registry-api-container');
   if (!container) return;
@@ -904,13 +911,20 @@ async function fetchRegistryData(category, btnEl) {
   container.innerHTML = `<div style="padding: 20px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase;"><span class="status-pulse red"></span> Querying ${category.toUpperCase()}...</div>`;
 
   try {
+    // Attempt handshake with Registry Node
     const response = await fetch(`https://palestine-api.viethere.com/api/v1/${category}`);
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
     
-    const records = await response.json();
+    if (!response.ok) {
+      throw new Error(`NODE_REFUSAL: HTTP ${response.status} ${response.statusText}`);
+    }
+    
+    const rawData = await response.json();
+    
+    // Support both direct list responses and wrapped objects
+    const records = Array.isArray(rawData) ? rawData : (rawData.data || Object.values(rawData));
 
     if (!records || records.length === 0) {
-      container.innerHTML = `<div class="terminal-alert">NODE EMPTY: NO RECORDS FOUND</div>`;
+      container.innerHTML = `<div class="terminal-alert">NODE EMPTY: NO RECORDS REGISTERED IN THIS SECTOR.</div>`;
       return;
     }
 
