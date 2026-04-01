@@ -1,93 +1,24 @@
 <div id="page-registry" class="page">
   <aside class="sidebar" data-autosidebar></aside>
-
-  <div class="main" style="padding:40px;">
+  <div class="main">
 	<div class="un-header">
-	  <h1 class="un-title">Archive Registry Index</h1>
-	  <div class="un-subtitle">Master File Directory // Forensic Identifiers</div>
-	  <p class="hr-header-text" style="margin-top: 16px;">The definitive index of categorized forensic evidence files held within the Judicial Monolith. Each ID corresponds to a verified evidentiary packet.</p>
+	  <h1 class="un-title">Archive Registry</h1>
+	  <div class="un-subtitle">Consolidated Resource Index // Cultural & Humanitarian</div>
+	  <p class="hr-header-text" style="margin-top: 16px;">A centralized ledger of Palestinian literature, cinema, and international advocacy organizations. Data retrieved via unified API handshake.</p>
 	</div>
-	
-	<div class="terminal-alert">
-	  SECURITY CLEARANCE: PUBLIC_READ_ONLY. ALL EVIDENTIARY HASHES ARE IMMUTABLY LOGGED ON THE DECENTRALIZED LEDGER.
+
+	<div class="timeline-filters" style="margin-bottom: 32px; grid-template-columns: repeat(3, 1fr);">
+	  <button class="btn-outline active" id="btn-reg-orgs" onclick="fetchRegistryData('organizations', this)">Organizations</button>
+	  <button class="btn-outline" id="btn-reg-books" onclick="fetchRegistryData('books', this)">Literature</button>
+	  <button class="btn-outline" id="btn-reg-movies" onclick="fetchRegistryData('movies', this)">Cinema</button>
 	</div>
-	
-	<table class="census-table" id="registry-master-table">
-	  <thead>
-		<tr>
-		  <th>File ID</th>
-		  <th>Category</th>
-		  <th>Subject Matter</th>
-		  <th>Verification Hash</th>
-		  <th>Access</th>
-		</tr>
-	  </thead>
-	  <tbody>
-		<tr>
-		  <td><strong style="color:var(--red);">ARCH-992-G</strong></td>
-		  <td>Ballistics</td>
-		  <td>Fragment Analysis: Jabalia Strike</td>
-		  <td><span class="data-point" data-id="HSH-0x11A">0x11A...F4</span></td>
-		  <td><a href="#" class="detention-btn proc-download">Decrypt</a></td>
-		</tr>
-		<tr>
-		  <td><strong style="color:var(--red);">ARCH-044-W</strong></td>
-		  <td>Legal</td>
-		  <td>Cabinet Minutes: Forced Displacement</td>
-		  <td><span class="data-point" data-id="HSH-0x22B">0x22B...D9</span></td>
-		  <td><a href="#" class="detention-btn proc-download">Decrypt</a></td>
-		</tr>
-		<tr>
-			  <td><strong style="color:var(--red);">ARCH-108-S</strong></td>
-			  <td>Satellite</td>
-			  <td>Agricultural Demolition: Area C</td>
-			  <td><span class="data-point" data-id="HSH-0x44C">0x44C...A1</span></td>
-			  <td><a href="#" class="detention-btn proc-download">Decrypt</a></td>
-			</tr>
-			<tr>
-			  <td><strong style="color:var(--black);">ARCH-302-M</strong></td>
-			  <td>Medical Forensics</td>
-			  <td>Mass Grave Exhumation: Nasser Hospital</td>
-			  <td><span class="data-point" data-id="HSH-0x99F">0x99F...B3</span></td>
-			  <td><a href="#" class="detention-btn proc-download">Decrypt</a></td>
-			</tr>
-			<tr>
-			  <td><strong style="color:var(--amber);">ARCH-811-C</strong></td>
-			  <td>Cyber Telemetry</td>
-			  <td>ISP Blackout Routing Logs</td>
-			  <td><span class="data-point" data-id="HSH-0x71D">0x71D...E8</span></td>
-			  <td><a href="#" class="detention-btn proc-download">Decrypt</a></td>
-			</tr>
-			<tr>
-			  <td><strong style="color:var(--red);">ARCH-719-A</strong></td>
-			  <td>Aviation</td>
-			  <td>Drone Strike Video Feed: Al-Mawasi Tent Camp</td>
-			  <td><span class="data-point" data-id="HSH-0x33A">0x33A...C9</span></td>
-			  <td><a href="#" class="detention-btn proc-download">Decrypt</a></td>
-			</tr>
-			<tr>
-			  <td><strong style="color:var(--black);">ARCH-405-D</strong></td>
-			  <td>Demographics</td>
-			  <td>Civil Registry Erasure Metrics</td>
-			  <td><span class="data-point" data-id="HSH-0x66B">0x66B...F2</span></td>
-			  <td><a href="#" class="detention-btn proc-download">Decrypt</a></td>
-			</tr>
-			<tr>
-			  <td><strong style="color:var(--black);">ARCH-550-E</strong></td>
-			  <td>Economic</td>
-			  <td>Land Expropriation Deeds: Jordan Valley</td>
-			  <td><span class="data-point" data-id="HSH-0x88C">0x88C...D4</span></td>
-			  <td><a href="#" class="detention-btn proc-download">Decrypt</a></td>
-			</tr>
-		  </tbody>
-		</table>
-		
-		<footer>
-	  <div class="footer-brand">
-		ARCHIVE.PS
-		<span>© 2024 THE JUDICIAL MONOLITH. ALL RECORDS PERMANENT.</span>
+
+	<div id="registry-api-container">
+	  <div style="padding: 20px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase;">
+		<span class="status-pulse red"></span> Initializing Handshake...
 	  </div>
-	</footer>
+	</div>
+
+	<footer></footer>
   </div>
 </div>
->>>>

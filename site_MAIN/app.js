@@ -72,6 +72,9 @@ function executeSwitch(id) {
   syncSidebarHighlight(id);
   syncSidebars(); // Ensure all sidebars and footers are consistently updated on routing
   
+  // Bind Global Stats Data if the newly loaded page has data-tfp elements
+  if (typeof bindTfpData === 'function') bindTfpData();
+  
   // Trigger Map API if user opens the Geospatial Node
   if (id === 'maps') {
     setTimeout(initMapsApi, 100);
@@ -109,32 +112,44 @@ function showLoader(id) {
 }
 
 // ── TECH FOR PALESTINE (GLOBAL SUMMARY API) ──
+let tfpSummaryData = null;
+
 async function initTechForPalestineData() {
   try {
     const response = await fetch('https://data.techforpalestine.org/api/v3/summary.json');
     if (!response.ok) return;
     
-    const data = await response.json();
-
-    // Auto-bind data to any element with a data-tfp attribute (e.g., data-tfp="gaza.killed.total")
-    document.querySelectorAll('[data-tfp]').forEach(el => {
-      const path = el.getAttribute('data-tfp').split('.');
-      let val = data;
-      
-      // Traverse the JSON object based on the attribute path
-      for (const key of path) {
-        if (val[key] !== undefined) val = val[key];
-        else { val = null; break; }
-      }
-      
-      if (val !== null) {
-        el.innerText = typeof val === 'number' ? val.toLocaleString() : val;
-        el.classList.remove('status-pulse'); // Remove loading animation once populated
-      }
-    });
+    tfpSummaryData = await response.json();
+    bindTfpData(); // Bind to any elements currently in the DOM
   } catch (error) {
     console.error('TFP Summary fetch error:', error);
   }
+}
+
+function bindTfpData() {
+  if (!tfpSummaryData) return; // Wait until API data is ready
+  
+  // Find all elements needing data that haven't been bound yet
+  document.querySelectorAll('[data-tfp]:not([data-tfp-bound])').forEach(el => {
+    const path = el.getAttribute('data-tfp').split('.');
+    let val = tfpSummaryData;
+    
+    // Traverse the JSON object to find the specific nested value
+    for (const key of path) {
+      if (val && val[key] !== undefined) val = val[key];
+      else { val = null; break; }
+    }
+    
+    // Inject value and lock the element
+    if (val !== null) {
+      el.innerText = typeof val === 'number' ? val.toLocaleString() : val;
+      el.classList.remove('status-pulse');
+      el.setAttribute('data-tfp-bound', 'true'); 
+    } else {
+      el.innerText = "N/A";
+      el.classList.remove('status-pulse');
+    }
+  });
 }
 
 // ── KILLED CHILDREN BY NAME API (CENSUS NODE) ──
@@ -870,3 +885,75 @@ document.addEventListener('DOMContentLoaded', () => {
 
   console.log('ARCHIVE.PS // MONOLITH_OS: OPERATIONAL');
 });
+// --- Add to executeSwitch(id) ---
+if (id === 'registry') {
+  setTimeout(() => fetchRegistryData('organizations'), 100);
+}
+
+// --- Add to the bottom of app.js ---
+async function fetchRegistryData(category, btnEl) {
+  const container = document.getElementById('registry-api-container');
+  if (!container) return;
+
+  // UI Update: Active Button State
+  if (btnEl) {
+    document.querySelectorAll('.timeline-filters .btn-outline').forEach(b => b.classList.remove('active'));
+    btnEl.classList.add('active');
+  }
+
+  container.innerHTML = `<div style="padding: 20px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase;"><span class="status-pulse red"></span> Querying ${category.toUpperCase()}...</div>`;
+
+  try {
+    const response = await fetch(`https://palestine-api.viethere.com/api/v1/${category}`);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    
+    const records = await response.json();
+
+    if (!records || records.length === 0) {
+      container.innerHTML = `<div class="terminal-alert">NODE EMPTY: NO RECORDS FOUND</div>`;
+      return;
+    }
+
+    let html = `<table class="census-table"><thead><tr>`;
+    
+    // Custom Headers per Category
+    if (category === 'organizations') {
+      html += `<th>Organization</th><th>Description</th><th>Focus</th><th>Access</th></tr></thead><tbody>`;
+      records.forEach(rec => {
+        html += `<tr>
+          <td><strong style="color:var(--black);">${rec.name}</strong></td>
+          <td style="font-size:11px; line-height:1.5;">${rec.description || '-'}</td>
+          <td><span class="exhibit-tag">${rec.type || 'NGO'}</span></td>
+          <td><a href="${rec.link}" target="_blank" class="detention-btn">Link</a></td>
+        </tr>`;
+      });
+    } else if (category === 'books') {
+      html += `<th>Title</th><th>Author</th><th>Year</th><th>Access</th></tr></thead><tbody>`;
+      records.forEach(rec => {
+        html += `<tr>
+          <td><strong style="color:var(--black);">${rec.title}</strong></td>
+          <td>${rec.author || '-'}</td>
+          <td>${rec.year || '-'}</td>
+          <td><a href="${rec.link}" target="_blank" class="detention-btn">Source</a></td>
+        </tr>`;
+      });
+    } else { // Movies
+      html += `<th>Title</th><th>Director</th><th>Year</th><th>Link</th></tr></thead><tbody>`;
+      records.forEach(rec => {
+        html += `<tr>
+          <td><strong style="color:var(--black);">${rec.title}</strong></td>
+          <td>${rec.director || '-'}</td>
+          <td>${rec.year || '-'}</td>
+          <td><a href="${rec.link}" target="_blank" class="detention-btn">Watch</a></td>
+        </tr>`;
+      });
+    }
+
+    html += `</tbody></table>`;
+    container.innerHTML = html;
+
+  } catch (error) {
+    console.error('Registry API Error:', error);
+    container.innerHTML = `<div class="terminal-alert" style="border-color:var(--red);">ERR_CONNECTION_FAILED: Unable to reach Registry Node.</div>`;
+  }
+}
