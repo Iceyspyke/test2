@@ -50,8 +50,8 @@ function executeSwitch(id) {
   document.body.classList.remove('mobile-menu-open');
 
   document.title = `ARCHIVE.PS — ${id.toUpperCase()}_NODE`;
-  syncSidebarHighlight(id);
   syncSidebars();
+  syncSidebarHighlight(id);
   
   // QOL: Live Telemetry Handshake
   if (typeof bindTfpData === 'function') bindTfpData();
@@ -924,15 +924,43 @@ document.addEventListener('DOMContentLoaded', () => {
   console.log('ARCHIVE.PS // MONOLITH_OS: OPERATIONAL');
   });
   
-  // ── INFRASTRUCTURE DAMAGE API ──
-  async function initInfrastructureApi() {
+  // ── INFRASTRUCTURE DAMAGE API (PAGINATED) ──
+  let cachedInfraData = null; // Store data to avoid refetching on page change
+  
+  async function initInfrastructureApi(page = 1) {
     const container = document.getElementById('infra-api-container');
+    const pagination = document.getElementById('infra-pagination');
+    const pageSize = 20;
+  
     if (!container) return;
-    container.innerHTML = `<div class="skeleton-wrap"><div class="skeleton-row"></div><div class="skeleton-row"></div><div class="skeleton-row"></div></div>`;
+    if (page === 1) {
+      container.innerHTML = `<div class="skeleton-wrap"><div class="skeleton-row"></div><div class="skeleton-row"></div><div class="skeleton-row"></div></div>`;
+    }
+  
     try {
-      const response = await fetch('https://data.techforpalestine.org/api/v3/infrastructure-damaged.json');
-      const data = await response.json();
-      
+      if (!cachedInfraData) {
+        const response = await fetch('https://data.techforpalestine.org/api/v3/infrastructure-damaged.json');
+        if (!response.ok) throw new Error('OFFLINE');
+        const rawData = await response.json();
+        
+        // Filter for unique significant updates only
+        const uniqueData = [];
+        let lastHash = "";
+        for (let i = rawData.length - 1; i >= 0; i--) {
+          const d = rawData[i];
+          const hash = `${d.residential?.ext_destroyed}|${d.educational_buildings?.ext_damaged}|${d.places_of_worship?.ext_mosques_destroyed}`;
+          if (hash !== lastHash) {
+            uniqueData.push(d);
+            lastHash = hash;
+          }
+        }
+        cachedInfraData = uniqueData;
+      }
+  
+      const totalPages = Math.ceil(cachedInfraData.length / pageSize);
+      const start = (page - 1) * pageSize;
+      const pagedData = cachedInfraData.slice(start, start + pageSize);
+  
       let html = `
         <div class="table-header-ctrl">
           <div class="table-search-box">
@@ -946,26 +974,36 @@ document.addEventListener('DOMContentLoaded', () => {
                 <th>Report Date</th>
                 <th>Residential (Destroyed)</th>
                 <th>Educational Units</th>
-                <th>Healthcare Facilities</th>
                 <th>Places of Worship</th>
               </tr>
             </thead>
             <tbody>`;
       
-      data.slice(-30).reverse().forEach(day => {
+      pagedData.forEach(day => {
         html += `<tr>
           <td><span style="font-family:mono; font-size:11px;">${day.report_date}</span></td>
-          <td style="color:var(--red); font-weight:bold;">${day.residential.ext_destroyed.toLocaleString()}</td>
-          <td>${day.educational_buildings.ext_damaged.toLocaleString()}</td>
-          <td>${day.health_facilities.ext_damaged.toLocaleString()}</td>
-          <td>${day.places_of_worship.ext_mosques_destroyed.toLocaleString()}</td>
+          <td style="color:var(--red); font-weight:bold;">${(day.residential?.ext_destroyed || 0).toLocaleString()}</td>
+          <td>${(day.educational_buildings?.ext_damaged || 0).toLocaleString()}</td>
+          <td>${(day.places_of_worship?.ext_mosques_destroyed || 0).toLocaleString()}</td>
         </tr>`;
       });
       
       html += `</tbody></table></div>`;
       container.innerHTML = html;
       attachTableSearch('infra-api-container', 'infra-search');
-    } catch (e) { container.innerHTML = `<div class="terminal-alert">ERR_INFRA_STREAM_OFFLINE: UNABLE TO SYNC SATELLITE TELEMETRY</div>`; }
+  
+      // Pagination UI
+      if (pagination) {
+        pagination.innerHTML = `
+          <button class="btn-outline" style="padding:8px 16px; border-color:var(--border);" onclick="initInfrastructureApi(${page - 1})" ${page <= 1 ? 'disabled' : ''}>PREV</button>
+          <span style="font-family:mono; font-size:10px; color:var(--muted);">PAGE ${page} OF ${totalPages}</span>
+          <button class="btn-outline" style="padding:8px 16px; border-color:var(--border);" onclick="initInfrastructureApi(${page + 1})" ${page >= totalPages ? 'disabled' : ''}>NEXT</button>
+        `;
+      }
+  
+    } catch (e) { 
+      container.innerHTML = `<div class="terminal-alert">ERR_INFRA_STREAM_OFFLINE: UNABLE TO SYNC SATELLITE TELEMETRY</div>`; 
+    }
   }
   
   // ── MARTYRS NAMES REGISTRY (Killed in Gaza) ──
