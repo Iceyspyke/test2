@@ -76,6 +76,11 @@ function executeSwitch(id) {
   if (id === 'maps') {
     setTimeout(initMapsApi, 100);
   }
+  
+  // Trigger Presences API if user opens the Movement Node
+  if (id === 'movement') {
+    setTimeout(() => initPresencesApi(1), 100);
+  }
 }
 
 function syncSidebarHighlight(id) {
@@ -568,6 +573,86 @@ function triggerForensicPing(type, siteId) {
 // ── MAP PING HANDLER ──
 function pingMapSite(type, siteId) {
   triggerForensicPing(type, siteId);
+}
+
+// ── PRESENCES API INTEGRATION ──
+async function initPresencesApi(page = 1) {
+  const container = document.getElementById('presences-api-container');
+  const pagination = document.getElementById('presences-pagination');
+  if (!container) return;
+
+  container.innerHTML = `<div style="padding: 20px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase;"><span class="status-pulse red" style="margin-top:8px;"></span> Fetching Node Data...</div>`;
+
+  try {
+    // Attempt fetch from public endpoint (use relative fallback if dealing with proxies)
+    const response = await fetch(`https://gazamaps.com/api/v1/presences?page=${page}`)
+      .catch(() => fetch(`/api/v1/presences?page=${page}`));
+
+    if (!response || !response.ok) throw new Error('Network response was not ok');
+
+    const data = await response.json();
+    
+    // Support both wrapped paginated response (data.data) and raw array responses
+    const records = data.data || (Array.isArray(data) ? data : []);
+
+    if (records.length === 0) {
+      container.innerHTML = `<div class="terminal-alert">NO RECORDS FOUND ON THIS PAGE</div>`;
+      if (pagination) pagination.innerHTML = '';
+      return;
+    }
+
+    // Dynamically build headers based on the first record's keys (excluding ID for cleaner display)
+    const keys = Object.keys(records[0]).filter(k => k !== 'id');
+
+    let html = `<table class="census-table"><thead><tr>`;
+    keys.forEach(k => { 
+      html += `<th>${k.replace(/_/g, ' ')}</th>`; 
+    });
+    html += `</tr></thead><tbody>`;
+
+    // Map rows dynamically to prevent breaking when new attributes are added
+    records.forEach(rec => {
+      html += `<tr>`;
+      keys.forEach(k => {
+        let val = rec[k];
+        if (Array.isArray(val)) val = val.join(', '); // Handle array attributes
+        
+        // Wrap hyperlinks for "source" or similar URLs automatically
+        if (typeof val === 'string' && val.startsWith('http')) {
+          val = `<a href="${val}" target="_blank" style="color:var(--red); text-decoration:underline;">View Source</a>`;
+        }
+        
+        html += `<td>${val !== undefined && val !== '' ? val : '-'}</td>`;
+      });
+      html += `</tr>`;
+    });
+    html += `</tbody></table>`;
+
+    container.innerHTML = html;
+
+    // Build Pagination Controls
+    if (pagination) {
+      const currentPage = data.current_page || page;
+      const lastPage = data.last_page || (records.length === 100 ? currentPage + 1 : currentPage);
+      
+      let btnHtml = '';
+      if (currentPage > 1) {
+         btnHtml += `<button class="btn-outline" style="color:var(--black); border-color:var(--border);" onclick="initPresencesApi(${currentPage - 1})">PREV PAGE</button>`;
+      }
+      
+      btnHtml += `<span style="font-family:'IBM Plex Mono', monospace; font-size:10px; padding:10px; color:var(--muted); font-weight:600;">PAGE ${currentPage} ${data.last_page ? 'OF ' + lastPage : ''}</span>`;
+      
+      if (currentPage < lastPage) {
+         btnHtml += `<button class="btn-outline" style="color:var(--black); border-color:var(--border);" onclick="initPresencesApi(${currentPage + 1})">NEXT PAGE</button>`;
+      }
+      pagination.innerHTML = btnHtml;
+    }
+
+  } catch (error) {
+    console.error('API Error:', error);
+    container.innerHTML = `<div class="terminal-alert" style="margin:20px; border-radius:0;">ERR_CONNECTION_REFUSED<br>Unable to fetch presences datastream.</div>`;
+    if (pagination) pagination.innerHTML = '';
+  }
 }
 
 // ── INIT ──
