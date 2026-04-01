@@ -49,10 +49,13 @@ function executeSwitch(id) {
   if (navEl) navEl.classList.add('active');
 
   // FIX: Close mobile menus if open upon navigation
-  const topnav = document.querySelector('.topnav-links');
-  if (topnav) {
-    topnav.classList.remove('active');
-    topnav.style.removeProperty('display');
+  const topnavWrap = document.querySelector('.topnav');
+  if (topnavWrap) topnavWrap.classList.remove('expanded');
+  
+  const topnavLinks = document.querySelector('.topnav-links');
+  if (topnavLinks) {
+    topnavLinks.classList.remove('active');
+    topnavLinks.style.removeProperty('display');
   }
   document.querySelectorAll('.sidebar').forEach(s => {
     s.classList.remove('active');
@@ -68,6 +71,11 @@ function executeSwitch(id) {
   document.title = `ARCHIVE.PS — ${id.toUpperCase()}_NODE`;
   syncSidebarHighlight(id);
   syncSidebars(); // Ensure all sidebars and footers are consistently updated on routing
+  
+  // Trigger Map API if user opens the Geospatial Node
+  if (id === 'maps') {
+    setTimeout(initMapsApi, 100);
+  }
 }
 
 function syncSidebarHighlight(id) {
@@ -401,57 +409,26 @@ function stopAudio(stopBtn) {
   if (playBtn) playBtn.style.display = 'inline-flex';
 }
 
+// ── HEADER LINKS TOGGLE ──
+function toggleHeaderLinks() {
+  const topnav = document.querySelector('.topnav');
+  if (topnav) {
+    topnav.classList.toggle('expanded');
+  }
+}
+
 // ── MOBILE MENU ──
 function toggleMobileMenu() {
-  const topnav = document.querySelector('.topnav-links');
   const sidebar = document.querySelector('.page.active .sidebar');
   const isActive = document.body.classList.contains('mobile-menu-open');
   
   if (isActive) {
-    if (topnav) {
-      topnav.classList.remove('active');
-      topnav.style.removeProperty('display');
-    }
-    if (sidebar) {
-      sidebar.classList.remove('active');
-      // Keep top/height properties to avoid layout shifts on close
-    }
+    if (sidebar) sidebar.classList.remove('active');
     document.body.style.overflow = '';
     document.body.classList.remove('mobile-menu-open');
   } else {
-    if (window.innerWidth <= 768 && sidebar && topnav) {
-      // Merge topnav into sidebar to avoid "2 sidebars" issue on mobile
-      if (!sidebar.querySelector('.mobile-topnav-clone')) {
-        const clone = topnav.cloneNode(true);
-        clone.className = 'mobile-topnav-clone';
-        clone.style.display = 'flex';
-        clone.style.flexDirection = 'column';
-        clone.style.position = 'static';
-        clone.style.width = '100%';
-        clone.style.height = 'auto';
-        clone.style.borderRight = 'none';
-        clone.style.borderBottom = '1px solid var(--border)';
-        clone.style.padding = '0 0 20px 0';
-        clone.style.marginBottom = '20px';
-        clone.style.boxShadow = 'none';
-        clone.style.gap = '20px';
-        
-        // Remove duplicate IDs
-        clone.querySelectorAll('*').forEach(el => {
-          if (el.id) el.removeAttribute('id');
-        });
-        
-        sidebar.insertBefore(clone, sidebar.firstChild);
-      }
-      topnav.style.setProperty('display', 'none', 'important');
+    if (sidebar) {
       sidebar.classList.add('active');
-      sidebar.style.setProperty('position', 'fixed', 'important');
-      sidebar.style.setProperty('top', '70px', 'important');
-      sidebar.style.setProperty('height', 'calc(100vh - 70px)', 'important');
-      sidebar.style.setProperty('z-index', '10000', 'important');
-    } else {
-      if (topnav) topnav.classList.add('active');
-      if (sidebar) sidebar.classList.add('active');
     }
     document.body.style.overflow = 'hidden';
     document.body.classList.add('mobile-menu-open');
@@ -480,6 +457,104 @@ function injectRealImages() {
     }
   });
 }
+
+// ── MAPS API INTEGRATION ──
+let displacementMapsData = [];
+let mapsApiInitialized = false;
+
+async function initMapsApi() {
+  if (mapsApiInitialized) return;
+  const listEl = document.getElementById('map-order-list');
+  if (!listEl) return;
+  
+  try {
+    // Attempt fetch from Gazamaps public endpoint
+    const response = await fetch('https://gazamaps.com/api/v1/displacement')
+      .catch(() => fetch('/api/v1/displacement')); // Fallback if proxy is required
+      
+    if (!response || !response.ok) throw new Error('Network response was not ok');
+    
+    const data = await response.json();
+    displacementMapsData = data;
+    
+    // Sort newest first
+    displacementMapsData.sort((a, b) => new Date(b.date) - new Date(a.date));
+    
+    renderMapOrders();
+    if (displacementMapsData.length > 0) {
+      selectMapOrder(0);
+    }
+    mapsApiInitialized = true;
+  } catch (error) {
+    console.error('API Error:', error);
+    listEl.innerHTML = `<div class="terminal-alert" style="margin:20px; border-radius:0;">ERR_CONNECTION_REFUSED<br>Unable to fetch displacement datastream.</div>`;
+  }
+}
+
+function renderMapOrders() {
+  const listEl = document.getElementById('map-order-list');
+  if (!listEl) return;
+  
+  listEl.innerHTML = displacementMapsData.map((item, index) => `
+    <div class="map-order-item" onclick="selectMapOrder(${index})" data-index="${index}">
+      <div class="map-order-date">${item.date}</div>
+      <div class="map-order-meta">ID: ${item.id} <br> Disp: ${item.area_sq_km_displacement} km²</div>
+    </div>
+  `).join('');
+}
+
+window.selectMapOrder = function(index) {
+  const item = displacementMapsData[index];
+  if (!item) return;
+  
+  // Update Active State
+  document.querySelectorAll('.map-order-item').forEach(el => el.classList.remove('active'));
+  const activeEl = document.querySelector(`.map-order-item[data-index="${index}"]`);
+  if (activeEl) activeEl.classList.add('active');
+  
+  // Update UI Elements
+  const titleEl = document.getElementById('map-ui-title');
+  if (titleEl) titleEl.innerText = `ORDER REF: ${item.id}`;
+  
+  const dateEl = document.getElementById('map-val-date');
+  if (dateEl) dateEl.innerText = item.date;
+  
+  const dispEl = document.getElementById('map-val-disp-area');
+  if (dispEl) dispEl.innerText = `${item.area_sq_km_displacement} sq km`;
+  
+  const safeEl = document.getElementById('map-val-safe-area');
+  if (safeEl) safeEl.innerText = `${item.area_sq_km_labeled_safe} sq km`;
+  
+  const blocksEl = document.getElementById('map-val-blocks');
+  if (blocksEl) blocksEl.innerText = item.displacement_blocks || 'None Specified';
+  
+  // Button Routing
+  const btnIdf = document.getElementById('map-btn-idf');
+  const btnFull = document.getElementById('map-btn-full');
+  
+  if (btnIdf) {
+    btnIdf.href = item.source || item.link || '#';
+    btnIdf.style.display = (item.source || item.link) ? 'block' : 'none';
+  }
+  if (btnFull) {
+    btnFull.href = item.map_full || item.map_zoom || '#';
+    btnFull.style.display = (item.map_full || item.map_zoom) ? 'block' : 'none';
+  }
+  
+  // Update Image Display (Priority: Zoom > Full > IDF Source)
+  const imgEl = document.getElementById('active-map-img');
+  if (imgEl) {
+    const targetSrc = item.map_zoom || item.map_full || item.map_idf;
+    if (targetSrc) {
+      imgEl.src = targetSrc;
+      imgEl.style.display = 'block';
+    } else {
+      imgEl.style.display = 'none';
+    }
+  }
+  
+  triggerForensicPing('GEO', item.id);
+};
 
 // ── TRIGGER FORENSIC PING ──
 function triggerForensicPing(type, siteId) {

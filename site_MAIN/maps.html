@@ -2,124 +2,46 @@
   <aside class="sidebar" data-autosidebar></aside>
   <div class="main">
 	<div class="map-header">
-	  <h1 class="map-title">Geospatial Forensics</h1>
-	  <div class="map-subtitle">Tracking Annexation &amp; Architectural Fragmentation</div>
+	  <h2 class="map-title">Geospatial Intelligence Node</h2>
+	  <div class="map-subtitle">Forced Displacement & Evacuation Orders Archive</div>
 	</div>
-
-	<div class="terminal-alert">
-	  CARTOGRAPHIC WARFARE DETECTED: TERRITORIAL CONTIGUITY SEVERED. BANTUSTANIZATION PROTOCOLS ACTIVE ACROSS ALL SECTORS.
-	</div>
-
-	<div class="data-block">
-	  <div class="data-block-header"><span>SPATIAL DOMINATION</span><span>SOURCE: PEACE NOW // B'TSELEM</span></div>
-	  <div class="data-block-content">Geospatial forensics reveal the deliberate weaponization of architecture. Through the construction of bypass roads, military closed zones, and the Separation Wall, the occupying power has engineered an archipelago of isolated enclaves, permanently foreclosing the possibility of a contiguous sovereign state.</div>
-	</div>
-	
-	<div class="map-viewer">
-	  <div class="map-grid-bg"></div>
+	<div class="map-layout">
+	  <div class="map-order-list" id="map-order-list">
+		<div style="padding: 20px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase;">
+		  Initializing API Connection...<br>
+		  <span class="status-pulse red" style="margin-top:8px;"></span> Awaiting Data
+		</div>
+	  </div>
 	  
-	  <svg viewBox="0 0 800 600" style="width:100%; height:100%; opacity: 0.8;">
-		<path d="M300 100 Q400 50 450 150 Q550 200 500 350 Q480 500 400 550 Q300 500 250 400 Q200 250 300 100Z" fill="#152015" stroke="#2D6B4F" stroke-width="2"/>
+	  <div class="map-viewer">
+		<div class="map-grid-bg"></div>
+		<img id="active-map-img" src="" style="width:100%; height:100%; object-fit:contain; position:relative; z-index:2; display:none; filter: grayscale(0.2) contrast(1.1);" />
 		
-		<g class="map-ping" style="cursor:crosshair;">
-		  <circle cx="420" cy="180" r="6" fill="var(--red)" opacity="0.8">
-			<animate attributeName="r" values="6;9;6" dur="2s" repeatCount="indefinite" />
-		  </circle>
-		  <text x="430" y="175" fill="white" font-family="monospace" font-size="8" opacity="0">ID: OUTPOST_ALPHA</text>
-		</g>
-		
-		<g class="map-ping" style="cursor:crosshair;">
-		  <circle cx="480" cy="220" r="4" fill="var(--red)" opacity="0.8"/>
-		  <text x="490" y="215" fill="white" font-family="monospace" font-size="8" opacity="0">ID: SITE_HEBRON_9</text>
-		</g>
-		<circle cx="450" cy="280" r="8" fill="var(--red)"/>
-		<circle cx="380" cy="320" r="5" fill="var(--red)"/>
-		<circle cx="410" cy="400" r="7" fill="var(--red)"/>
-		<circle cx="320" cy="450" r="4" fill="var(--red)"/>
-		
-		<path d="M420 180 L480 220 L450 280 L410 400 L320 450" fill="none" stroke="#555" stroke-width="3" stroke-dasharray="4,4"/>
-		<path d="M450 280 L380 320 L410 400" fill="none" stroke="#555" stroke-width="3" stroke-dasharray="4,4"/>
-
-		<pattern id="stripes" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-		  <line x1="0" y1="0" x2="0" y2="10" stroke="var(--amber)" stroke-width="2" opacity="0.3"/>
-		</pattern>
-		<circle cx="350" cy="200" r="40" fill="url(#stripes)"/>
-		<circle cx="460" cy="450" r="35" fill="url(#stripes)"/>
-	  </svg>
-
-	  <div class="map-ui-overlay">
-		<div class="map-ui-title">Sector Analysis: Area C</div>
-		<div class="map-data-row">
-		  <span class="map-data-label">Total Outposts</span>
-		  <span class="map-data-val">144+</span>
+		<div class="map-ui-overlay" style="z-index:10;">
+		  <div class="map-ui-title" id="map-ui-title">Awaiting Selection</div>
+		  <div class="map-data-row">
+			<span class="map-data-label">DATE EXECUTED</span>
+			<span class="map-data-val" id="map-val-date">--</span>
+		  </div>
+		  <div class="map-data-row">
+			<span class="map-data-label">DISPLACEMENT</span>
+			<span class="map-data-val red" id="map-val-disp-area">-- sq km</span>
+		  </div>
+		  <div class="map-data-row">
+			<span class="map-data-label">"SAFE" ZONE</span>
+			<span class="map-data-val" id="map-val-safe-area" style="color:var(--green-light)">-- sq km</span>
+		  </div>
+		  <div class="map-data-row" style="flex-direction:column; gap:8px; margin-top:16px;">
+			<span class="map-data-label">AFFECTED BLOCKS</span>
+			<span class="map-data-val" id="map-val-blocks" style="font-size:8px; line-height:1.4; white-space:normal; word-wrap:break-word; max-height:80px; overflow-y:auto;">--</span>
+		  </div>
+		  
+		  <div style="margin-top: 24px; display:flex; gap:8px;">
+			 <a id="map-btn-idf" href="#" target="_blank" class="btn-outline" style="font-size:8px; padding:8px; flex:1; text-align:center; border-color:rgba(255,255,255,0.3); display:none;">IDF Post</a>
+			 <a id="map-btn-full" href="#" target="_blank" class="btn-primary" style="font-size:8px; padding:8px; flex:1; text-align:center; display:none;">HD Map</a>
+		  </div>
 		</div>
-		<div class="map-data-row">
-		  <span class="map-data-label">Demolitions (2023)</span>
-		  <span class="map-data-val red">1,128</span>
-		</div>
-		<div class="map-data-row">
-		  <span class="map-data-label">Bypass Roads</span>
-		  <span class="map-data-val">790 km</span>
-		</div>
-		<div class="map-data-row">
-		  <span class="map-data-label">Annexation Wall</span>
-		  <span class="map-data-val">712 km</span>
-		</div>
-		<div class="map-data-row" style="margin-top: 8px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 12px;">
-		  <span class="map-data-label">Restricted Access Zones</span>
-		  <span class="map-data-val">60% of Area C</span>
-		</div>
-		<div class="map-data-row">
-		  <span class="map-data-label">Agricultural Dispossession</span>
-		  <span class="map-data-val red">40,000+ Dunams</span>
-		</div>
-		<div style="margin-top: 20px; font-family: 'IBM Plex Mono', monospace; font-size: 8px; color: rgba(255,255,255,0.4); text-transform: uppercase;">
-		  Data sourced from UN OCHA &amp; Peace Now satellite telemetry.
-		</div>
-		<button class="btn-view-register proc-download" style="border-color:rgba(255,255,255,0.2); color:var(--cream); margin-top:16px;">Decrypt Geospatial Ledger</button>
 	  </div>
 	</div>
-
-	<h2 class="section-title" style="font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 800; margin: 60px 0 24px;">Architectural Fragmentation Models</h2>
-
-	<div class="siege-grid">
-	  <div class="siege-card">
-		<div class="siege-card-meta">Geospatial Model 01</div>
-		<h3 class="siege-card-title">The Seam Zone</h3>
-		<p class="siege-card-desc">Mapping the 9.4% of the West Bank artificially trapped between the Green Line and the Separation Wall. This zone cuts off 11,000 Palestinians from their urban centers and expropriates the most fertile agricultural land and water aquifers.</p>
-		<a class="siege-card-action">View Cartography <span>→</span></a>
-	  </div>
-
-	  <div class="siege-card">
-		<div class="siege-card-meta">Geospatial Model 02</div>
-		<h3 class="siege-card-title">Hebron H2 Partition</h3>
-		<p class="siege-card-desc">Forensic reconstruction of the sterilization of Shuhada Street. Over 1,000 Palestinian homes and 500 businesses forcibly shuttered to create a hyper-militarized, segregated corridor exclusively for 800 settlers.</p>
-		<a class="siege-card-action">View Cartography <span>→</span></a>
-	  </div>
-
-	  <div class="siege-card">
-		<div class="siege-card-meta">Geospatial Model 03</div>
-		<h3 class="siege-card-title">Netzarim Military Corridor</h3>
-		<p class="siege-card-desc">Satellite tracking of the newly engineered 6.5km highway bisecting the Gaza Strip from east to west. Constructed by demolishing all civilian structures in its path to permanently sever the north from the south.</p>
-		<a class="siege-card-action">View Cartography <span>→</span></a>
-	  </div>
-
-	  <div class="siege-card">
-		<div class="siege-card-meta">Geospatial Model 04</div>
-		<h3 class="siege-card-title">Lethal Buffer Zones</h3>
-		<p class="siege-card-desc">Analysis of the systematic leveling of all buildings within a 1-kilometer radius of the eastern perimeter fence, de facto annexing 16% of the territory's total landmass and destroying its agricultural backbone.</p>
-		<a class="siege-card-action">View Cartography <span>→</span></a>
-	  </div>
-	</div>
-
-	<footer>
-	  <div class="footer-brand">ARCHIVE.PS <span>© 2024 THE JUDICIAL MONOLITH. ALL RECORDS PERMANENT.</span></div>
-	  <nav class="footer-links">
-		<a href="#" onclick="showPage('legal'); return false;">Declassification Policy</a>
-		<a href="#" onclick="showPage('legal'); return false;">Official Contact</a>
-		<a href="#" onclick="showPage('legal'); return false;">Privacy Protocol</a>
-		<a href="#" onclick="showPage('legal'); return false;">Legal Disclaimer</a>
-	  </nav>
-	</footer>
   </div>
 </div>

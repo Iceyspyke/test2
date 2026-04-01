@@ -135,6 +135,7 @@ li { margin-bottom: 0.5em; }
 .topnav-icons svg { width: 18px; height: 18px; opacity: 0.7; cursor: pointer; }
 .mobile-menu-btn { display: none; background: none; border: none; cursor: pointer; }
 .mobile-menu-btn svg { width: 20px; height: 20px; }
+.header-toggle-btn { display: none; } /* Hide toggle button on desktop */
 
 @media (max-width: 768px) {
   .mobile-menu-btn { display: block; color: var(--text); }
@@ -466,7 +467,41 @@ footer { padding: 40px; border-top: 1px solid var(--border); display: flex; flex
 .map-header { padding: 24px 40px; border-bottom: 1px solid var(--border); background: var(--cream); z-index: 10; }
 .map-title { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 800; margin-bottom: 4px; }
 .map-subtitle { font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
-.map-viewer { flex-grow: 1; background: #0a0f0a; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; min-height: 600px; }
+
+.map-layout { 
+  display: flex; 
+  flex: 1; 
+  height: calc(100vh - 120px); 
+  max-height: calc(100vh - 120px); /* Strictly lock container height to the viewport */
+  background: var(--cream); 
+  align-items: flex-start; /* Stop right box from stretching to list height */
+}
+
+.map-order-list { 
+  width: 300px; 
+  height: 100%; /* Force list to scroll within layout bounds */
+  background: #fff; 
+  border-right: 1px solid var(--border); 
+  overflow-y: auto; 
+  flex-shrink: 0; 
+}
+
+.map-order-item { padding: 16px 20px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background var(--transition-fast); border-left: 3px solid transparent; }
+.map-order-item:hover { background: rgba(0,0,0,0.02); }
+.map-order-item.active { background: rgba(0,0,0,0.04); border-left-color: var(--red); }
+.map-order-date { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 800; color: var(--black); margin-bottom: 4px; }
+.map-order-meta { font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); line-height: 1.4; }
+
+.map-viewer { 
+  flex-grow: 1; 
+  height: 100%; /* Match exactly the layout height */
+  background: transparent; /* Remove dark box so it visually blends to the image size */
+  position: relative; 
+  display: flex; 
+  align-items: flex-start; /* Align image to top */
+  justify-content: center; 
+  overflow: hidden;
+}
 .map-grid-bg { position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px); background-size: 40px 40px; opacity: 0.5; }
 .map-ui-overlay { position: absolute; top: 24px; left: 24px; background: rgba(0,0,0,0.85); color: #fff; padding: 20px; border: 1px solid rgba(255,255,255,0.1); width: 280px; backdrop-filter: blur(4px); z-index: 5; }
 .map-ui-title { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--green-light); margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; }
