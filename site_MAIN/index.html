@@ -504,17 +504,16 @@ document.addEventListener('DOMContentLoaded', () => {
         // Inject footer into any new main containers
         if (footerTmpl) {
           const mains = node.classList?.contains('main') ? [node] : node.querySelectorAll?.('.main') || [];
-          mains.forEach(main => {
-            const existingFooter = main.querySelector('footer');
-            // Remove old, inconsistent footers
-            if (existingFooter && !existingFooter.classList.contains('unified-footer')) {
-              existingFooter.remove();
-            }
-            // Add the new unified footer
-            if (!main.querySelector('.unified-footer')) {
-              main.appendChild(footerTmpl.content.cloneNode(true));
-            }
-          });
+          if (mains.length || mains.forEach) {
+            mains.forEach(main => {
+              main.querySelectorAll('footer').forEach(f => {
+                if (!f.classList.contains('unified-footer')) f.remove();
+              });
+              if (!main.querySelector('.unified-footer')) {
+                main.appendChild(footerTmpl.content.cloneNode(true));
+              }
+            });
+          }
         }
       });
     });

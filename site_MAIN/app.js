@@ -67,6 +67,7 @@ function executeSwitch(id) {
 
   document.title = `ARCHIVE.PS — ${id.toUpperCase()}_NODE`;
   syncSidebarHighlight(id);
+  syncSidebars(); // Ensure all sidebars and footers are consistently updated on routing
 }
 
 function syncSidebarHighlight(id) {
@@ -413,8 +414,7 @@ function toggleMobileMenu() {
     }
     if (sidebar) {
       sidebar.classList.remove('active');
-      sidebar.style.removeProperty('top');
-      sidebar.style.removeProperty('height');
+      // Keep top/height properties to avoid layout shifts on close
     }
     document.body.style.overflow = '';
     document.body.classList.remove('mobile-menu-open');
@@ -445,8 +445,10 @@ function toggleMobileMenu() {
       }
       topnav.style.setProperty('display', 'none', 'important');
       sidebar.classList.add('active');
+      sidebar.style.setProperty('position', 'fixed', 'important');
       sidebar.style.setProperty('top', '70px', 'important');
       sidebar.style.setProperty('height', 'calc(100vh - 70px)', 'important');
+      sidebar.style.setProperty('z-index', '10000', 'important');
     } else {
       if (topnav) topnav.classList.add('active');
       if (sidebar) sidebar.classList.add('active');
