@@ -82,6 +82,11 @@ function executeSwitch(id) {
     setTimeout(() => initPresencesApi(1), 100);
   }
   
+  // Trigger Child Names API if user opens the Census Node
+  if (id === 'census') {
+    setTimeout(initChildNamesApi, 100);
+  }
+  
   // Trigger Media Casualties API if user opens the Media Node
   if (id === 'media') {
     setTimeout(initMediaApi, 100);
@@ -101,6 +106,68 @@ function syncSidebarHighlight(id) {
 // ── SYSTEM LOADER (no-op, kept for API) ──
 function showLoader(id) {
   executeSwitch(id);
+}
+
+// ── TECH FOR PALESTINE (GLOBAL SUMMARY API) ──
+async function initTechForPalestineData() {
+  try {
+    const response = await fetch('https://data.techforpalestine.org/api/v3/summary.json');
+    if (!response.ok) return;
+    
+    const data = await response.json();
+
+    // Auto-bind data to any element with a data-tfp attribute (e.g., data-tfp="gaza.killed.total")
+    document.querySelectorAll('[data-tfp]').forEach(el => {
+      const path = el.getAttribute('data-tfp').split('.');
+      let val = data;
+      
+      // Traverse the JSON object based on the attribute path
+      for (const key of path) {
+        if (val[key] !== undefined) val = val[key];
+        else { val = null; break; }
+      }
+      
+      if (val !== null) {
+        el.innerText = typeof val === 'number' ? val.toLocaleString() : val;
+        el.classList.remove('status-pulse'); // Remove loading animation once populated
+      }
+    });
+  } catch (error) {
+    console.error('TFP Summary fetch error:', error);
+  }
+}
+
+// ── KILLED CHILDREN BY NAME API (CENSUS NODE) ──
+async function initChildNamesApi() {
+  const container = document.getElementById('child-names-api-container');
+  if (!container) return;
+
+  container.innerHTML = `<div style="padding: 20px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase;"><span class="status-pulse red" style="margin-top:8px;"></span> Accessing Child Casualty Datastream...</div>`;
+
+  try {
+    const response = await fetch('https://data.techforpalestine.org/api/v2/killed-in-gaza/child-name-counts-en.json');
+    if (!response.ok) throw new Error('API Error');
+    
+    const records = await response.json();
+    if (!records || records.length === 0) return;
+
+    let html = `<table class="census-table"><thead><tr><th>First Name</th><th>Frequency (Children Killed)</th></tr></thead><tbody style="max-height: 400px; display: block; overflow-y: auto; width: 100%; border-bottom: 1px solid var(--border);">`;
+    
+    // The API returns an array, map it to rows
+    records.slice(0, 100).forEach(rec => { // Limit to top 100 for performance
+      html += `<tr style="display:table; width:100%; table-layout:fixed;">
+        <td><strong style="color:var(--black); text-transform:uppercase;">${rec.name || rec[0] || 'Unknown'}</strong></td>
+        <td style="color:var(--red); font-weight:bold;">${rec.count || rec[1] || 0}</td>
+      </tr>`;
+    });
+    
+    html += `</tbody></table><div class="hr-header-text" style="font-size:10px; margin-top:8px;">*Displaying top 100 derived name frequencies.</div>`;
+    container.innerHTML = html;
+
+  } catch (error) {
+    console.error('Child Names API Error:', error);
+    container.innerHTML = `<div class="terminal-alert" style="border-color:var(--amber); color:var(--amber);">WARNING: UNABLE TO ESTABLISH SECURE HANDSHAKE WITH CENSUS NODE.</div>`;
+  }
 }
 
 // ── MODAL ENGINE ──
@@ -771,6 +838,7 @@ async function initMediaApi() {
 // ── INIT ──
 document.addEventListener('DOMContentLoaded', () => {
   syncSidebars();
+  initTechForPalestineData(); // Fetch global live statistics
   initTimelineFilter();
   initSearch();
   initMapTooltips();
