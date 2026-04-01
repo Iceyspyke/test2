@@ -494,13 +494,42 @@ footer { padding: 40px; border-top: 1px solid var(--border); display: flex; flex
 
 .map-viewer { 
   flex-grow: 1; 
-  height: 100%; /* Match exactly the layout height */
-  background: transparent; /* Remove dark box so it visually blends to the image size */
+  height: 100%; 
+  background: transparent; 
   position: relative; 
   display: flex; 
-  align-items: flex-start; /* Align image to top */
-  justify-content: center; 
+  flex-direction: row; /* Place image and info box side-by-side */
+  align-items: stretch; 
+  justify-content: flex-start; 
   overflow: hidden;
+}
+
+.map-ui-overlay { 
+  position: relative !important; /* Stop floating over the image */
+  top: auto !important; 
+  right: auto !important; 
+  bottom: auto !important; 
+  left: auto !important;
+  width: 320px !important; 
+  height: 100% !important;
+  flex-shrink: 0;
+  background: #111 !important; /* Keep the dark terminal look */
+  border-left: 1px solid var(--border) !important; 
+  border-top: none !important;
+  border-right: none !important;
+  border-bottom: none !important;
+  border-radius: 0 !important;
+  padding: 24px !important; 
+  color: #fff !important; 
+  z-index: 10 !important; 
+  overflow-y: auto;
+}
+
+#active-map-img {
+  flex-grow: 1;
+  width: calc(100% - 320px) !important; /* Prevent image from stretching under the box */
+  height: 100% !important;
+  object-fit: contain;
 }
 .map-grid-bg { position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px); background-size: 40px 40px; opacity: 0.5; }
 .map-ui-overlay { position: absolute; top: 24px; left: 24px; background: rgba(0,0,0,0.85); color: #fff; padding: 20px; border: 1px solid rgba(255,255,255,0.1); width: 280px; backdrop-filter: blur(4px); z-index: 5; }

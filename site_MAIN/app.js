@@ -81,6 +81,11 @@ function executeSwitch(id) {
   if (id === 'movement') {
     setTimeout(() => initPresencesApi(1), 100);
   }
+  
+  // Trigger Media Casualties API if user opens the Media Node
+  if (id === 'media') {
+    setTimeout(initMediaApi, 100);
+  }
 }
 
 function syncSidebarHighlight(id) {
@@ -684,6 +689,82 @@ async function initPresencesApi(page = 1) {
       <span style="display:block; margin-top:8px; font-size:10px; color:var(--muted); text-transform:none;">SERVER OUTPUT: ${error.message}</span>
     </div>`;
     if (pagination) pagination.innerHTML = '';
+  }
+}
+
+// ── MEDIA CASUALTIES API INTEGRATION ──
+async function initMediaApi() {
+  const container = document.getElementById('media-api-container');
+  if (!container) return;
+
+  container.innerHTML = `<div style="padding: 20px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase;"><span class="status-pulse red" style="margin-top:8px;"></span> Fetching Node Data...</div>`;
+
+  try {
+    const response = await fetch('https://stopmurderingjournalists.com/api/v1/martyrs');
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    let records = await response.json();
+    
+    // Failsafe extraction in case the API wraps the array inside an object
+    if (!Array.isArray(records)) {
+      records = records.data || Object.values(records);
+    }
+
+    if (!records || records.length === 0) {
+      container.innerHTML = `<div class="terminal-alert">NO RECORDS FOUND</div>`;
+      return;
+    }
+
+    // Dynamically build headers based on whatever attributes the API provides (ignoring generic IDs)
+    const keys = Object.keys(records[0]).filter(k => k !== 'id');
+
+    let html = `<table class="census-table"><thead><tr>`;
+    keys.forEach(k => { 
+      // Clean up keys like 'date_killed' into 'Date Killed'
+      let cleanKey = k.replace(/_/g, ' ');
+      html += `<th style="text-transform: capitalize;">${cleanKey}</th>`; 
+    });
+    html += `</tr></thead><tbody>`;
+
+    // Map rows dynamically to ensure compliance with API's no-hardcoding rule
+    records.forEach(rec => {
+      html += `<tr>`;
+      keys.forEach(k => {
+        let val = rec[k];
+        
+        // Handle nested arrays/objects gracefully
+        if (Array.isArray(val)) {
+          val = val.join(', ');
+        } else if (typeof val === 'object' && val !== null) {
+          val = val.name || val.title || JSON.stringify(val);
+        }
+        
+        // Wrap hyperlinks and images automatically
+        if (typeof val === 'string' && val.startsWith('http')) {
+          if (val.match(/\.(jpeg|jpg|gif|png)$/i)) {
+            val = `<img src="${val}" alt="Portrait" style="max-height:40px; border-radius:2px;">`;
+          } else {
+            val = `<a href="${val}" target="_blank" style="color:var(--red); text-decoration:underline;">View Source</a>`;
+          }
+        }
+        
+        html += `<td><span style="${k.includes('name') ? 'font-weight:bold; color:var(--black);' : ''}">${val !== undefined && val !== null && val !== '' ? val : '-'}</span></td>`;
+      });
+      html += `</tr>`;
+    });
+    html += `</tbody></table>`;
+
+    container.innerHTML = html;
+
+  } catch (error) {
+    console.error('API Error:', error);
+    container.innerHTML = `<div class="terminal-alert" style="margin:20px; border-radius:0; border-color:var(--red);">
+      ERR_API_FAILURE<br>Unable to fetch media casualty datastream.<br>
+      <span style="display:block; margin-top:8px; font-size:10px; color:var(--muted); text-transform:none;">SERVER OUTPUT: ${error.message}</span>
+    </div>`;
   }
 }
 

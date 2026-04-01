@@ -30,10 +30,22 @@
 }
 
 /* API Map Layout Restructuring for Mobile */
-.map-layout { flex-direction: column !important; overflow-y: auto !important; height: auto !important; }
-.map-order-list { width: 100% !important; height: 200px !important; border-right: none !important; border-bottom: 1px solid var(--border) !important; }
-.map-viewer { min-height: 500px !important; }
-.map-ui-overlay { top: auto !important; bottom: 20px !important; left: 20px !important; right: 20px !important; width: auto !important; }
+.map-layout { flex-direction: column !important; overflow-y: auto !important; height: auto !important; max-height: none !important; }
+.map-order-list { width: 100% !important; height: 250px !important; border-right: none !important; border-bottom: 1px solid var(--border) !important; }
+
+/* Stack Map and Overlay */
+.map-viewer { flex-direction: column !important; min-height: auto !important; height: auto !important; }
+.map-ui-overlay { 
+  width: 100% !important; 
+  height: auto !important; 
+  border-left: none !important; 
+  border-top: 1px solid rgba(255,255,255,0.2) !important; 
+}
+#active-map-img { 
+  width: 100% !important; 
+  height: 350px !important; /* Fixed height for image area on mobile */
+  flex-grow: 0 !important; 
+}
 
 .verdicts-inner, .bm-viewer {
   padding: 24px 16px !important;
