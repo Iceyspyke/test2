@@ -584,16 +584,38 @@ async function initPresencesApi(page = 1) {
   container.innerHTML = `<div style="padding: 20px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase;"><span class="status-pulse red" style="margin-top:8px;"></span> Fetching Node Data...</div>`;
 
   try {
-    // Strictly fetch from the exact endpoint defined in the API documentation
-    const response = await fetch(`https://gazamaps.com/api/v1/presences?page=${page}`)
+    const response = await fetch(`https://movements.genocide.live/api/v1/presences?page=${page}`)
       .catch(() => fetch(`/api/v1/presences?page=${page}`));
 
-    if (!response || !response.ok) throw new Error('Network response was not ok');
+    if (!response || !response.ok) {
+      throw new Error(`HTTP ${response ? response.status : 'Unknown'}: ${response ? response.statusText : 'Network Error'}`);
+    }
 
-    const data = await response.json();
+    const rawData = await response.json();
     
-    // Support both wrapped paginated response (data.data) and raw array responses
-    const records = data.data || (Array.isArray(data) ? data : []);
+    // FIX 1: Bulletproof data extraction regardless of API structure changes
+    let pageData = rawData;
+    let records = [];
+
+    // Scenario A: API wraps the pagination in an array -> [ { current_page: 1, data: [...] } ]
+    if (Array.isArray(rawData) && rawData.length > 0 && rawData[0].data) {
+      pageData = rawData[0];
+      records = pageData.data;
+    } 
+    // Scenario B: Standard pagination object -> { current_page: 1, data: [...] }
+    else if (rawData && rawData.data) {
+      pageData = rawData;
+      records = pageData.data;
+    } 
+    // Scenario C: Direct array of items -> [ { id: 1 }, { id: 2 } ]
+    else if (Array.isArray(rawData)) {
+      records = rawData;
+    }
+
+    // FAILSAFE: If the API returned an object dictionary instead of an array (e.g., { "0": {...}, "1": {...} })
+    if (!Array.isArray(records)) {
+      records = Object.values(records);
+    }
 
     if (records.length === 0) {
       container.innerHTML = `<div class="terminal-alert">NO RECORDS FOUND ON THIS PAGE</div>`;
@@ -601,56 +623,66 @@ async function initPresencesApi(page = 1) {
       return;
     }
 
-    // Dynamically build headers based on the first record's keys (excluding ID for cleaner display)
-    const keys = Object.keys(records[0]).filter(k => k !== 'id');
+    // FIX 2: Explicitly map the nested objects (unit.name, area.name) from the JSON schema
+    let html = `<table class="census-table">
+      <thead>
+        <tr>
+          <th>Date Entered</th>
+          <th>Date Exited</th>
+          <th>Military Unit</th>
+          <th>Area / Location</th>
+          <th>Verification Source</th>
+        </tr>
+      </thead>
+      <tbody>`;
 
-    let html = `<table class="census-table"><thead><tr>`;
-    keys.forEach(k => { 
-      html += `<th>${k.replace(/_/g, ' ')}</th>`; 
-    });
-    html += `</tr></thead><tbody>`;
-
-    // Map rows dynamically to prevent breaking when new attributes are added
     records.forEach(rec => {
-      html += `<tr>`;
-      keys.forEach(k => {
-        let val = rec[k];
-        if (Array.isArray(val)) val = val.join(', '); // Handle array attributes
-        
-        // Wrap hyperlinks for "source" or similar URLs automatically
-        if (typeof val === 'string' && val.startsWith('http')) {
-          val = `<a href="${val}" target="_blank" style="color:var(--red); text-decoration:underline;">View Source</a>`;
-        }
-        
-        html += `<td>${val !== undefined && val !== '' ? val : '-'}</td>`;
-      });
-      html += `</tr>`;
-    });
-    html += `</tbody></table>`;
+      // Safely access nested properties
+      const dateEnter = rec.date_entered_display || '-';
+      const dateExit = rec.date_exited_display || 'Present';
+      const unitName = rec.unit ? (rec.unit.name || '-') : '-';
+      const areaName = rec.area ? (rec.area.name || '-') : '-';
+      const sourceLink = rec.enter_source 
+        ? `<a href="${rec.enter_source}" target="_blank" style="color:var(--red); text-decoration:underline;">View Source</a>` 
+        : '-';
 
+      html += `<tr>
+        <td>${dateEnter}</td>
+        <td>${dateExit}</td>
+        <td><strong style="color:var(--black);">${unitName}</strong></td>
+        <td>${areaName}</td>
+        <td>${sourceLink}</td>
+      </tr>`;
+    });
+    
+    html += `</tbody></table>`;
     container.innerHTML = html;
 
     // Build Pagination Controls
     if (pagination) {
-      const currentPage = data.current_page || page;
-      const lastPage = data.last_page || (records.length === 100 ? currentPage + 1 : currentPage);
+      const currentPage = pageData.current_page || page;
+      // Handle missing last_page safely based on array length
+      const lastPage = pageData.last_page || (records.length >= 100 ? currentPage + 1 : currentPage);
       
       let btnHtml = '';
       if (currentPage > 1) {
-         btnHtml += `<button class="btn-outline" style="color:var(--black); border-color:var(--border);" onclick="initPresencesApi(${currentPage - 1})">PREV PAGE</button>`;
+         btnHtml += `<button class="btn-outline" style="color:var(--black); border-color:var(--border); padding:8px 16px;" onclick="initPresencesApi(${currentPage - 1})">PREV PAGE</button>`;
       }
       
-      btnHtml += `<span style="font-family:'IBM Plex Mono', monospace; font-size:10px; padding:10px; color:var(--muted); font-weight:600;">PAGE ${currentPage} ${data.last_page ? 'OF ' + lastPage : ''}</span>`;
+      btnHtml += `<span style="font-family:'IBM Plex Mono', monospace; font-size:10px; padding:10px; color:var(--muted); font-weight:600;">PAGE ${currentPage} ${pageData.last_page ? 'OF ' + lastPage : ''}</span>`;
       
       if (currentPage < lastPage) {
-         btnHtml += `<button class="btn-outline" style="color:var(--black); border-color:var(--border);" onclick="initPresencesApi(${currentPage + 1})">NEXT PAGE</button>`;
+         btnHtml += `<button class="btn-outline" style="color:var(--black); border-color:var(--border); padding:8px 16px;" onclick="initPresencesApi(${currentPage + 1})">NEXT PAGE</button>`;
       }
       pagination.innerHTML = btnHtml;
     }
 
   } catch (error) {
     console.error('API Error:', error);
-    container.innerHTML = `<div class="terminal-alert" style="margin:20px; border-radius:0;">ERR_CONNECTION_REFUSED<br>Unable to fetch presences datastream.</div>`;
+    container.innerHTML = `<div class="terminal-alert" style="margin:20px; border-radius:0; border-color:var(--red);">
+      ERR_API_FAILURE<br>Unable to fetch presences datastream.<br>
+      <span style="display:block; margin-top:8px; font-size:10px; color:var(--muted); text-transform:none;">SERVER OUTPUT: ${error.message}</span>
+    </div>`;
     if (pagination) pagination.innerHTML = '';
   }
 }
