@@ -95,11 +95,13 @@ p, .cyber-log, .data-block-content, .case-indictment-text, .hero-subtitle {
   min-height: 70px !important; /* Match the .page clearance to prevent layout shifting */
   padding: 12px 16px !important;
   align-items: center !important;
-  z-index: 10000 !important;
+  z-index: 9999 !important; /* Fixed: Keeps header strictly under sidebar */
 }
 
 .topnav-logo {
   grid-column: 1 !important;
+  display: flex !important;
+  align-items: center !important;
 }
 
 .topnav-icons {
@@ -157,7 +159,11 @@ p, .cyber-log, .data-block-content, .case-indictment-text, .hero-subtitle {
 
 .topnav.expanded .topnav-links {
   display: flex !important; /* Show when toggled */
+  z-index: 20000 !important; /* Fixed: Expanded links push over layout bounds */
 }
+
+/* Fixed: Center folder images on mobile */
+.folder-thumb { margin: 0 auto 12px auto !important; }
 
 .topnav-links li {
   width: 100% !important;
@@ -235,6 +241,18 @@ p, .cyber-log, .data-block-content, .case-indictment-text, .hero-subtitle {
   border-bottom: 1px solid var(--border) !important;
   box-sizing: border-box !important;
   word-wrap: break-word !important;
+}
+
+.hr-table td::before, .detention-table td::before, .compliance-table td::before, 
+.checkpoint-table td::before, .census-table td::before, #registry-master-table td::before {
+  content: attr(data-label);
+  display: block;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+  font-weight: 600;
 }
 
 .hr-table tr:last-child td, .detention-table tr:last-child td, 

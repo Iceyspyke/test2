@@ -38,37 +38,47 @@
 
 <!-- SIDEBAR TEMPLATE (reused by all pages via JS) -->
 <template id="sidebar-template">
-  <div class="sidebar-label">Case Files</div>
-  <div class="sidebar-sublabel">Official Judicial Records</div>
+  <div class="sidebar-label">Archive Nodes</div>
+  <div class="sidebar-sublabel">Official Records</div>
   <ul class="sidebar-nav">
+    <li><a href="#" onclick="showPage('nakba'); return false;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>The Nakba Archive</a></li>
+    <li><a href="#" onclick="showPage('census'); return false;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>1948 Census</a></li>
+    <li><a href="#" onclick="showPage('british'); return false;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 12h4"/><path d="M10 16h4"/></svg>British Mandate</a></li>
+    <li><a href="#" onclick="showPage('icj'); return false;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>The ICJ Docket</a></li>
+    <li><a href="#" onclick="showPage('icc'); return false;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/></svg>The ICC Warrants</a></li>
+    <li><a href="#" onclick="showPage('un'); return false;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/></svg>UN Resolutions</a></li>
     <li><a href="#" onclick="showPage('siege'); return false;">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3h18v4H3zM3 9h18v4H3zM3 15h12v4H3z"/></svg>Siege Documents</a></li>
     <li><a href="#" onclick="showPage('maps'); return false;">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 20H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v3M13 20l4-4 4 4M17 12v8"/></svg>Settlement Maps</a></li>
-    <li><a href="#" onclick="showPage('testimonies'); return false;">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>Testimonies</a></li>
-    <li><a href="#" onclick="showPage('un'); return false;">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>UN Resolutions</a></li>
-    <li><a href="#" onclick="showPage('detention'); return false;">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>Detention Records</a></li>
-    <li><a href="#" onclick="showPage('media'); return false;">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8l-4 4v14a2 2 0 0 0 2 2z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 12h4"/><path d="M10 16h4"/></svg>Press &amp; Media</a></li>
-    <li><a href="#" onclick="showPage('arms'); return false;">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Arms &amp; Complicity</a></li>
-    <li><a href="#" onclick="showPage('medical'); return false;">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>Healthcare Collapse</a></li>
-    <li><a href="#" onclick="showPage('culture'); return false;">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Scholasticide</a></li>
-    <li><a href="#" onclick="showPage('geneva'); return false;">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v20M2 12h20M12 2a10 10 0 0 1 10 10M12 2a10 10 0 0 0-10 10M12 22a10 10 0 0 1 10-10M12 22a10 10 0 0 0-10-10"/></svg>Geneva Conventions</a></li>
-    <li><a href="#" onclick="showPage('infrastructure'); return false;">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 21h18M3 10h18M5 10V3h14v7M9 21v-4a3 3 0 0 1 6 0v4"/></svg>Civilian Infrastructure</a></li>
-    <li><a href="#" onclick="showPage('compliance'); return false;">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>State Compliance</a></li>
-    <li><a href="#" onclick="showPage('surveillance'); return false;">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg>Digital Surveillance</a></li>
     <li><a href="#" onclick="showPage('movement'); return false;">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 5l7 7-7 7M5 12h11"/></svg>Movement &amp; Access</a></li>
+    <li><a href="#" onclick="showPage('detention'); return false;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>Detention Records</a></li>
+    <li><a href="#" onclick="showPage('infrastructure'); return false;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 21h18M3 10h18M5 10V3h14v7M9 21v-4a3 3 0 0 1 6 0v4"/></svg>Civil Infrastructure</a></li>
+    <li><a href="#" onclick="showPage('medical'); return false;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>Medical Collapse</a></li>
+    <li><a href="#" onclick="showPage('media'); return false;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8l-4 4v14a2 2 0 0 0 2 2z"/></svg>Press &amp; Media</a></li>
+    <li><a href="#" onclick="showPage('culture'); return false;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/></svg>Scholasticide</a></li>
+    <li><a href="#" onclick="showPage('surveillance'); return false;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/></svg>Surveillance</a></li>
+    <li><a href="#" onclick="showPage('arms'); return false;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Arms &amp; Complicity</a></li>
+    <li><a href="#" onclick="showPage('compliance'); return false;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12l2 2 4-4"/></svg>State Compliance</a></li>
+    <li><a href="#" onclick="showPage('testimonies'); return false;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>Testimonies</a></li>
+    <li><a href="#" onclick="showPage('geneva'); return false;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v20M2 12h20"/></svg>Geneva Conventions</a></li>
     <li><a href="#" onclick="showPage('registry'); return false;">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 7h16M4 12h16M4 17h16"/></svg>Archive Registry</a></li>
   </ul>
