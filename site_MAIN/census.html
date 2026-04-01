@@ -1,7 +1,8 @@
 <div id="page-census" class="page">
   <aside class="sidebar" data-autosidebar></aside>
   <div class="main">
-	<div class="census-header-title">1948 Depopulation Ledger</div>
+	<div class="un-header">
+	  <h1 class="census-header-title">1948 Depopulation Ledger</h1>
 	<p class="census-header-text">Archival census data documenting the systematic erasure of over 530 Palestinian towns and villages. Data cross-referenced with British Mandate records and UN Conciliation Commission files.</p>
 
 	<div class="terminal-alert">
@@ -68,10 +69,15 @@
 		  </tbody>
 		</table>
 		<div id="child-names-api-container"></div>
-		<div class="un-header">
-		  <h1 class="un-title">1948 - 2024 Village & Martyr Registry</h1>
-		  <div class="detention-stats-grid" style="margin-top:20px;">
-			<div class="detention-stat-box"><div class="detention-stat-label">Senior Women</div><div class="detention-stat-val" data-tfp="known_killed_in_gaza.female.senior">--</div></div>
+		<div class="un-header" style="margin-top: 80px; padding-top: 40px; border-top: 1px solid var(--border);">
+		  <h2 class="un-title" style="font-size: 32px;">Identified Martyrs Registry</h2>
+		  <div class="hr-header-text" style="margin-bottom: 24px;">Centralized database of individuals killed since October 7, 2023. Telemetry synced with Ministry of Health archival records.</div>
+		  
+		  <div class="detention-stats-grid">
+			<div class="detention-stat-box" style="border-top-color: var(--black);">
+				<div class="detention-stat-label">Senior Citizens</div>
+				<div class="detention-stat-val status-pulse" data-tfp="known_killed_in_gaza.male.senior">--</div>
+			</div>
 			<div class="detention-stat-box"><div class="detention-stat-label">Senior Men</div><div class="detention-stat-val" data-tfp="known_killed_in_gaza.male.senior">--</div></div>
 			<div class="detention-stat-box"><div class="detention-stat-label">Girls Killed</div><div class="detention-stat-val" data-tfp="known_killed_in_gaza.female.child">--</div></div>
 			<div class="detention-stat-box"><div class="detention-stat-label">Boys Killed</div><div class="detention-stat-val" data-tfp="known_killed_in_gaza.male.child">--</div></div>

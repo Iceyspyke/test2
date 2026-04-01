@@ -26,7 +26,10 @@
     <button class="header-toggle-btn" onclick="toggleHeaderLinks()" aria-label="Toggle Header">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
     </button>
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" onclick="openSearch()" title="Search"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+    <div class="nav-icon-wrap" onclick="openSearch()" title="System Query [S]">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      <span class="kb-shortcut">S</span>
+    </div>
   </div>
   <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle menu">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
@@ -441,14 +444,15 @@ async function ensurePageLoaded(id) {
 
 // Override showPage to ensure dynamic loading before switching
 window.showPage = async function(id) {
-  // 1. Try to load the page fragment if not already in DOM
+  if (document.getElementById('page-' + id)?.classList.contains('active')) return;
+
   if (!document.getElementById('page-' + id)) {
     const loaded = await ensurePageLoaded(id);
     if (!loaded) {
       showFallbackPage(id);
       return;
     }
-    // Inject sidebar into any newly added data-autosidebar elements
+    
     const tmpl = document.getElementById('sidebar-template');
     if (tmpl) {
       document.querySelectorAll('.sidebar[data-autosidebar]').forEach(sb => {
@@ -456,9 +460,8 @@ window.showPage = async function(id) {
       });
     }
   }
-    
     executeSwitch(id);
-  };
+};
 
 function showFallbackPage(id) {
   // Generate a stub page if file not found

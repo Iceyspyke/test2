@@ -33,87 +33,42 @@ function showPage(id) {
 }
 
 function executeSwitch(id) {
-  document.querySelectorAll('.page').forEach(p => {
-    p.classList.remove('active');
-    p.style.display = '';
-  });
+  document.querySelectorAll('.page').forEach(p => { p.classList.remove('active'); p.style.display = ''; });
   document.querySelectorAll('.topnav-links a').forEach(a => a.classList.remove('active'));
 
   const pageEl = document.getElementById(PAGE_MAP[id] || 'page-' + id);
   const navEl  = document.getElementById(NAV_MAP[id] || 'nav-mandate');
 
-  if (pageEl) {
-    pageEl.classList.add('active');
-    window.scrollTo(0, 0);
-  }
+  if (pageEl) { pageEl.classList.add('active'); window.scrollTo(0, 0); }
   if (navEl) navEl.classList.add('active');
 
-  // FIX: Close mobile menus if open upon navigation
+  // UI State Reset
   const topnavWrap = document.querySelector('.topnav');
   if (topnavWrap) topnavWrap.classList.remove('expanded');
-  
-  const topnavLinks = document.querySelector('.topnav-links');
-  if (topnavLinks) {
-    topnavLinks.classList.remove('active');
-    topnavLinks.style.removeProperty('display');
-  }
-  document.querySelectorAll('.sidebar').forEach(s => {
-    s.classList.remove('active');
-    s.style.removeProperty('top');
-    s.style.removeProperty('height');
-    // Remove cloned mobile navs so they regenerate with correct active states
-    const clone = s.querySelector('.mobile-topnav-clone');
-    if (clone) clone.remove();
-  });
+  document.querySelectorAll('.sidebar').forEach(s => { s.classList.remove('active'); const clone = s.querySelector('.mobile-topnav-clone'); if (clone) clone.remove(); });
   document.body.style.overflow = '';
   document.body.classList.remove('mobile-menu-open');
 
   document.title = `ARCHIVE.PS — ${id.toUpperCase()}_NODE`;
   syncSidebarHighlight(id);
-  syncSidebars(); // Ensure all sidebars and footers are consistently updated on routing
+  syncSidebars();
   
-  // Bind Global Stats Data if the newly loaded page has data-tfp elements
+  // QOL: Live Telemetry Handshake
   if (typeof bindTfpData === 'function') bindTfpData();
   
-  // Trigger Map API if user opens the Geospatial Node
-  if (id === 'maps') {
-    setTimeout(initMapsApi, 100);
-  }
-  
-  // Trigger Presences API if user opens the Movement Node
-  if (id === 'movement') {
-    setTimeout(() => initPresencesApi(1), 100);
-  }
-  
-  // Trigger Child Names API if user opens the Census Node
-  if (id === 'census') {
-    setTimeout(initChildNamesApi, 100);
-  }
-  
-  // Trigger Media Casualties API if user opens the Media Node
-  if (id === 'media') {
-    setTimeout(initMediaApi, 100);
-  }
+  // ── CENTRALIZED API DISPATCHER ──
+  const triggers = {
+    'maps': () => initMapsApi(),
+    'movement': () => initPresencesApi(1),
+    'census': () => { initChildNamesApi(); initKilledNamesApi(1); },
+    'media': () => initMediaApi(),
+    'registry': () => fetchRegistryData('organizations'),
+    'infrastructure': () => initInfrastructureApi(),
+    'hr': () => initDailyCasualtiesApi(),
+    'icj': () => { if (typeof bindTfpData === 'function') bindTfpData(); }
+  };
 
-  // Trigger Registry API if user opens the Registry Node
-  if (id === 'registry') {
-    setTimeout(() => fetchRegistryData('organizations'), 100);
-  }
-
-  // Trigger Infrastructure API
-  if (id === 'infrastructure') {
-    setTimeout(initInfrastructureApi, 100);
-  }
-
-  // Trigger Martyrs Names Registry
-  if (id === 'census') {
-    setTimeout(() => initKilledNamesApi(1), 100);
-  }
-
-  // Trigger Daily Logs
-  if (id === 'hr') {
-    setTimeout(initDailyCasualtiesApi, 100);
-  }
+  if (triggers[id]) setTimeout(triggers[id], 150);
 }
 
 function syncSidebarHighlight(id) {
@@ -192,7 +147,13 @@ async function initChildNamesApi() {
     const records = await response.json();
     if (!records || records.length === 0) return;
 
-    let html = `<table class="census-table"><thead><tr><th>First Name</th><th>Frequency (Children Killed)</th></tr></thead><tbody style="max-height: 400px; display: block; overflow-y: auto; width: 100%; border-bottom: 1px solid var(--border);">`;
+    let html = `
+      <div class="table-header-ctrl">
+        <div class="table-search-box">
+          <input type="text" id="child-names-search" placeholder="FILTER BY NAME...">
+        </div>
+      </div>
+      <table class="census-table"><thead><tr><th>First Name</th><th>Frequency (Children Killed)</th></tr></thead><tbody style="max-height: 400px; display: block; overflow-y: auto; width: 100%; border-bottom: 1px solid var(--border);">`;
     
     // The API returns an array, map it to rows
     records.slice(0, 100).forEach(rec => { // Limit to top 100 for performance
@@ -204,6 +165,7 @@ async function initChildNamesApi() {
     
     html += `</tbody></table><div class="hr-header-text" style="font-size:10px; margin-top:8px;">*Displaying top 100 derived name frequencies.</div>`;
     container.innerHTML = html;
+    attachTableSearch('child-names-api-container', 'child-names-search');
 
   } catch (error) {
     console.error('Child Names API Error:', error);
@@ -211,37 +173,23 @@ async function initChildNamesApi() {
   }
 }
 
-// ── MODAL ENGINE ──
-let modalTimeouts = [];
-
+// ── MODAL ENGINE (Cleaned) ──
 function openModal(lines, color) {
   const modal = document.getElementById('access-modal');
   const content = document.getElementById('modal-content');
-  
-  // FIX: Clear pending line animations to prevent overlap on rapid clicks
-  modalTimeouts.forEach(clearTimeout);
-  modalTimeouts = [];
-  
   content.innerHTML = '';
   modal.classList.add('active');
   
-  lines.forEach((lineText, index) => {
-    const t = setTimeout(() => {
-      const prevLine = content.lastElementChild;
-      if (prevLine) prevLine.classList.add('done');
-      const div = document.createElement('div');
-      div.className = 'modal-line';
-      div.innerText = lineText;
-      if (lineText.includes('DENIED') || lineText.includes('ERROR') || lineText.includes('WARNING')) {
-        div.style.color = 'var(--red)';
-      } else if (lineText.includes('GRANTED') || lineText.includes('SUCCESS')) {
-        div.style.color = 'var(--green-light)';
-      } else if (color) {
-        div.style.color = color;
-      }
-      content.appendChild(div);
-    }, index * 900);
-    modalTimeouts.push(t);
+  lines.forEach(lineText => {
+    const div = document.createElement('div');
+    div.className = 'modal-line done';
+    div.innerText = lineText;
+    
+    if (/DENIED|ERROR|WARNING|CRITICAL|BREACH/.test(lineText)) div.style.color = 'var(--red)';
+    else if (/GRANTED|SUCCESS|VERIFIED|SYNCED/.test(lineText)) div.style.color = 'var(--green-light)';
+    else if (color) div.style.color = color;
+    
+    content.appendChild(div);
   });
 }
 
@@ -313,32 +261,40 @@ function initSearch() {
   if (!input || !resultsBlock) return;
 
   input.addEventListener('input', (e) => {
-    const term = e.target.value.toLowerCase();
-    const results = resultsBlock.querySelectorAll('.search-result-item');
-    let found = false;
-    if (term.length > 1) {
+    const term = e.target.value.toLowerCase().trim();
+    const results = Array.from(resultsBlock.querySelectorAll('.search-result-item'));
+    
+    if (term.length > 0) {
+      let foundCount = 0;
       results.forEach(item => {
-        const textToSearch = item.innerText.toLowerCase();
-        // Improve search feature: matching against route keywords as well
-        const routeAttr = item.getAttribute('onclick') || '';
-        const visible = textToSearch.includes(term) || routeAttr.toLowerCase().includes(term);
-        item.style.display = visible ? 'block' : 'none';
-        if (visible) found = true;
+        const title = item.querySelector('.sr-title')?.innerText.toLowerCase() || '';
+        const desc = item.querySelector('.sr-desc')?.innerText.toLowerCase() || '';
+        const meta = item.querySelector('.sr-meta')?.innerText.toLowerCase() || '';
+        
+        const isMatch = title.includes(term) || desc.includes(term) || meta.includes(term);
+        item.style.display = isMatch ? 'block' : 'none';
+        if (isMatch) foundCount++;
       });
-      resultsBlock.classList.toggle('active', found);
+      
+      resultsBlock.classList.toggle('active', foundCount > 0);
+      
+      // UI Polish: Highlight the first result
+      results.forEach(r => r.style.borderColor = '');
+      const first = results.find(r => r.style.display === 'block');
+      if (first) first.style.borderColor = 'var(--red)';
     } else {
       resultsBlock.classList.remove('active');
-      results.forEach(item => item.style.display = 'block');
+      results.forEach(item => {
+        item.style.display = 'block';
+        item.style.borderColor = '';
+      });
     }
   });
 
-  // Feature: Press Enter to select the first visible search result
   input.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
-      const firstVisible = Array.from(resultsBlock.querySelectorAll('.search-result-item')).find(item => item.style.display === 'block');
-      if (firstVisible) {
-        firstVisible.click();
-      }
+      const visible = Array.from(resultsBlock.querySelectorAll('.search-result-item')).filter(r => r.style.display !== 'none');
+      if (visible.length > 0) visible[0].click();
     }
   });
 }
@@ -420,16 +376,21 @@ function initTimelineFilter() {
   type.addEventListener('change', filterTimeline);
 }
 
-// ── CENSUS TABLE FILTER ──
-function filterCensusTable() {
-  const input = document.getElementById('census-search');
-  if (!input) return;
-  const filter = input.value.toUpperCase();
-  const table = document.getElementById('census-master-table');
-  if (!table) return;
-  Array.from(table.getElementsByTagName('tr')).slice(1).forEach(tr => {
-    const visible = Array.from(tr.getElementsByTagName('td')).some(td => td.innerText.toUpperCase().includes(filter));
-    tr.style.display = visible ? '' : 'none';
+// ── GENERIC TABLE SEARCH ──
+function attachTableSearch(containerId, inputId) {
+  const input = document.getElementById(inputId);
+  const container = document.getElementById(containerId);
+  if (!input || !container) return;
+
+  input.addEventListener('input', () => {
+    const filter = input.value.toUpperCase();
+    const table = container.querySelector('table');
+    if (!table) return;
+    const rows = table.querySelectorAll('tbody tr');
+    rows.forEach(tr => {
+      const text = tr.innerText.toUpperCase();
+      tr.style.display = text.includes(filter) ? '' : 'none';
+    });
   });
 }
 
@@ -456,6 +417,9 @@ let audioContext;
 function initAudio() {
   if (!audioContext) {
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (audioContext.state === 'suspended') {
+    audioContext.resume();
   }
 }
 
@@ -671,7 +635,7 @@ window.selectMapOrder = function(index) {
     }
   }
   
-  triggerForensicPing('GEO', item.id);
+  triggerForensicPing('maps', item.id);
 };
 
 // ── TRIGGER FORENSIC PING ──
@@ -736,8 +700,13 @@ async function initPresencesApi(page = 1) {
       return;
     }
 
-    // FIX 2: Explicitly map the nested objects (unit.name, area.name) from the JSON schema
-    let html = `<table class="census-table">
+    let html = `
+      <div class="table-header-ctrl">
+        <div class="table-search-box">
+          <input type="text" id="presences-search" placeholder="FILTER DEPLOYMENTS...">
+        </div>
+      </div>
+      <table class="census-table">
       <thead>
         <tr>
           <th>Date Entered</th>
@@ -770,6 +739,7 @@ async function initPresencesApi(page = 1) {
     
     html += `</tbody></table>`;
     container.innerHTML = html;
+    attachTableSearch('presences-api-container', 'presences-search');
 
     // Build Pagination Controls
     if (pagination) {
@@ -829,7 +799,13 @@ async function initMediaApi() {
     // Dynamically build headers based on whatever attributes the API provides (ignoring generic IDs)
     const keys = Object.keys(records[0]).filter(k => k !== 'id');
 
-    let html = `<table class="census-table"><thead><tr>`;
+    let html = `
+      <div class="table-header-ctrl">
+        <div class="table-search-box">
+          <input type="text" id="media-search" placeholder="FILTER JOURNALISTS...">
+        </div>
+      </div>
+      <table class="census-table"><thead><tr>`;
     keys.forEach(k => { 
       // Clean up keys like 'date_killed' into 'Date Killed'
       let cleanKey = k.replace(/_/g, ' ');
@@ -866,6 +842,7 @@ async function initMediaApi() {
     html += `</tbody></table>`;
 
     container.innerHTML = html;
+    attachTableSearch('media-api-container', 'media-search');
 
   } catch (error) {
     console.error('API Error:', error);
@@ -876,9 +853,39 @@ async function initMediaApi() {
   }
 }
 
+// ── QOL: SCROLL & NAVIGATION UTILITIES ──
+function initQolFeatures() {
+  // Create Back to Top Button
+  if (!document.getElementById('back-to-top')) {
+    const btt = document.createElement('div');
+    btt.id = 'back-to-top';
+    btt.innerHTML = '↑';
+    document.body.appendChild(btt);
+    
+    window.addEventListener('scroll', () => {
+      btt.classList.toggle('visible', window.scrollY > 500);
+    }, { passive: true });
+    
+    btt.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // Data Point Hash Copying
+  document.addEventListener('click', (e) => {
+    const dp = e.target.closest('.data-point');
+    if (dp && dp.dataset.id) {
+      navigator.clipboard.writeText(dp.dataset.id).then(() => {
+        const originalText = dp.innerText;
+        dp.innerText = 'ID_COPIED';
+        setTimeout(() => dp.innerText = originalText, 1000);
+      });
+    }
+  });
+}
+
 // ── INIT ──
 document.addEventListener('DOMContentLoaded', () => {
   syncSidebars();
+  initQolFeatures();
   initTechForPalestineData(); // Fetch global live statistics
   initTimelineFilter();
   initSearch();
@@ -900,12 +907,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // ESC closes modals/search
+  // Hotkeys & Listeners
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       closeModal();
       closeSearch();
       closeLightbox();
+    }
+    // 'S' key for Search
+    if ((e.key === 's' || e.key === 'S') && !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
+      e.preventDefault();
+      openSearch();
     }
   });
 
@@ -916,19 +928,44 @@ document.addEventListener('DOMContentLoaded', () => {
   async function initInfrastructureApi() {
     const container = document.getElementById('infra-api-container');
     if (!container) return;
-    container.innerHTML = `<div class="status-pulse red" style="padding:20px; font-family:mono; font-size:10px;">SYNCING INFRASTRUCTURE DATA...</div>`;
+    container.innerHTML = `<div class="skeleton-wrap"><div class="skeleton-row"></div><div class="skeleton-row"></div><div class="skeleton-row"></div></div>`;
     try {
       const response = await fetch('https://data.techforpalestine.org/api/v3/infrastructure-damaged.json');
       const data = await response.json();
-      const latest = data[data.length - 1];
-      container.innerHTML = `
-        <div class="detention-stats-grid" style="margin-bottom:40px;">
-          <div class="detention-stat-box" style="border-top-color:var(--red);"><div class="detention-stat-label">Homes Destroyed</div><div class="detention-stat-val">${latest.residential.ext_destroyed.toLocaleString()}</div></div>
-          <div class="detention-stat-box" style="border-top-color:var(--amber);"><div class="detention-stat-label">Schools Damaged</div><div class="detention-stat-val">${latest.educational_buildings.ext_damaged.toLocaleString()}</div></div>
-          <div class="detention-stat-box" style="border-top-color:var(--black);"><div class="detention-stat-label">Mosques Destroyed</div><div class="detention-stat-val">${latest.places_of_worship.ext_mosques_destroyed.toLocaleString()}</div></div>
-          <div class="detention-stat-box" style="border-top-color:var(--black);"><div class="detention-stat-label">Civic Buildings</div><div class="detention-stat-val">${latest.civic_buildings.ext_destroyed.toLocaleString()}</div></div>
-        </div>`;
-    } catch (e) { container.innerHTML = `<div class="terminal-alert">ERR_INFRA_STREAM_OFFLINE</div>`; }
+      
+      let html = `
+        <div class="table-header-ctrl">
+          <div class="table-search-box">
+            <input type="text" id="infra-search" placeholder="FILTER BY DATE OR SECTOR...">
+          </div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="census-table">
+            <thead>
+              <tr>
+                <th>Report Date</th>
+                <th>Residential (Destroyed)</th>
+                <th>Educational Units</th>
+                <th>Healthcare Facilities</th>
+                <th>Places of Worship</th>
+              </tr>
+            </thead>
+            <tbody>`;
+      
+      data.slice(-30).reverse().forEach(day => {
+        html += `<tr>
+          <td><span style="font-family:mono; font-size:11px;">${day.report_date}</span></td>
+          <td style="color:var(--red); font-weight:bold;">${day.residential.ext_destroyed.toLocaleString()}</td>
+          <td>${day.educational_buildings.ext_damaged.toLocaleString()}</td>
+          <td>${day.health_facilities.ext_damaged.toLocaleString()}</td>
+          <td>${day.places_of_worship.ext_mosques_destroyed.toLocaleString()}</td>
+        </tr>`;
+      });
+      
+      html += `</tbody></table></div>`;
+      container.innerHTML = html;
+      attachTableSearch('infra-api-container', 'infra-search');
+    } catch (e) { container.innerHTML = `<div class="terminal-alert">ERR_INFRA_STREAM_OFFLINE: UNABLE TO SYNC SATELLITE TELEMETRY</div>`; }
   }
   
   // ── MARTYRS NAMES REGISTRY (Killed in Gaza) ──
@@ -940,12 +977,20 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const response = await fetch(`https://data.techforpalestine.org/api/v2/killed-in-gaza/page-${page}.json`);
       const records = await response.json();
-      let html = `<table class="census-table"><thead><tr><th>Name (Arabic)</th><th>English Translation</th><th>Age</th><th>Sex</th></tr></thead><tbody>`;
+      let html = `
+        <div class="table-header-ctrl">
+          <div class="table-search-box">
+            <input type="text" id="martyrs-search" placeholder="FILTER BY NAME...">
+          </div>
+        </div>
+        <table class="census-table"><thead><tr><th>Name (Arabic)</th><th>English Translation</th><th>Age</th><th>Sex</th></tr></thead><tbody>`;
       records.forEach(rec => {
-        html += `<tr><td>${rec.name}</td><td><strong>${rec.en_name}</strong></td><td>${rec.age || 'N/A'}</td><td>${rec.sex.toUpperCase()}</td></tr>`;
+        const sex = rec.sex ? rec.sex.toUpperCase() : 'N/A';
+        html += `<tr><td>${rec.name}</td><td><strong>${rec.en_name}</strong></td><td>${rec.age || 'N/A'}</td><td>${sex}</td></tr>`;
       });
       html += `</tbody></table>`;
       container.innerHTML = html;
+      attachTableSearch('names-registry-container', 'martyrs-search');
       pagination.innerHTML = `
         <button class="btn-outline" style="padding:8px 16px; border-color:var(--border);" onclick="initKilledNamesApi(${page - 1})" ${page <= 1 ? 'disabled' : ''}>PREV</button>
         <span style="font-family:mono; font-size:10px; color:var(--muted); padding:0 10px;">PAGE ${page}</span>
