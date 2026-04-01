@@ -104,14 +104,14 @@ const EXHIBIT_DATA = {
 // Unsplash image collections for real images (using public Unsplash source)
 // Note: These use the Unsplash Source API (free, no key required)
 const REAL_IMAGES = {
-  hero: 'https://images.unsplash.com/photo-1587474260584-136574528ed5?w=1400&q=80&fit=crop', // Middle East landscape
+  hero: 'https://theintercept.com/wp-content/uploads/2019/01/GettyImages-1077343584-1547140810-e1547141434550.jpg?fit=5000%2C2500?w=1400&q=80&fit=crop', // Middle East landscape
   balfour: 'https://images.unsplash.com/photo-1569937756447-121bb8e7a083?w=400&q=80&fit=crop', // Archive/document
-  timeline1: 'https://images.unsplash.com/photo-1595979937005-7a58d0b6da1f?w=400&q=80&fit=crop', // Historical scene
+  timeline1: 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=400&q=80&fit=crop', // Historical scene
   timeline2: 'https://images.unsplash.com/photo-1590012314607-cda9d9b699ae?w=400&q=80&fit=crop', // Landscape
   satellite: 'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=600&q=80&fit=crop', // Satellite/aerial
   documents: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80&fit=crop', // Old documents
   humanitarian: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=600&q=80&fit=crop', // Humanitarian
-  protest: 'https://images.unsplash.com/photo-1539635278303-d4002c07eae3?w=600&q=80&fit=crop', // Protest/gathering
+  protest: 'https://www.crisisgroup.org/sites/default/files/gaza-briefing-16nov18.jpg', // Protest/gathering
   ruins: 'https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=600&q=80&fit=crop', // Ruins / destruction
   press: 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=400&q=80&fit=crop', // Press/media
   hospital: 'https://images.unsplash.com/photo-1516549655169-df83a0774514?w=400&q=80&fit=crop', // Medical

@@ -634,8 +634,6 @@ window.selectMapOrder = function(index) {
       imgEl.style.display = 'none';
     }
   }
-  
-  triggerForensicPing('maps', item.id);
 };
 
 // ── TRIGGER FORENSIC PING ──
@@ -649,7 +647,8 @@ function triggerForensicPing(type, siteId) {
 
 // ── MAP PING HANDLER ──
 function pingMapSite(type, siteId) {
-  triggerForensicPing(type, siteId);
+  // Console logging enabled for background telemetry instead of modal window
+  console.log(`OS_TELEMETRY: Site Ping [${type}] - ID: ${siteId}`);
 }
 
 // ── PRESENCES API INTEGRATION ──
@@ -796,8 +795,8 @@ async function initMediaApi() {
       return;
     }
 
-    // Dynamically build headers based on whatever attributes the API provides (ignoring generic IDs)
-    const keys = Object.keys(records[0]).filter(k => k !== 'id');
+    // Dynamically build headers based on attributes (ignoring technical SQL fields and IDs)
+    const keys = Object.keys(records[0]).filter(k => k !== 'id' && k !== 'date_of_martyrdom_sql');
 
     let html = `
       <div class="table-header-ctrl">
