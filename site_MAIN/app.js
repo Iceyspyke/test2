@@ -99,6 +99,21 @@ function executeSwitch(id) {
   if (id === 'registry') {
     setTimeout(() => fetchRegistryData('organizations'), 100);
   }
+
+  // Trigger Infrastructure API
+  if (id === 'infrastructure') {
+    setTimeout(initInfrastructureApi, 100);
+  }
+
+  // Trigger Martyrs Names Registry
+  if (id === 'census') {
+    setTimeout(() => initKilledNamesApi(1), 100);
+  }
+
+  // Trigger Daily Logs
+  if (id === 'hr') {
+    setTimeout(initDailyCasualtiesApi, 100);
+  }
 }
 
 function syncSidebarHighlight(id) {
@@ -895,159 +910,109 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   console.log('ARCHIVE.PS // MONOLITH_OS: OPERATIONAL');
-});
-
-// ── ARCHIVE REGISTRY API INTEGRATION ──
-async function fetchRegistryData(category, btnEl) {
-  const container = document.getElementById('registry-api-container');
-  if (!container) return;
-
-  // UI Update: Active Button State
-  if (btnEl) {
-    document.querySelectorAll('.timeline-filters .btn-outline').forEach(b => b.classList.remove('active'));
-    btnEl.classList.add('active');
+  });
+  
+  // ── INFRASTRUCTURE DAMAGE API ──
+  async function initInfrastructureApi() {
+    const container = document.getElementById('infra-api-container');
+    if (!container) return;
+    container.innerHTML = `<div class="status-pulse red" style="padding:20px; font-family:mono; font-size:10px;">SYNCING INFRASTRUCTURE DATA...</div>`;
+    try {
+      const response = await fetch('https://data.techforpalestine.org/api/v3/infrastructure-damaged.json');
+      const data = await response.json();
+      const latest = data[data.length - 1];
+      container.innerHTML = `
+        <div class="detention-stats-grid" style="margin-bottom:40px;">
+          <div class="detention-stat-box" style="border-top-color:var(--red);"><div class="detention-stat-label">Homes Destroyed</div><div class="detention-stat-val">${latest.residential.ext_destroyed.toLocaleString()}</div></div>
+          <div class="detention-stat-box" style="border-top-color:var(--amber);"><div class="detention-stat-label">Schools Damaged</div><div class="detention-stat-val">${latest.educational_buildings.ext_damaged.toLocaleString()}</div></div>
+          <div class="detention-stat-box" style="border-top-color:var(--black);"><div class="detention-stat-label">Mosques Destroyed</div><div class="detention-stat-val">${latest.places_of_worship.ext_mosques_destroyed.toLocaleString()}</div></div>
+          <div class="detention-stat-box" style="border-top-color:var(--black);"><div class="detention-stat-label">Civic Buildings</div><div class="detention-stat-val">${latest.civic_buildings.ext_destroyed.toLocaleString()}</div></div>
+        </div>`;
+    } catch (e) { container.innerHTML = `<div class="terminal-alert">ERR_INFRA_STREAM_OFFLINE</div>`; }
   }
-
-  container.innerHTML = `<div style="padding: 20px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase;"><span class="status-pulse red"></span> Querying ${category.toUpperCase()}...</div>`;
-
-  try {
-    // Attempt handshake with Registry Node
-    const response = await fetch(`https://palestine-api.viethere.com/api/v1/${category}`);
-    
-    if (!response.ok) {
-      throw new Error(`NODE_REFUSAL: HTTP ${response.status} ${response.statusText}`);
-    }
-    
-    const rawData = await response.json();
-    
-    // Support both direct list responses and wrapped objects
-    const records = Array.isArray(rawData) ? rawData : (rawData.data || Object.values(rawData));
-
-    if (!records || records.length === 0) {
-      container.innerHTML = `<div class="terminal-alert">NODE EMPTY: NO RECORDS REGISTERED IN THIS SECTOR.</div>`;
-      return;
-    }
-
-    let html = `<table class="census-table"><thead><tr>`;
-    
-    // Custom Headers per Category
-    if (category === 'organizations') {
-      html += `<th>Organization</th><th>Description</th><th>Focus</th><th>Access</th></tr></thead><tbody>`;
+  
+  // ── MARTYRS NAMES REGISTRY (Killed in Gaza) ──
+  async function initKilledNamesApi(page = 1) {
+    const container = document.getElementById('names-registry-container');
+    const pagination = document.getElementById('names-pagination');
+    if (!container) return;
+    container.innerHTML = `<div class="status-pulse red" style="padding:20px; font-family:mono; font-size:10px;">ACCESSING ARCHIVAL NAMES LIST...</div>`;
+    try {
+      const response = await fetch(`https://data.techforpalestine.org/api/v2/killed-in-gaza/page-${page}.json`);
+      const records = await response.json();
+      let html = `<table class="census-table"><thead><tr><th>Name (Arabic)</th><th>English Translation</th><th>Age</th><th>Sex</th></tr></thead><tbody>`;
       records.forEach(rec => {
-        html += `<tr>
-          <td><strong style="color:var(--black);">${rec.name}</strong></td>
-          <td style="font-size:11px; line-height:1.5;">${rec.description || '-'}</td>
-          <td><span class="exhibit-tag">${rec.type || 'NGO'}</span></td>
-          <td><a href="${rec.link}" target="_blank" class="detention-btn">Link</a></td>
-        </tr>`;
+        html += `<tr><td>${rec.name}</td><td><strong>${rec.en_name}</strong></td><td>${rec.age || 'N/A'}</td><td>${rec.sex.toUpperCase()}</td></tr>`;
       });
-    } else if (category === 'books') {
-      html += `<th>Title</th><th>Author</th><th>Year</th><th>Access</th></tr></thead><tbody>`;
-      records.forEach(rec => {
-        html += `<tr>
-          <td><strong style="color:var(--black);">${rec.title}</strong></td>
-          <td>${rec.author || '-'}</td>
-          <td>${rec.year || '-'}</td>
-          <td><a href="${rec.link}" target="_blank" class="detention-btn">Source</a></td>
-        </tr>`;
+      html += `</tbody></table>`;
+      container.innerHTML = html;
+      pagination.innerHTML = `
+        <button class="btn-outline" style="padding:8px 16px; border-color:var(--border);" onclick="initKilledNamesApi(${page - 1})" ${page <= 1 ? 'disabled' : ''}>PREV</button>
+        <span style="font-family:mono; font-size:10px; color:var(--muted); padding:0 10px;">PAGE ${page}</span>
+        <button class="btn-outline" style="padding:8px 16px; border-color:var(--border);" onclick="initKilledNamesApi(${page + 1})">NEXT</button>`;
+    } catch (e) { container.innerHTML = `<div class="terminal-alert">ERR_NAMES_STREAM_OFFLINE</div>`; }
+  }
+  
+  // ── DAILY CASUALTY LOGS (Gaza & West Bank) ──
+  async function initDailyCasualtiesApi() {
+    const container = document.getElementById('daily-log-container');
+    if (!container) return;
+    container.innerHTML = `<div class="status-pulse red" style="padding:20px; font-family:mono; font-size:10px;">SYNCING DAILY LOGS...</div>`;
+    try {
+      const response = await fetch('https://data.techforpalestine.org/api/v2/casualties_daily.json');
+      const data = await response.json();
+      const recent = data.slice(-15).reverse();
+      let html = `<table class="census-table"><thead><tr><th>Report Date</th><th>Killed (Cum)</th><th>Injured (Cum)</th><th>Children</th></tr></thead><tbody>`;
+      recent.forEach(day => {
+        html += `<tr><td>${day.report_date}</td><td style="color:var(--red); font-weight:bold;">${day.killed_cum.toLocaleString()}</td><td>${day.injured_cum.toLocaleString()}</td><td>${day.killed_children_cum?.toLocaleString() || '--'}</td></tr>`;
       });
-    } else { // Movies
-      html += `<th>Title</th><th>Director</th><th>Year</th><th>Link</th></tr></thead><tbody>`;
-      records.forEach(rec => {
-        html += `<tr>
-          <td><strong style="color:var(--black);">${rec.title}</strong></td>
-          <td>${rec.director || '-'}</td>
-          <td>${rec.year || '-'}</td>
-          <td><a href="${rec.link}" target="_blank" class="detention-btn">Watch</a></td>
-        </tr>`;
-      });
+      html += `</tbody></table>`;
+      container.innerHTML = html;
+    } catch (e) { container.innerHTML = `<div class="terminal-alert">ERR_CASUALTY_STREAM_OFFLINE</div>`; }
+  }
+  
+  // ── ARCHIVE REGISTRY (Culture & Resources) ──
+  async function fetchRegistryData(category, btnEl) {
+    const container = document.getElementById('registry-api-container');
+    if (!container) return;
+    if (btnEl) {
+      document.querySelectorAll('.timeline-filters .btn-outline').forEach(b => b.classList.remove('active'));
+      btnEl.classList.add('active');
     }
-
-    html += `</tbody></table>`;
-    container.innerHTML = html;
-
-  } catch (error) {
-    console.error('Registry API Error:', error);
-    container.innerHTML = `<div class="terminal-alert" style="border-color:var(--red);">ERR_CONNECTION_FAILED: Unable to reach Registry Node.</div>`;
+    container.innerHTML = `<div class="status-pulse red" style="padding:20px; font-family:mono; font-size:10px;">QUERYING ${category.toUpperCase()} NODE...</div>`;
+    try {
+      const response = await fetch(`https://palestine-api.viethere.com/api/v1/${category}`).catch(() => null);
+      let records = [];
+      if (response && response.ok) {
+        const rawData = await response.json();
+        records = Array.isArray(rawData) ? rawData : (rawData.data || Object.values(rawData));
+      } else {
+        // CONNECTION FAILED FALLBACK
+        const cache = {
+          organizations: [
+            { name: "PCRF", description: "Palestine Children's Relief Fund.", type: "Medical", link: "https://www.pcrf.net" },
+            { name: "Al-Haq", description: "Independent human rights organization.", type: "Human Rights", link: "https://www.alhaq.org" },
+            { name: "BDS Movement", description: "Boycott, Divestment, Sanctions campaign.", type: "Advocacy", link: "https://bdsmovement.net" }
+          ],
+          books: [
+            { title: "The Hundred Years' War on Palestine", author: "Rashid Khalidi", link: "#" },
+            { title: "The Ethnic Cleansing of Palestine", author: "Ilan Pappé", link: "#" }
+          ],
+          movies: [
+            { title: "Farha", director: "Darin J. Sallam", link: "https://www.netflix.com" },
+            { title: "Born in Gaza", director: "Hernán Zin", link: "#" }
+          ]
+        };
+        records = cache[category] || [];
+      }
+      let html = `<table class="census-table"><thead><tr>`;
+      if (category === 'organizations') {
+        html += `<th>Organization</th><th>Description</th><th>Focus</th><th>Access</th></tr></thead><tbody>`;
+        records.forEach(rec => { html += `<tr><td><strong style="color:var(--black);">${rec.name}</strong></td><td>${rec.description || '-'}</td><td><span class="exhibit-tag">${rec.type || 'NGO'}</span></td><td><a href="${rec.link}" target="_blank" class="detention-btn">Link</a></td></tr>`; });
+      } else {
+        html += `<th>Title</th><th>Creator</th><th>Access</th></tr></thead><tbody>`;
+        records.forEach(rec => { html += `<tr><td><strong style="color:var(--black);">${rec.title}</strong></td><td>${rec.author || rec.director || '-'}</td><td><a href="${rec.link}" target="_blank" class="detention-btn">View</a></td></tr>`; });
+      }
+      container.innerHTML = html + `</tbody></table>`;
+    } catch (e) { container.innerHTML = `<div class="terminal-alert">ERR_REGISTRY_HANDSHAKE_FAILED</div>`; }
   }
-}
-// --- Inside executeSwitch(id) ---
-  // Trigger Infrastructure API
-  if (id === 'infrastructure') {
-    setTimeout(initInfrastructureApi, 100);
-  }
-
-  // Trigger Martyrs Names Registry
-  if (id === 'census') {
-    setTimeout(() => initKilledNamesApi(1), 100);
-    setTimeout(initChildNamesApi, 100);
-  }
-
-  // Trigger Daily Logs
-  if (id === 'hr') {
-    setTimeout(initDailyCasualtiesApi, 100);
-  }
-// ------------------------------
-
-// ── INFRASTRUCTURE DAMAGE API ──
-async function initInfrastructureApi() {
-  const container = document.getElementById('infra-api-container');
-  if (!container) return;
-  container.innerHTML = `<div class="status-pulse red">SYNCING INFRASTRUCTURE DATA...</div>`;
-  try {
-    const response = await fetch('https://data.techforpalestine.org/api/v3/infrastructure-damaged.json');
-    const data = await response.json();
-    const latest = data[data.length - 1];
-    
-    let html = `<div class="detention-stats-grid" style="margin-bottom:40px;">
-      <div class="detention-stat-box"><div class="detention-stat-label">Homes Destroyed</div><div class="detention-stat-val">${latest.residential.destroyed.toLocaleString()}</div></div>
-      <div class="detention-stat-box"><div class="detention-stat-label">Schools Damaged</div><div class="detention-stat-val">${latest.educational_buildings.damaged.toLocaleString()}</div></div>
-      <div class="detention-stat-box"><div class="detention-stat-label">Mosques Destroyed</div><div class="detention-stat-val">${latest.places_of_worship.mosques_destroyed.toLocaleString()}</div></div>
-      <div class="detention-stat-box"><div class="detention-stat-label">Civic Buildings</div><div class="detention-stat-val">${latest.civic_buildings.destroyed.toLocaleString()}</div></div>
-    </div>`;
-    container.innerHTML = html;
-  } catch (e) { console.error(e); }
-}
-
-// ── MARTYRS NAMES REGISTRY (Killed in Gaza) ──
-async function initKilledNamesApi(page = 1) {
-  const container = document.getElementById('names-registry-container');
-  const pagination = document.getElementById('names-pagination');
-  if (!container) return;
-  container.innerHTML = `<div class="status-pulse red">ACCESSING ARCHIVAL NAMES LIST...</div>`;
-  try {
-    const response = await fetch(`https://data.techforpalestine.org/api/v2/killed-in-gaza/page-${page}.json`);
-    const records = await response.json();
-    
-    let html = `<table class="census-table"><thead><tr><th>Name (Arabic)</th><th>English Name</th><th>Age</th><th>Sex</th></tr></thead><tbody>`;
-    records.forEach(rec => {
-      html += `<tr><td>${rec.name}</td><td><strong>${rec.en_name}</strong></td><td>${rec.age || 'N/A'}</td><td>${rec.sex.toUpperCase()}</td></tr>`;
-    });
-    html += `</tbody></table>`;
-    container.innerHTML = html;
-
-    pagination.innerHTML = `
-      <button class="btn-outline" onclick="initKilledNamesApi(${page - 1})" ${page <= 1 ? 'disabled' : ''}>PREV</button>
-      <span style="font-family:mono; font-size:10px;">PAGE ${page}</span>
-      <button class="btn-outline" onclick="initKilledNamesApi(${page + 1})">NEXT</button>
-    `;
-  } catch (e) { console.error(e); }
-}
-
-// ── DAILY CASUALTY LOGS ──
-async function initDailyCasualtiesApi() {
-  const container = document.getElementById('daily-log-container');
-  if (!container) return;
-  try {
-    const response = await fetch('https://data.techforpalestine.org/api/v2/casualties_daily.json');
-    const data = await response.json();
-    const recent = data.slice(-15).reverse(); // Last 15 days
-
-    let html = `<table class="census-table"><thead><tr><th>Report Date</th><th>Killed (Cum)</th><th>Injured (Cum)</th><th>Children</th></tr></thead><tbody>`;
-    recent.forEach(day => {
-      html += `<tr><td>${day.report_date}</td><td class="red">${day.killed_cum.toLocaleString()}</td><td>${day.injured_cum.toLocaleString()}</td><td>${day.killed_children_cum?.toLocaleString() || '--'}</td></tr>`;
-    });
-    html += `</tbody></table>`;
-    container.innerHTML = html;
-  } catch (e) { console.error(e); }
-}
