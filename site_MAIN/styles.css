@@ -916,7 +916,8 @@ footer { padding: 40px; border-top: 1px solid var(--border); display: flex; flex
   /* 1. Global Spacing & Layout */
   .sidebar { 
     display: flex !important; position: fixed !important;
-    top: 250px !important; left: -100% !important; width: 280px !important;
+    top: 70px; left: -100% !important; width: 280px !important;
+    height: calc(100vh - 70px);
     background: var(--cream) !important; z-index: 1001 !important;
     transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
     border-right: 1px solid var(--border) !important;

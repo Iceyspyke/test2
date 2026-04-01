@@ -281,17 +281,19 @@ function filterCensusTable() {
 
 // ── MANDATE DOC SWITCHER ──
 function switchMandateDoc(docId, element) {
-  // Isolate the search strictly to the currently active page to prevent ID collisions
-  const activePage = document.querySelector('.page.active') || document;
+  // Isolate the search strictly to the element's own page context to prevent duplicate ID collisions
+  const activePage = element ? element.closest('.page') : document.querySelector('.page.active');
   
-  activePage.querySelectorAll('.bm-doc').forEach(doc => doc.classList.remove('active'));
-  activePage.querySelectorAll('.bm-list-item').forEach(item => item.classList.remove('active'));
-  
-  let target = activePage.querySelector('#doc-' + docId);
-  if (!target) target = document.getElementById('doc-' + docId); // Fallback
-  
-  if (target) target.classList.add('active');
-  if (element) element.classList.add('active');
+  if (activePage) {
+    activePage.querySelectorAll('.bm-doc').forEach(doc => doc.classList.remove('active'));
+    activePage.querySelectorAll('.bm-list-item').forEach(item => item.classList.remove('active'));
+    
+    // Find target safely bypassing duplicate ID browser quirks
+    const target = Array.from(activePage.querySelectorAll('.bm-doc')).find(doc => doc.id === 'doc-' + docId);
+    
+    if (target) target.classList.add('active');
+    if (element) element.classList.add('active');
+  }
 }
 
 // ── AUDIO ENGINE (FIXED) ──
@@ -389,8 +391,8 @@ function toggleMobileMenu() {
       // Dynamically align the sidebar right below the topnav to prevent overlapping
       setTimeout(() => {
         const rect = topnav.getBoundingClientRect();
-        sidebar.style.top = rect.bottom + 'px';
-        sidebar.style.height = `calc(100vh - ${rect.bottom}px)`;
+        sidebar.style.setProperty('top', rect.bottom + 'px', 'important');
+        sidebar.style.setProperty('height', `calc(100vh - ${rect.bottom}px)`, 'important');
       }, 10);
     }
     document.body.style.overflow = 'hidden'; // Prevent background scrolling
