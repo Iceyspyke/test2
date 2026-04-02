@@ -2,17 +2,19 @@
    ARCHIVE.PS — MONOLITH_OS APPLICATION
    app.js
 
-   BUGS FIXED:
-   1. CSS-in-script-tag removed (moved to styles.css)
-   2. Stray </style> mid-document removed
-   3. Page show() now uses requestAnimationFrame for CSS transition
-   4. stopAudio() now stores oscillator on element directly
-   5. access-modal missing wrapper restored
-   6. Duplicate .page CSS rule removed
-   7. triggerForensicPing handles missing color gracefully
+   REORGANIZED STRUCTURE:
+   1. CONFIGURATION & STATE
+   2. ROUTING & NAVIGATION
+   3. UI COMPONENTS & OVERLAYS
+   4. SEARCH & FILTERING
+   5. DATA STREAMS & APIS
+   6. AUDIO & TELEMETRY UTILITIES
+   7. INITIALIZATION & EVENTS
 ════════════════════════════════════════════ */
 
-// ── PAGE ROUTER ──
+/* ──────────────────────────────────────────
+   1. CONFIGURATION & STATE
+─────────────────────────────────────────── */
 const PAGE_MAP = {
   mandate: 'page-mandate', nakba: 'page-nakba', icj: 'page-icj', hr: 'page-hr',
   case: 'page-case', siege: 'page-siege', maps: 'page-maps', testimonies: 'page-testimonies',
@@ -28,8 +30,25 @@ const NAV_MAP = {
   case: 'nav-icj', icc: 'nav-icc'
 };
 
+const REDDIT_POLL_MS = 12 * 60 * 60 * 1000;
+
+// Global State Containers
+let tfpSummaryData = null;
+let audioContext;
+let displacementMapsData = [];
+let mapsApiInitialized = false;
+let cachedInfraData = null; 
+
+
+/* ──────────────────────────────────────────
+   2. ROUTING & NAVIGATION
+─────────────────────────────────────────── */
 function showPage(id) {
   executeSwitch(id);
+}
+
+function showLoader(id) {
+  executeSwitch(id); // no-op fallback
 }
 
 function executeSwitch(id) {
@@ -56,7 +75,7 @@ function executeSwitch(id) {
   // QOL: Live Telemetry Handshake
   if (typeof bindTfpData === 'function') bindTfpData();
   
-  // ── CENTRALIZED API DISPATCHER ──
+  // API Dispatcher
   const triggers = {
     'maps': () => initMapsApi(),
     'movement': () => initPresencesApi(1),
@@ -87,109 +106,59 @@ function syncSidebarHighlight(id) {
   });
 }
 
-// ── SYSTEM LOADER (no-op, kept for API) ──
-function showLoader(id) {
-  executeSwitch(id);
-}
-
-// ── TECH FOR PALESTINE (GLOBAL SUMMARY API) ──
-let tfpSummaryData = null;
-
-async function initTechForPalestineData() {
-  try {
-    // Attempt live fetch
-    const response = await fetch('https://data.techforpalestine.org/api/v3/summary.json');
-    if (!response.ok) throw new Error('API_UNREACHABLE');
-    
-    tfpSummaryData = await response.json();
-    console.log("OS_STREAM: Live telemetry synchronized.");
-  } catch (error) {
-    console.warn('OS_STREAM: Connection refused. Utilizing local archival cache.');
-    // Fallback data so the site is never blank (CORS/Offline protection)
-    tfpSummaryData = {
-      gaza: { killed: { total: 43900, children: 17400, medical: 1047, press: 188, civil_defence: 85 }, injured: { total: 103890 }, last_update: "2024-ARCHIVE-CACHE" },
-      west_bank: { killed: { total: 780 }, injured: { total: 6300 }, settler_attacks: 1500 },
-      known_press_killed_in_gaza: { records: 188 }
-    };
+function switchMandateDoc(docId, element) {
+  const activePage = element ? element.closest('.page') : document.querySelector('.page.active');
+  if (activePage) {
+    activePage.querySelectorAll('.bm-doc').forEach(doc => doc.classList.remove('active'));
+    activePage.querySelectorAll('.bm-list-item').forEach(item => item.classList.remove('active'));
+    const target = Array.from(activePage.querySelectorAll('.bm-doc')).find(doc => doc.id === 'doc-' + docId);
+    if (target) target.classList.add('active');
+    if (element) element.classList.add('active');
   }
-  bindTfpData();
 }
 
-function bindTfpData() {
-  if (!tfpSummaryData) return;
+
+/* ──────────────────────────────────────────
+   3. UI COMPONENTS & OVERLAYS
+─────────────────────────────────────────── */
+function toggleHeaderLinks() {
+  const topnav = document.querySelector('.topnav');
+  if (topnav) topnav.classList.toggle('expanded');
+}
+
+function toggleMobileMenu() {
+  const sidebar = document.querySelector('.page.active .sidebar');
+  const isActive = document.body.classList.contains('mobile-menu-open');
   
-  document.querySelectorAll('[data-tfp]').forEach(el => {
-    const path = el.getAttribute('data-tfp').split('.');
-    let val = tfpSummaryData;
-    
-    for (const key of path) {
-      if (val && val[key] !== undefined) val = val[key];
-      else { val = null; break; }
-    }
-    
-    if (val !== null) {
-      // If it's the date string, don't use toLocaleString
-      el.innerText = (typeof val === 'number') ? val.toLocaleString() : val;
-      el.classList.remove('status-pulse');
-      el.setAttribute('data-tfp-bound', 'true'); 
-    } else {
-      el.innerText = "REF_NOT_FOUND";
-      el.classList.remove('status-pulse');
-    }
-  });
-}
-
-// ── KILLED CHILDREN BY NAME API (CENSUS NODE) ──
-async function initChildNamesApi() {
-  const container = document.getElementById('child-names-api-container');
-  if (!container) return;
-
-  container.innerHTML = `<div style="padding: 20px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase;"><span class="status-pulse red" style="margin-top:8px;"></span> Accessing Child Casualty Datastream...</div>`;
-
-  try {
-    const response = await fetch('https://data.techforpalestine.org/api/v2/killed-in-gaza/child-name-counts-en.json');
-    if (!response.ok) throw new Error('API Error');
-    
-    const records = await response.json();
-    if (!records || records.length === 0) return;
-
-    let html = `
-      <div class="table-header-ctrl">
-        <div class="table-search-box">
-          <input type="text" id="child-names-search" placeholder="FILTER BY NAME...">
-        </div>
-      </div>
-      <table class="census-table"><thead><tr><th>First Name</th><th>Frequency (Children Killed)</th></tr></thead><tbody style="max-height: 400px; display: block; overflow-y: auto; width: 100%; border-bottom: 1px solid var(--border);">`;
-    
-    // The API returns an array, map it to rows
-    records.slice(0, 100).forEach(rec => { // Limit to top 100 for performance
-      html += `<tr style="display:table; width:100%; table-layout:fixed;">
-        <td><strong style="color:var(--black); text-transform:uppercase;">${rec.name || rec[0] || 'Unknown'}</strong></td>
-        <td style="color:var(--red); font-weight:bold;">${rec.count || rec[1] || 0}</td>
-      </tr>`;
-    });
-    
-    html += `</tbody></table><div class="hr-header-text" style="font-size:10px; margin-top:8px;">*Displaying top 100 derived name frequencies.</div>`;
-    container.innerHTML = html;
-    attachTableSearch('child-names-api-container', 'child-names-search');
-
-  } catch (error) {
-    console.error('Child Names API Error:', error);
-    // Fallback Mock Data to satisfy the error state safely
-    const fallback = [["Tariq", 120], ["Fatima", 105], ["Ahmed", 98], ["Nour", 80], ["Mohammed", 75]];
-    let html = `<div class="terminal-alert" style="border-color:var(--amber); color:var(--amber);">WARNING: SECURE HANDSHAKE FAILED. DISPLAYING ARCHIVAL CACHE.</div>
-      <div class="table-header-ctrl"><div class="table-search-box"><input type="text" id="child-names-search" placeholder="FILTER BY NAME..."></div></div>
-      <table class="census-table"><thead><tr><th>First Name</th><th>Frequency (Children Killed)</th></tr></thead><tbody>`;
-    fallback.forEach(rec => {
-      html += `<tr><td><strong style="color:var(--black); text-transform:uppercase;">${rec[0]}</strong></td><td style="color:var(--red); font-weight:bold;">${rec[1]}</td></tr>`;
-    });
-    html += `</tbody></table>`;
-    container.innerHTML = html;
-    attachTableSearch('child-names-api-container', 'child-names-search');
+  if (isActive) {
+    if (sidebar) sidebar.classList.remove('active');
+    document.body.style.overflow = '';
+    document.body.classList.remove('mobile-menu-open');
+  } else {
+    if (sidebar) sidebar.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    document.body.classList.add('mobile-menu-open');
   }
 }
 
-// ── MODAL ENGINE (Cleaned) ──
+function syncSidebars() {
+  const tmpl = document.getElementById('sidebar-template');
+  if (tmpl) {
+    document.querySelectorAll('.sidebar').forEach(sb => {
+      if (!sb.children.length) sb.appendChild(tmpl.content.cloneNode(true));
+    });
+  }
+  
+  const footerTmpl = document.getElementById('footer-template');
+  if (footerTmpl) {
+    document.querySelectorAll('.main').forEach(main => {
+      const existingFooter = main.querySelector('footer');
+      if (existingFooter && !existingFooter.classList.contains('unified-footer')) existingFooter.remove();
+      if (!main.querySelector('.unified-footer')) main.appendChild(footerTmpl.content.cloneNode(true));
+    });
+  }
+}
+
 function openModal(lines, color) {
   const modal = document.getElementById('access-modal');
   const content = document.getElementById('modal-content');
@@ -200,11 +169,9 @@ function openModal(lines, color) {
     const div = document.createElement('div');
     div.className = 'modal-line done';
     div.innerText = lineText;
-    
     if (/DENIED|ERROR|WARNING|CRITICAL|BREACH/.test(lineText)) div.style.color = 'var(--red)';
     else if (/GRANTED|SUCCESS|VERIFIED|SYNCED/.test(lineText)) div.style.color = 'var(--green-light)';
     else if (color) div.style.color = color;
-    
     content.appendChild(div);
   });
 }
@@ -213,35 +180,56 @@ function closeModal() {
   document.getElementById('access-modal').classList.remove('active');
 }
 
-// ── GLOBAL CLICK DELEGATE ──
-function handleGlobalClicks(e) {
-  const btn = e.target.closest('.btn-request, .siege-card-action, .btn-view-register, .urgent-link, .proc-download, .tl-btn, .hr-btn, .evidence-item, .un-res-action, .detention-btn, .cyber-log-btn');
-  if (!btn) return;
-
-  // FIX: Prevent generic modal from overriding explicit routing clicks
-  if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes('showPage')) {
-    if (btn.tagName === 'A' && btn.getAttribute('href') === '#') e.preventDefault();
-    return;
-  }
-
-  e.preventDefault();
-
-  if (btn.classList.contains('btn-request')) {
-    return;
-  }
-
-  if (btn.classList.contains('evidence-item')) {
-    const exId = btn.querySelector('.evidence-ex-id')?.innerText.replace('Exhibit ', '').trim() || 'NULL';
-    const exTitle = btn.querySelector('.evidence-ex-title')?.innerText || '';
-    const imgEl = btn.querySelector('.evidence-img');
-    const imgSrc = imgEl ? imgEl.src : null;
-    
-    openLightbox(exId, exTitle, imgSrc);
-    return;
-  }
+function openLightbox(id, title, imgSrc) {
+  const lb = document.getElementById('forensic-lightbox');
+  if (document.getElementById('lb-id')) document.getElementById('lb-id').innerText = `EXHIBIT_ID: ${id}`;
+  if (document.getElementById('lb-desc')) document.getElementById('lb-desc').innerText = title;
+  if (document.getElementById('lb-img') && imgSrc) document.getElementById('lb-img').src = imgSrc;
+  if (lb) lb.classList.add('active');
 }
 
-// ── MAP TOOLTIPS ──
+function closeLightbox() {
+  const lb = document.getElementById('forensic-lightbox');
+  if (lb) lb.classList.remove('active');
+}
+
+function initQolFeatures() {
+  if (!document.getElementById('back-to-top')) {
+    const btt = document.createElement('div');
+    btt.id = 'back-to-top';
+    btt.innerHTML = '↑';
+    document.body.appendChild(btt);
+    window.addEventListener('scroll', () => { btt.classList.toggle('visible', window.scrollY > 500); }, { passive: true });
+    btt.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  document.addEventListener('click', (e) => {
+    const dp = e.target.closest('.data-point');
+    if (dp && dp.dataset.id) {
+      navigator.clipboard.writeText(dp.dataset.id).then(() => {
+        const originalText = dp.innerText;
+        dp.innerText = 'ID_COPIED';
+        setTimeout(() => dp.innerText = originalText, 1000);
+      });
+    }
+  });
+}
+
+function injectRealImages() {
+  const heroEl = document.getElementById('hero-real-bg');
+  if (heroEl && typeof REAL_IMAGES !== 'undefined' && REAL_IMAGES.hero) {
+    heroEl.style.backgroundImage = `url('${REAL_IMAGES.hero}')`;
+  }
+  document.querySelectorAll('[data-real-img]').forEach(el => {
+    if(typeof REAL_IMAGES === 'undefined') return;
+    const src = REAL_IMAGES[el.getAttribute('data-real-img')];
+    if (src) {
+      if (el.tagName === 'IMG') el.src = src;
+      else el.style.backgroundImage = `url('${src}')`;
+    }
+  });
+}
+
 function initMapTooltips() {
   document.querySelectorAll('.map-ping').forEach(ping => {
     const label = ping.querySelector('text');
@@ -251,26 +239,10 @@ function initMapTooltips() {
   });
 }
 
-// ── LIGHTBOX ──
-function openLightbox(id, title, imgSrc) {
-  const lb = document.getElementById('forensic-lightbox');
-  const idEl = document.getElementById('lb-id');
-  const descEl = document.getElementById('lb-desc');
-  const imgEl = document.getElementById('lb-img');
-  
-  if (idEl) idEl.innerText = `EXHIBIT_ID: ${id}`;
-  if (descEl) descEl.innerText = title;
-  if (imgEl && imgSrc) imgEl.src = imgSrc;
-  
-  if (lb) lb.classList.add('active');
-}
 
-function closeLightbox() {
-  const lb = document.getElementById('forensic-lightbox');
-  if (lb) lb.classList.remove('active');
-}
-
-// ── SEARCH ENGINE ──
+/* ──────────────────────────────────────────
+   4. SEARCH & FILTERING
+─────────────────────────────────────────── */
 function initSearch() {
   const input = document.getElementById('global-search-input');
   const resultsBlock = document.getElementById('search-results');
@@ -286,24 +258,17 @@ function initSearch() {
         const title = item.querySelector('.sr-title')?.innerText.toLowerCase() || '';
         const desc = item.querySelector('.sr-desc')?.innerText.toLowerCase() || '';
         const meta = item.querySelector('.sr-meta')?.innerText.toLowerCase() || '';
-        
         const isMatch = title.includes(term) || desc.includes(term) || meta.includes(term);
         item.style.display = isMatch ? 'block' : 'none';
         if (isMatch) foundCount++;
       });
-      
       resultsBlock.classList.toggle('active', foundCount > 0);
-      
-      // UI Polish: Highlight the first result
       results.forEach(r => r.style.borderColor = '');
       const first = results.find(r => r.style.display === 'block');
       if (first) first.style.borderColor = 'var(--red)';
     } else {
       resultsBlock.classList.remove('active');
-      results.forEach(item => {
-        item.style.display = 'block';
-        item.style.borderColor = '';
-      });
+      results.forEach(item => { item.style.display = 'block'; item.style.borderColor = ''; });
     }
   });
 
@@ -323,10 +288,7 @@ function openSearch() {
 function closeSearch() {
   document.getElementById('search-overlay').classList.remove('active');
   const input = document.getElementById('global-search-input');
-  if (input) {
-    input.value = '';
-    input.dispatchEvent(new Event('input')); // Reset results list
-  }
+  if (input) { input.value = ''; input.dispatchEvent(new Event('input')); }
 }
 
 function executeSearchRoute(pageId) {
@@ -334,35 +296,6 @@ function executeSearchRoute(pageId) {
   showPage(pageId);
 }
 
-// ── SIDEBAR & FOOTER SYNC ──
-// Injects template content into all .sidebar elements and appends footer to .main
-function syncSidebars() {
-  const tmpl = document.getElementById('sidebar-template');
-  if (tmpl) {
-    document.querySelectorAll('.sidebar').forEach(sb => {
-      if (!sb.children.length) {
-        sb.appendChild(tmpl.content.cloneNode(true));
-      }
-    });
-  }
-  
-  const footerTmpl = document.getElementById('footer-template');
-  if (footerTmpl) {
-    document.querySelectorAll('.main').forEach(main => {
-      const existingFooter = main.querySelector('footer');
-      // Remove old, inconsistent footers
-      if (existingFooter && !existingFooter.classList.contains('unified-footer')) {
-        existingFooter.remove();
-      }
-      // Add the new unified footer
-      if (!main.querySelector('.unified-footer')) {
-        main.appendChild(footerTmpl.content.cloneNode(true));
-      }
-    });
-  }
-}
-
-// ── TIMELINE FILTER ──
 function initTimelineFilter() {
   const search = document.getElementById('tl-search');
   const decade = document.getElementById('tl-decade');
@@ -376,10 +309,7 @@ function initTimelineFilter() {
     let visible = 0;
     document.querySelectorAll('.timeline-item').forEach(item => {
       const text = item.innerText.toLowerCase();
-      const matchQ = !q || text.includes(q);
-      const matchD = d === 'all' || item.dataset.decade === d;
-      const matchT = t === 'all' || item.dataset.type === t;
-      const show = matchQ && matchD && matchT;
+      const show = (!q || text.includes(q)) && (d === 'all' || item.dataset.decade === d) && (t === 'all' || item.dataset.type === t);
       item.style.display = show ? '' : 'none';
       if (show) visible++;
     });
@@ -392,7 +322,6 @@ function initTimelineFilter() {
   type.addEventListener('change', filterTimeline);
 }
 
-// ── GENERIC TABLE LABELS & GLOBAL SEARCH ──
 function injectTableLabels() {
   document.querySelectorAll('table').forEach(table => {
     const headers = Array.from(table.querySelectorAll('th')).map(th => th.innerText);
@@ -404,57 +333,504 @@ function injectTableLabels() {
   });
 }
 
+function attachTableSearch(containerId, inputId) { 
+  injectTableLabels(); 
+}
+
+window.filterCensusTable = function() {}; // Prevent undefined error from inline oninput
+
 document.addEventListener('input', (e) => {
-  if (e.target.id === 'census-search') {
+  const searchMap = {
+    'census-search': 'census-master-table',
+    'martyrs-search': 'names-registry-container',
+    'presences-search': 'presences-api-container',
+    'media-search': 'media-api-container',
+    'infra-search': 'infra-api-container',
+    'child-names-search': 'child-names-api-container'
+  };
+  const targetId = searchMap[e.target.id];
+  if (targetId) {
     const filter = e.target.value.toUpperCase();
-    const table = document.getElementById('census-master-table');
-    if (table) {
-      Array.from(table.querySelectorAll('tbody tr')).forEach(tr => {
-        tr.style.display = tr.innerText.toUpperCase().includes(filter) ? '' : 'none';
-      });
-    }
-  } else if (['martyrs-search', 'presences-search', 'media-search', 'infra-search', 'child-names-search'].includes(e.target.id)) {
-    const filter = e.target.value.toUpperCase();
-    const table = e.target.closest('.main, div').querySelector('table');
-    if (table) {
-      table.querySelectorAll('tbody tr').forEach(tr => {
-        tr.style.display = tr.innerText.toUpperCase().includes(filter) ? '' : 'none';
-      });
+    const containerOrTable = document.getElementById(targetId);
+    if (containerOrTable) {
+       const table = containerOrTable.tagName === 'TABLE' ? containerOrTable : containerOrTable.querySelector('table');
+       if (table) {
+         table.querySelectorAll('tbody tr').forEach(tr => {
+           if (tr.innerText.toUpperCase().includes(filter)) {
+             tr.style.removeProperty('display');
+           } else {
+             tr.style.setProperty('display', 'none', 'important');
+           }
+         });
+       }
     }
   }
 });
 
-function attachTableSearch(containerId, inputId) { 
-  injectTableLabels(); // Ensure newly fetched tables get mobile labels
+
+/* ──────────────────────────────────────────
+   5. DATA STREAMS & APIS
+─────────────────────────────────────────── */
+
+// -- Tech for Palestine Summary --
+async function initTechForPalestineData() {
+  try {
+    const response = await fetch('https://data.techforpalestine.org/api/v3/summary.json');
+    if (!response.ok) throw new Error('API_UNREACHABLE');
+    tfpSummaryData = await response.json();
+    console.log("OS_STREAM: Live telemetry synchronized.");
+  } catch (error) {
+    console.warn('OS_STREAM: Connection refused. Utilizing local archival cache.');
+    tfpSummaryData = {
+      gaza: { killed: { total: 43900, children: 17400, medical: 1047, press: 188, civil_defence: 85 }, injured: { total: 103890 }, last_update: "2024-ARCHIVE-CACHE" },
+      west_bank: { killed: { total: 780 }, injured: { total: 6300 }, settler_attacks: 1500 },
+      known_press_killed_in_gaza: { records: 188 }
+    };
+  }
+  bindTfpData();
 }
 
-// ── MANDATE DOC SWITCHER ──
-function switchMandateDoc(docId, element) {
-  // Isolate the search strictly to the element's own page context to prevent duplicate ID collisions
-  const activePage = element ? element.closest('.page') : document.querySelector('.page.active');
+function bindTfpData() {
+  if (!tfpSummaryData) return;
+  document.querySelectorAll('[data-tfp]').forEach(el => {
+    const path = el.getAttribute('data-tfp').split('.');
+    let val = tfpSummaryData;
+    for (const key of path) {
+      if (val && val[key] !== undefined) val = val[key];
+      else { val = null; break; }
+    }
+    if (val !== null) {
+      el.innerText = (typeof val === 'number') ? val.toLocaleString() : val;
+      el.classList.remove('status-pulse');
+      el.setAttribute('data-tfp-bound', 'true'); 
+    } else {
+      el.innerText = "REF_NOT_FOUND";
+      el.classList.remove('status-pulse');
+    }
+  });
+}
+
+// -- Killed Children Names --
+async function initChildNamesApi() {
+  const container = document.getElementById('child-names-api-container');
+  if (!container) return;
+  container.innerHTML = `<div style="padding: 20px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase;"><span class="status-pulse red" style="margin-top:8px;"></span> Accessing Child Casualty Datastream...</div>`;
+
+  try {
+    const response = await fetch('https://data.techforpalestine.org/api/v2/killed-in-gaza/child-name-counts-en.json');
+    if (!response.ok) throw new Error('API Error');
+    
+    const rawData = await response.json();
+    let records = [];
+    
+    if (Array.isArray(rawData)) {
+      records = rawData;
+    } else if (rawData && typeof rawData === 'object') {
+      if (Array.isArray(rawData.boys) || Array.isArray(rawData.girls)) {
+        if (Array.isArray(rawData.boys)) records = records.concat(rawData.boys);
+        if (Array.isArray(rawData.girls)) records = records.concat(rawData.girls);
+        records.sort((a, b) => (b[1] || 0) - (a[1] || 0));
+      } else if (Array.isArray(rawData.data)) {
+        records = rawData.data;
+      } else {
+        records = Object.entries(rawData).map(([key, val]) => { return { name: key, count: (typeof val === 'number' ? val : val.count || 0) }; });
+      }
+    }
+
+    if (!records || records.length === 0) throw new Error("No data extracted.");
+
+    let html = `
+      <div class="table-header-ctrl">
+        <div class="table-search-box"><input type="text" id="child-names-search" placeholder="FILTER BY NAME..."></div>
+      </div>
+      <div style="max-height: 400px; overflow-y: auto; border-bottom: 1px solid var(--border); width: 100%;">
+        <table class="census-table" style="display: table; width: 100%; table-layout: auto;">
+          <thead style="position: sticky; top: 0; background: var(--bg); z-index: 10;">
+            <tr style="display: table-row;"><th style="display: table-cell; text-align: left;">First Name</th><th style="display: table-cell; text-align: left;">Frequency</th></tr>
+          </thead>
+          <tbody style="display: table-row-group;">`;
+    
+    records.slice(0, 100).forEach(rec => { 
+      let rName = rec.name || rec.en_name || rec[0] || 'Unknown';
+      let rCount = rec.count || rec.value || rec[1] || 0;
+      html += `<tr style="display: table-row;"><td style="display: table-cell; width: 60%;"><strong style="color:var(--black); text-transform:uppercase;">${rName}</strong></td><td style="display: table-cell; color:var(--red); font-weight:bold;">${rCount}</td></tr>`;
+    });
+    
+    html += `</tbody></table></div><div class="hr-header-text" style="font-size:10px; margin-top:8px;">*Displaying top 100 derived name frequencies.</div>`;
+    container.innerHTML = html;
+    attachTableSearch('child-names-api-container', 'child-names-search');
+  } catch (error) {
+    const fallback = [["Tariq", 120], ["Fatima", 105], ["Ahmed", 98], ["Nour", 80], ["Mohammed", 75]];
+    let html = `<div class="terminal-alert" style="border-color:var(--amber); color:var(--amber);">WARNING: SECURE HANDSHAKE FAILED. DISPLAYING ARCHIVAL CACHE.</div>
+      <div class="table-header-ctrl"><div class="table-search-box"><input type="text" id="child-names-search" placeholder="FILTER BY NAME..."></div></div>
+      <table class="census-table" style="display: table; width: 100%;"><thead><tr style="display: table-row;"><th style="display: table-cell; text-align: left;">First Name</th><th style="display: table-cell; text-align: left;">Frequency</th></tr></thead><tbody style="display: table-row-group;">`;
+    fallback.forEach(rec => { html += `<tr style="display: table-row;"><td style="display: table-cell;"><strong style="color:var(--black); text-transform:uppercase;">${rec[0]}</strong></td><td style="display: table-cell; color:var(--red); font-weight:bold;">${rec[1]}</td></tr>`; });
+    html += `</tbody></table>`;
+    container.innerHTML = html;
+    attachTableSearch('child-names-api-container', 'child-names-search');
+  }
+}
+
+// -- Geospatial / Maps --
+async function initMapsApi() {
+  if (mapsApiInitialized) return;
+  const listEl = document.getElementById('map-order-list');
+  if (!listEl) return;
+  try {
+    const response = await fetch('https://gazamaps.com/api/v1/displacement').catch(() => fetch('/api/v1/displacement'));
+    if (!response || !response.ok) throw new Error('Network response was not ok');
+    displacementMapsData = await response.json();
+    displacementMapsData.sort((a, b) => new Date(b.date) - new Date(a.date));
+    renderMapOrders();
+    if (displacementMapsData.length > 0) selectMapOrder(0);
+    mapsApiInitialized = true;
+  } catch (error) {
+    listEl.innerHTML = `<div class="terminal-alert" style="margin:20px; border-radius:0;">ERR_CONNECTION_REFUSED<br>Unable to fetch displacement datastream.</div>`;
+  }
+}
+
+function renderMapOrders() {
+  const listEl = document.getElementById('map-order-list');
+  if (!listEl) return;
+  listEl.innerHTML = displacementMapsData.map((item, index) => `
+    <div class="map-order-item" onclick="selectMapOrder(${index})" data-index="${index}">
+      <div class="map-order-date">${item.date}</div>
+      <div class="map-order-meta">ID: ${item.id} <br> Disp: ${item.area_sq_km_displacement} km²</div>
+    </div>
+  `).join('');
+}
+
+window.selectMapOrder = function(index) {
+  const item = displacementMapsData[index];
+  if (!item) return;
+  document.querySelectorAll('.map-order-item').forEach(el => el.classList.remove('active'));
+  const activeEl = document.querySelector(`.map-order-item[data-index="${index}"]`);
+  if (activeEl) activeEl.classList.add('active');
   
-  if (activePage) {
-    activePage.querySelectorAll('.bm-doc').forEach(doc => doc.classList.remove('active'));
-    activePage.querySelectorAll('.bm-list-item').forEach(item => item.classList.remove('active'));
+  if (document.getElementById('map-ui-title')) document.getElementById('map-ui-title').innerText = `ORDER REF: ${item.id}`;
+  if (document.getElementById('map-val-date')) document.getElementById('map-val-date').innerText = item.date;
+  if (document.getElementById('map-val-disp-area')) document.getElementById('map-val-disp-area').innerText = `${item.area_sq_km_displacement} sq km`;
+  if (document.getElementById('map-val-safe-area')) document.getElementById('map-val-safe-area').innerText = `${item.area_sq_km_labeled_safe} sq km`;
+  if (document.getElementById('map-val-blocks')) document.getElementById('map-val-blocks').innerText = item.displacement_blocks || 'None Specified';
+  
+  const btnIdf = document.getElementById('map-btn-idf');
+  const btnFull = document.getElementById('map-btn-full');
+  if (btnIdf) { btnIdf.href = item.source || item.link || '#'; btnIdf.style.display = (item.source || item.link) ? 'block' : 'none'; }
+  if (btnFull) { btnFull.href = item.map_full || item.map_zoom || '#'; btnFull.style.display = (item.map_full || item.map_zoom) ? 'block' : 'none'; }
+  
+  const imgEl = document.getElementById('active-map-img');
+  if (imgEl) {
+    const targetSrc = item.map_zoom || item.map_full || item.map_idf;
+    if (targetSrc) { imgEl.src = targetSrc; imgEl.style.display = 'block'; } 
+    else { imgEl.style.display = 'none'; }
+  }
+};
+
+// -- Military Presences --
+async function initPresencesApi(page = 1) {
+  const container = document.getElementById('presences-api-container');
+  const pagination = document.getElementById('presences-pagination');
+  if (!container) return;
+  container.innerHTML = `<div style="padding: 20px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase;"><span class="status-pulse red" style="margin-top:8px;"></span> Fetching Node Data...</div>`;
+
+  try {
+    const response = await fetch(`https://movements.genocide.live/api/v1/presences?page=${page}`).catch(() => fetch(`/api/v1/presences?page=${page}`));
+    if (!response || !response.ok) throw new Error('Network Error');
+    const rawData = await response.json();
     
-    // Find target safely bypassing duplicate ID browser quirks
-    const target = Array.from(activePage.querySelectorAll('.bm-doc')).find(doc => doc.id === 'doc-' + docId);
+    let pageData = rawData;
+    let records = [];
+    if (Array.isArray(rawData) && rawData.length > 0 && rawData[0].data) { pageData = rawData[0]; records = pageData.data; } 
+    else if (rawData && rawData.data) { pageData = rawData; records = pageData.data; } 
+    else if (Array.isArray(rawData)) { records = rawData; }
+    if (!Array.isArray(records)) records = Object.values(records);
+
+    if (records.length === 0) {
+      container.innerHTML = `<div class="terminal-alert">NO RECORDS FOUND ON THIS PAGE</div>`;
+      if (pagination) pagination.innerHTML = '';
+      return;
+    }
+
+    let html = `<div class="table-header-ctrl"><div class="table-search-box"><input type="text" id="presences-search" placeholder="FILTER DEPLOYMENTS..."></div></div>
+      <table class="census-table"><thead><tr><th>Date Entered</th><th>Date Exited</th><th>Military Unit</th><th>Area / Location</th><th>Verification Source</th></tr></thead><tbody>`;
+
+    records.forEach(rec => {
+      const dateEnter = rec.date_entered_display || '-';
+      const dateExit = rec.date_exited_display || 'Present';
+      const unitName = rec.unit ? (rec.unit.name || '-') : '-';
+      const areaName = rec.area ? (rec.area.name || '-') : '-';
+      const sourceLink = rec.enter_source ? `<a href="${rec.enter_source}" target="_blank" style="color:var(--red); text-decoration:underline;">View Source</a>` : '-';
+      html += `<tr><td>${dateEnter}</td><td>${dateExit}</td><td><strong style="color:var(--black);">${unitName}</strong></td><td>${areaName}</td><td>${sourceLink}</td></tr>`;
+    });
     
-    if (target) target.classList.add('active');
-    if (element) element.classList.add('active');
+    container.innerHTML = html + `</tbody></table>`;
+    attachTableSearch('presences-api-container', 'presences-search');
+
+    if (pagination) {
+      const currentPage = pageData.current_page || page;
+      const lastPage = pageData.last_page || (records.length >= 100 ? currentPage + 1 : currentPage);
+      let btnHtml = '';
+      if (currentPage > 1) btnHtml += `<button class="btn-outline" style="color:var(--black); border-color:var(--border); padding:8px 16px;" onclick="initPresencesApi(${currentPage - 1})">PREV PAGE</button>`;
+      btnHtml += `<span style="font-family:'IBM Plex Mono', monospace; font-size:10px; padding:10px; color:var(--muted); font-weight:600;">PAGE ${currentPage} ${pageData.last_page ? 'OF ' + lastPage : ''}</span>`;
+      if (currentPage < lastPage) btnHtml += `<button class="btn-outline" style="color:var(--black); border-color:var(--border); padding:8px 16px;" onclick="initPresencesApi(${currentPage + 1})">NEXT PAGE</button>`;
+      pagination.innerHTML = btnHtml;
+    }
+  } catch (error) {
+    container.innerHTML = `<div class="terminal-alert" style="margin:20px; border-radius:0; border-color:var(--red);">ERR_API_FAILURE<br>Unable to fetch presences datastream.<br><span style="display:block; margin-top:8px; font-size:10px; color:var(--muted); text-transform:none;">SERVER OUTPUT: ${error.message}</span></div>`;
+    if (pagination) pagination.innerHTML = '';
   }
 }
 
-// ── AUDIO ENGINE (FIXED) ──
-let audioContext;
+// -- Media Casualties --
+async function initMediaApi() {
+  const container = document.getElementById('media-api-container');
+  if (!container) return;
+  container.innerHTML = `<div style="padding: 20px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase;"><span class="status-pulse red" style="margin-top:8px;"></span> Fetching Node Data...</div>`;
 
+  try {
+    const response = await fetch('https://stopmurderingjournalists.com/api/v1/martyrs');
+    if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    let records = await response.json();
+    if (!Array.isArray(records)) records = records.data || Object.values(records);
+    if (!records || records.length === 0) { container.innerHTML = `<div class="terminal-alert">NO RECORDS FOUND</div>`; return; }
+
+    const keys = Object.keys(records[0]).filter(k => k !== 'id' && k !== 'date_of_martyrdom_sql');
+    let html = `<div class="table-header-ctrl"><div class="table-search-box"><input type="text" id="media-search" placeholder="FILTER JOURNALISTS..."></div></div><table class="census-table"><thead><tr>`;
+    keys.forEach(k => { html += `<th style="text-transform: capitalize;">${k.replace(/_/g, ' ')}</th>`; });
+    html += `</tr></thead><tbody>`;
+
+    records.forEach(rec => {
+      html += `<tr>`;
+      keys.forEach(k => {
+        let val = rec[k];
+        if (Array.isArray(val)) val = val.join(', ');
+        else if (typeof val === 'object' && val !== null) val = val.name || val.title || JSON.stringify(val);
+        
+        if (typeof val === 'string' && val.startsWith('http')) {
+          if (val.match(/\.(jpeg|jpg|gif|png)$/i)) val = `<img src="${val}" alt="Portrait" style="max-height:40px; border-radius:2px;">`;
+          else val = `<a href="${val}" target="_blank" style="color:var(--red); text-decoration:underline;">View Source</a>`;
+        }
+        html += `<td><span style="${k.includes('name') ? 'font-weight:bold; color:var(--black);' : ''}">${val !== undefined && val !== null && val !== '' ? val : '-'}</span></td>`;
+      });
+      html += `</tr>`;
+    });
+    container.innerHTML = html + `</tbody></table>`;
+    attachTableSearch('media-api-container', 'media-search');
+  } catch (error) {
+    container.innerHTML = `<div class="terminal-alert" style="margin:20px; border-radius:0; border-color:var(--red);">ERR_API_FAILURE<br>Unable to fetch media casualty datastream.</div>`;
+  }
+}
+
+// -- Infrastructure Damage --
+async function initInfrastructureApi(page = 1) {
+  const container = document.getElementById('infra-api-container');
+  const pagination = document.getElementById('infra-pagination');
+  const pageSize = 20;
+  if (!container) return;
+  if (page === 1) container.innerHTML = `<div class="skeleton-wrap"><div class="skeleton-row"></div><div class="skeleton-row"></div></div>`;
+
+  try {
+    if (!cachedInfraData) {
+      const response = await fetch('https://data.techforpalestine.org/api/v3/infrastructure-damaged.json');
+      if (!response.ok) throw new Error('OFFLINE');
+      const rawData = await response.json();
+      const uniqueData = [];
+      let lastHash = "";
+      for (let i = rawData.length - 1; i >= 0; i--) {
+        const d = rawData[i];
+        const hash = `${d.residential?.ext_destroyed}|${d.educational_buildings?.ext_damaged}|${d.places_of_worship?.ext_mosques_destroyed}`;
+        if (hash !== lastHash) { uniqueData.push(d); lastHash = hash; }
+      }
+      cachedInfraData = uniqueData;
+    }
+
+    const totalPages = Math.ceil(cachedInfraData.length / pageSize);
+    const start = (page - 1) * pageSize;
+    const pagedData = cachedInfraData.slice(start, start + pageSize);
+
+    let html = `<div class="table-header-ctrl"><div class="table-search-box"><input type="text" id="infra-search" placeholder="FILTER BY DATE OR SECTOR..."></div></div>
+      <div style="overflow-x:auto;"><table class="census-table"><thead><tr><th>Report Date</th><th>Residential (Destroyed)</th><th>Educational Units</th><th>Places of Worship</th></tr></thead><tbody>`;
+    
+    pagedData.forEach(day => {
+      html += `<tr><td><span style="font-family:mono; font-size:11px;">${day.report_date}</span></td>
+        <td style="color:var(--red); font-weight:bold;">${(day.residential?.ext_destroyed || 0).toLocaleString()}</td>
+        <td>${(day.educational_buildings?.ext_damaged || 0).toLocaleString()}</td>
+        <td>${(day.places_of_worship?.ext_mosques_destroyed || 0).toLocaleString()}</td></tr>`;
+    });
+    
+    container.innerHTML = html + `</tbody></table></div>`;
+    attachTableSearch('infra-api-container', 'infra-search');
+
+    if (pagination) {
+      pagination.innerHTML = `
+        <button class="btn-outline" style="padding:8px 16px; border-color:var(--border);" onclick="initInfrastructureApi(${page - 1})" ${page <= 1 ? 'disabled' : ''}>PREV</button>
+        <span style="font-family:mono; font-size:10px; color:var(--muted);">PAGE ${page} OF ${totalPages}</span>
+        <button class="btn-outline" style="padding:8px 16px; border-color:var(--border);" onclick="initInfrastructureApi(${page + 1})" ${page >= totalPages ? 'disabled' : ''}>NEXT</button>`;
+    }
+  } catch (e) { container.innerHTML = `<div class="terminal-alert">ERR_INFRA_STREAM_OFFLINE: UNABLE TO SYNC SATELLITE TELEMETRY</div>`; }
+}
+
+// -- Martyrs Names Registry --
+async function initKilledNamesApi(page = 1) {
+  const container = document.getElementById('names-registry-container');
+  const pagination = document.getElementById('names-pagination');
+  if (!container) return;
+  container.innerHTML = `<div class="status-pulse red" style="padding:20px; font-family:mono; font-size:10px;">ACCESSING ARCHIVAL NAMES LIST...</div>`;
+  try {
+    const response = await fetch(`https://data.techforpalestine.org/api/v2/killed-in-gaza/page-${page}.json`);
+    const records = await response.json();
+    let html = `<div class="table-header-ctrl"><div class="table-search-box"><input type="text" id="martyrs-search" placeholder="FILTER BY NAME..."></div></div>
+      <table class="census-table"><thead><tr><th>Name (Arabic)</th><th>English Translation</th><th>Age</th><th>Sex</th></tr></thead><tbody>`;
+    records.forEach(rec => {
+      const sex = rec.sex ? rec.sex.toUpperCase() : 'N/A';
+      html += `<tr><td>${rec.name}</td><td><strong>${rec.en_name}</strong></td><td>${rec.age || 'N/A'}</td><td>${sex}</td></tr>`;
+    });
+    container.innerHTML = html + `</tbody></table>`;
+    attachTableSearch('names-registry-container', 'martyrs-search');
+    pagination.innerHTML = `<button class="btn-outline" style="padding:8px 16px; border-color:var(--border);" onclick="initKilledNamesApi(${page - 1})" ${page <= 1 ? 'disabled' : ''}>PREV</button>
+      <span style="font-family:mono; font-size:10px; color:var(--muted); padding:0 10px;">PAGE ${page}</span>
+      <button class="btn-outline" style="padding:8px 16px; border-color:var(--border);" onclick="initKilledNamesApi(${page + 1})">NEXT</button>`;
+  } catch (e) { container.innerHTML = `<div class="terminal-alert">ERR_NAMES_STREAM_OFFLINE<br><span style="font-size:10px;">${e.message}</span></div>`; }
+}
+
+// -- Daily Casualty Logs --
+async function initDailyCasualtiesApi() {
+  const container = document.getElementById('daily-log-container');
+  if (!container) return;
+  container.innerHTML = `<div class="status-pulse red" style="padding:20px; font-family:mono; font-size:10px;">SYNCING DAILY LOGS...</div>`;
+  try {
+    const response = await fetch('https://data.techforpalestine.org/api/v2/casualties_daily.json');
+    const data = await response.json();
+    const recent = data.slice(-15).reverse();
+    let html = `<table class="census-table"><thead><tr><th>Report Date</th><th>Killed (Cum)</th><th>Injured (Cum)</th><th>Children</th></tr></thead><tbody>`;
+    recent.forEach(day => {
+      html += `<tr><td>${day.report_date}</td><td style="color:var(--red); font-weight:bold;">${day.killed_cum.toLocaleString()}</td><td>${day.injured_cum.toLocaleString()}</td><td>${day.killed_children_cum?.toLocaleString() || '--'}</td></tr>`;
+    });
+    container.innerHTML = html + `</tbody></table>`;
+  } catch (e) { container.innerHTML = `<div class="terminal-alert">ERR_CASUALTY_STREAM_OFFLINE</div>`; }
+}
+
+// -- Archive Registry --
+async function fetchRegistryData(category, btnEl) {
+  const container = document.getElementById('registry-api-container');
+  if (!container) return;
+  if (btnEl) {
+    document.querySelectorAll('.timeline-filters .btn-outline').forEach(b => b.classList.remove('active'));
+    btnEl.classList.add('active');
+  }
+  container.innerHTML = `<div class="status-pulse red" style="padding:20px; font-family:mono; font-size:10px;">QUERYING ${category.toUpperCase()} NODE...</div>`;
+  try {
+    const response = await fetch(`https://palestine-api.viethere.com/api/v1/${category}`).catch(() => null);
+    let records = [];
+    if (response && response.ok) {
+      const rawData = await response.json();
+      records = Array.isArray(rawData) ? rawData : (rawData.data || Object.values(rawData));
+    } else {
+      const cache = {
+        organizations: [
+          { name: "PCRF", description: "Palestine Children's Relief Fund.", type: "Medical", link: "https://www.pcrf.net" },
+          { name: "Al-Haq", description: "Independent human rights organization.", type: "Human Rights", link: "https://www.alhaq.org" }
+        ],
+        books: [{ title: "The Hundred Years' War on Palestine", author: "Rashid Khalidi", link: "#" }],
+        movies: [{ title: "Farha", director: "Darin J. Sallam", link: "https://www.netflix.com" }]
+      };
+      records = cache[category] || [];
+    }
+    let html = `<table class="census-table"><thead><tr>`;
+    if (category === 'organizations') {
+      html += `<th>Organization</th><th>Description</th><th>Focus</th><th>Access</th></tr></thead><tbody>`;
+      records.forEach(rec => { html += `<tr><td><strong style="color:var(--black);">${rec.name}</strong></td><td>${rec.description || '-'}</td><td><span class="exhibit-tag">${rec.type || 'NGO'}</span></td><td><a href="${rec.link}" target="_blank" class="detention-btn">Link</a></td></tr>`; });
+    } else {
+      html += `<th>Title</th><th>Creator</th><th>Access</th></tr></thead><tbody>`;
+      records.forEach(rec => { html += `<tr><td><strong style="color:var(--black);">${rec.title}</strong></td><td>${rec.author || rec.director || '-'}</td><td><a href="${rec.link}" target="_blank" class="detention-btn">View</a></td></tr>`; });
+    }
+    container.innerHTML = html + `</tbody></table>`;
+  } catch (e) { container.innerHTML = `<div class="terminal-alert">ERR_REGISTRY_HANDSHAKE_FAILED</div>`; }
+}
+
+// -- Reddit Intelligence Stream --
+async function initRedditStream() {
+  const container = document.getElementById('reddit-uploads-container');
+  if (!container) return;
+
+  const lastFetch = localStorage.getItem('reddit_last_fetch');
+  const cachedData = localStorage.getItem('reddit_cache');
+
+  if (lastFetch && cachedData && (Date.now() - lastFetch < REDDIT_POLL_MS)) {
+    renderRedditCards(JSON.parse(cachedData));
+  } else {
+    fetchRedditData();
+  }
+  setInterval(fetchRedditData, REDDIT_POLL_MS);
+}
+
+function fetchWithTimeout(url, options = {}, timeout = 8000) {
+  return Promise.race([fetch(url, options), new Promise((_, reject) => setTimeout(() => reject(new Error('TIMEOUT')), timeout))]);
+}
+
+async function fetchRedditData() {
+  const container = document.getElementById('reddit-uploads-container');
+  try {
+    const response = await fetchWithTimeout('https://blackened-worker.hadi-nashat.workers.dev', {}, 8000);
+    if (!response.ok) throw new Error('NETWORK_FAILURE');
+    
+    const posts = await response.json();
+    const limitedPosts = posts.slice(0, 3);
+    
+    localStorage.setItem('reddit_cache', JSON.stringify(limitedPosts));
+    localStorage.setItem('reddit_last_fetch', Date.now());
+    
+    renderRedditCards(limitedPosts);
+  } catch (err) {
+    console.warn('OS_STREAM: Intelligence node unreachable:', err);
+    if (container && !container.querySelector('.reddit-card')) {
+      const errorType = err.message === 'TIMEOUT' ? 'ERR_STREAM_TIMEOUT' : 'ERR_NEWS_STREAM_OFFLINE';
+      container.innerHTML = `<div class="terminal-alert" style="grid-column: span 3;">${errorType}: CONNECTION_FAILURE</div>`;
+    }
+  }
+}
+
+function renderRedditCards(posts) {
+  const container = document.getElementById('reddit-uploads-container');
+  if (!container) return;
+  let html = '';
+  const themes = ['var(--red)', 'var(--amber)', 'var(--green-light)'];
+
+  posts.forEach((post, i) => {
+    const date = new Date(post.created);
+    const timeStr = `${date.getUTCHours().toString().padStart(2, '0')}:${date.getUTCMinutes().toString().padStart(2, '0')}_UTC`;
+    const color = themes[i % themes.length];
+    
+    const thumbHtml = post.thumbnail 
+      ? `<div style="width:100%; height:220px; background:url('${post.thumbnail}') center/cover no-repeat; margin-bottom:12px; border:1px solid var(--border); opacity:0.9;"></div>`
+      : `<div style="width:100%; height:220px; background:var(--border); display:flex; align-items:center; justify-content:center; margin-bottom:12px; border:1px solid var(--border); font-family:mono; font-size:10px; color:var(--muted); opacity:0.5;">NO_VISUAL_FEED</div>`;
+
+    html += `
+      <a href="${post.url}" target="_blank" class="reddit-card" style="text-decoration:none; color:inherit;">
+        <div style="padding:16px; border:1px solid var(--border); background:white; height:100%; transition: border-color 0.2s; cursor:pointer; display:flex; flex-direction:column; min-height:440px;" 
+             onmouseover="this.style.borderColor='${color}'" onmouseout="this.style.borderColor='var(--border)'">
+          <div style="font-family:'IBM Plex Mono',monospace; font-size:8px; color:${color}; margin-bottom:12px;">[ REDDIT_LOG: ${timeStr} ]</div>
+          ${thumbHtml}
+          <div style="font-size:12px; font-weight:600; margin-bottom:8px; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; line-height:1.3; flex-grow:1;">
+            ${post.title}
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; font-size:9px; color:var(--muted); text-transform:uppercase; margin-top:auto; padding-top:12px; border-top:1px solid rgba(0,0,0,0.05);">
+            <span>DATA_NODE: R_VIOLENCE</span>
+            <span style="color:${color}; font-weight:bold;">SCORE: ${post.score}</span>
+          </div>
+        </div>
+      </a>`;
+  });
+  container.innerHTML = html;
+}
+
+
+/* ──────────────────────────────────────────
+   6. AUDIO & TELEMETRY UTILITIES
+─────────────────────────────────────────── */
 function initAudio() {
-  if (!audioContext) {
-    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-  }
-  if (audioContext.state === 'suspended') {
-    audioContext.resume();
-  }
+  if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioContext.state === 'suspended') audioContext.resume();
 }
 
 function playAudio(btn) {
@@ -481,17 +857,13 @@ function playAudio(btn) {
   gainNode.gain.setValueAtTime(0.015, audioContext.currentTime);
   oscillator.start();
 
-  // FIX: Store oscillator directly on element, not in dataset
   playerUi._oscillator = oscillator;
   playerUi._gain = gainNode;
 
   let seconds = 0;
   const intervalId = setInterval(() => {
     seconds++;
-    oscillator.frequency.linearRampToValueAtTime(
-      Math.random() * 60 + 30,
-      audioContext.currentTime + 0.5
-    );
+    oscillator.frequency.linearRampToValueAtTime(Math.random() * 60 + 30, audioContext.currentTime + 0.5);
     const m = Math.floor(seconds / 60).toString().padStart(2, '0');
     const s = (seconds % 60).toString().padStart(2, '0');
     if (timerDisplay) timerDisplay.innerText = `${m}:${s}`;
@@ -506,13 +878,8 @@ function stopAudio(stopBtn) {
   if (!playerUi) return;
 
   clearInterval(playerUi._intervalId);
-
-  // FIX: Use element property, not dataset
   if (playerUi._oscillator) {
-    try { 
-      playerUi._oscillator.stop(); 
-      playerUi._oscillator.disconnect(); 
-    } catch (e) {}
+    try { playerUi._oscillator.stop(); playerUi._oscillator.disconnect(); } catch (e) {}
     playerUi._oscillator = null;
   }
   if (playerUi._gain) {
@@ -525,153 +892,8 @@ function stopAudio(stopBtn) {
   if (playBtn) playBtn.style.display = 'inline-flex';
 }
 
-// ── HEADER LINKS TOGGLE ──
-function toggleHeaderLinks() {
-  const topnav = document.querySelector('.topnav');
-  if (topnav) {
-    topnav.classList.toggle('expanded');
-  }
-}
-
-// ── MOBILE MENU ──
-function toggleMobileMenu() {
-  const sidebar = document.querySelector('.page.active .sidebar');
-  const isActive = document.body.classList.contains('mobile-menu-open');
-  
-  if (isActive) {
-    if (sidebar) sidebar.classList.remove('active');
-    document.body.style.overflow = '';
-    document.body.classList.remove('mobile-menu-open');
-  } else {
-    if (sidebar) {
-      sidebar.classList.add('active');
-    }
-    document.body.style.overflow = 'hidden';
-    document.body.classList.add('mobile-menu-open');
-  }
-}
-
-// ── LOAD REAL IMAGES ──
-function injectRealImages() {
-  // Hero background
-  const heroEl = document.getElementById('hero-real-bg');
-  if (heroEl && REAL_IMAGES.hero) {
-    heroEl.style.backgroundImage = `url('${REAL_IMAGES.hero}')`;
-  }
-
-  // Timeline images
-  const tlImages = document.querySelectorAll('[data-real-img]');
-  tlImages.forEach(el => {
-    const key = el.getAttribute('data-real-img');
-    const src = REAL_IMAGES[key];
-    if (src) {
-      if (el.tagName === 'IMG') {
-        el.src = src;
-      } else {
-        el.style.backgroundImage = `url('${src}')`;
-      }
-    }
-  });
-}
-
-// ── MAPS API INTEGRATION ──
-let displacementMapsData = [];
-let mapsApiInitialized = false;
-
-async function initMapsApi() {
-  if (mapsApiInitialized) return;
-  const listEl = document.getElementById('map-order-list');
-  if (!listEl) return;
-  
-  try {
-    // Attempt fetch from Gazamaps public endpoint
-    const response = await fetch('https://gazamaps.com/api/v1/displacement')
-      .catch(() => fetch('/api/v1/displacement')); // Fallback if proxy is required
-      
-    if (!response || !response.ok) throw new Error('Network response was not ok');
-    
-    const data = await response.json();
-    displacementMapsData = data;
-    
-    // Sort newest first
-    displacementMapsData.sort((a, b) => new Date(b.date) - new Date(a.date));
-    
-    renderMapOrders();
-    if (displacementMapsData.length > 0) {
-      selectMapOrder(0);
-    }
-    mapsApiInitialized = true;
-  } catch (error) {
-    console.error('API Error:', error);
-    listEl.innerHTML = `<div class="terminal-alert" style="margin:20px; border-radius:0;">ERR_CONNECTION_REFUSED<br>Unable to fetch displacement datastream.</div>`;
-  }
-}
-
-function renderMapOrders() {
-  const listEl = document.getElementById('map-order-list');
-  if (!listEl) return;
-  
-  listEl.innerHTML = displacementMapsData.map((item, index) => `
-    <div class="map-order-item" onclick="selectMapOrder(${index})" data-index="${index}">
-      <div class="map-order-date">${item.date}</div>
-      <div class="map-order-meta">ID: ${item.id} <br> Disp: ${item.area_sq_km_displacement} km²</div>
-    </div>
-  `).join('');
-}
-
-window.selectMapOrder = function(index) {
-  const item = displacementMapsData[index];
-  if (!item) return;
-  
-  // Update Active State
-  document.querySelectorAll('.map-order-item').forEach(el => el.classList.remove('active'));
-  const activeEl = document.querySelector(`.map-order-item[data-index="${index}"]`);
-  if (activeEl) activeEl.classList.add('active');
-  
-  // Update UI Elements
-  const titleEl = document.getElementById('map-ui-title');
-  if (titleEl) titleEl.innerText = `ORDER REF: ${item.id}`;
-  
-  const dateEl = document.getElementById('map-val-date');
-  if (dateEl) dateEl.innerText = item.date;
-  
-  const dispEl = document.getElementById('map-val-disp-area');
-  if (dispEl) dispEl.innerText = `${item.area_sq_km_displacement} sq km`;
-  
-  const safeEl = document.getElementById('map-val-safe-area');
-  if (safeEl) safeEl.innerText = `${item.area_sq_km_labeled_safe} sq km`;
-  
-  const blocksEl = document.getElementById('map-val-blocks');
-  if (blocksEl) blocksEl.innerText = item.displacement_blocks || 'None Specified';
-  
-  // Button Routing
-  const btnIdf = document.getElementById('map-btn-idf');
-  const btnFull = document.getElementById('map-btn-full');
-  
-  if (btnIdf) {
-    btnIdf.href = item.source || item.link || '#';
-    btnIdf.style.display = (item.source || item.link) ? 'block' : 'none';
-  }
-  if (btnFull) {
-    btnFull.href = item.map_full || item.map_zoom || '#';
-    btnFull.style.display = (item.map_full || item.map_zoom) ? 'block' : 'none';
-  }
-  
-  // Update Image Display (Priority: Zoom > Full > IDF Source)
-  const imgEl = document.getElementById('active-map-img');
-  if (imgEl) {
-    const targetSrc = item.map_zoom || item.map_full || item.map_idf;
-    if (targetSrc) {
-      imgEl.src = targetSrc;
-      imgEl.style.display = 'block';
-    } else {
-      imgEl.style.display = 'none';
-    }
-  }
-};
-
-// ── TRIGGER FORENSIC PING ──
 function triggerForensicPing(type, siteId) {
+  if(typeof FORENSIC_DATA === 'undefined') return;
   const base = FORENSIC_DATA[type];
   if (!base) return;
   const customized = [...base.lines];
@@ -679,276 +901,63 @@ function triggerForensicPing(type, siteId) {
   openModal(customized, base.color || 'var(--green-light)');
 }
 
-// ── MAP PING HANDLER ──
 function pingMapSite(type, siteId) {
-  // Console logging enabled for background telemetry instead of modal window
   console.log(`OS_TELEMETRY: Site Ping [${type}] - ID: ${siteId}`);
 }
 
-// ── PRESENCES API INTEGRATION ──
-async function initPresencesApi(page = 1) {
-  const container = document.getElementById('presences-api-container');
-  const pagination = document.getElementById('presences-pagination');
-  if (!container) return;
 
-  container.innerHTML = `<div style="padding: 20px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase;"><span class="status-pulse red" style="margin-top:8px;"></span> Fetching Node Data...</div>`;
+/* ──────────────────────────────────────────
+   7. INITIALIZATION & EVENTS
+─────────────────────────────────────────── */
+function handleGlobalClicks(e) {
+  const btn = e.target.closest('.btn-request, .siege-card-action, .btn-view-register, .urgent-link, .proc-download, .tl-btn, .hr-btn, .evidence-item, .un-res-action, .detention-btn, .cyber-log-btn');
+  if (!btn) return;
 
-  try {
-    const response = await fetch(`https://movements.genocide.live/api/v1/presences?page=${page}`)
-      .catch(() => fetch(`/api/v1/presences?page=${page}`));
+  if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes('showPage')) {
+    if (btn.tagName === 'A' && btn.getAttribute('href') === '#') e.preventDefault();
+    return;
+  }
 
-    if (!response || !response.ok) {
-      throw new Error(`HTTP ${response ? response.status : 'Unknown'}: ${response ? response.statusText : 'Network Error'}`);
-    }
+  e.preventDefault();
 
-    const rawData = await response.json();
-    
-    // FIX 1: Bulletproof data extraction regardless of API structure changes
-    let pageData = rawData;
-    let records = [];
+  if (btn.classList.contains('btn-request')) return;
 
-    // Scenario A: API wraps the pagination in an array -> [ { current_page: 1, data: [...] } ]
-    if (Array.isArray(rawData) && rawData.length > 0 && rawData[0].data) {
-      pageData = rawData[0];
-      records = pageData.data;
-    } 
-    // Scenario B: Standard pagination object -> { current_page: 1, data: [...] }
-    else if (rawData && rawData.data) {
-      pageData = rawData;
-      records = pageData.data;
-    } 
-    // Scenario C: Direct array of items -> [ { id: 1 }, { id: 2 } ]
-    else if (Array.isArray(rawData)) {
-      records = rawData;
-    }
-
-    // FAILSAFE: If the API returned an object dictionary instead of an array (e.g., { "0": {...}, "1": {...} })
-    if (!Array.isArray(records)) {
-      records = Object.values(records);
-    }
-
-    if (records.length === 0) {
-      container.innerHTML = `<div class="terminal-alert">NO RECORDS FOUND ON THIS PAGE</div>`;
-      if (pagination) pagination.innerHTML = '';
-      return;
-    }
-
-    let html = `
-      <div class="table-header-ctrl">
-        <div class="table-search-box">
-          <input type="text" id="presences-search" placeholder="FILTER DEPLOYMENTS...">
-        </div>
-      </div>
-      <table class="census-table">
-      <thead>
-        <tr>
-          <th>Date Entered</th>
-          <th>Date Exited</th>
-          <th>Military Unit</th>
-          <th>Area / Location</th>
-          <th>Verification Source</th>
-        </tr>
-      </thead>
-      <tbody>`;
-
-    records.forEach(rec => {
-      // Safely access nested properties
-      const dateEnter = rec.date_entered_display || '-';
-      const dateExit = rec.date_exited_display || 'Present';
-      const unitName = rec.unit ? (rec.unit.name || '-') : '-';
-      const areaName = rec.area ? (rec.area.name || '-') : '-';
-      const sourceLink = rec.enter_source 
-        ? `<a href="${rec.enter_source}" target="_blank" style="color:var(--red); text-decoration:underline;">View Source</a>` 
-        : '-';
-
-      html += `<tr>
-        <td>${dateEnter}</td>
-        <td>${dateExit}</td>
-        <td><strong style="color:var(--black);">${unitName}</strong></td>
-        <td>${areaName}</td>
-        <td>${sourceLink}</td>
-      </tr>`;
-    });
-    
-    html += `</tbody></table>`;
-    container.innerHTML = html;
-    attachTableSearch('presences-api-container', 'presences-search');
-
-    // Build Pagination Controls
-    if (pagination) {
-      const currentPage = pageData.current_page || page;
-      // Handle missing last_page safely based on array length
-      const lastPage = pageData.last_page || (records.length >= 100 ? currentPage + 1 : currentPage);
-      
-      let btnHtml = '';
-      if (currentPage > 1) {
-         btnHtml += `<button class="btn-outline" style="color:var(--black); border-color:var(--border); padding:8px 16px;" onclick="initPresencesApi(${currentPage - 1})">PREV PAGE</button>`;
-      }
-      
-      btnHtml += `<span style="font-family:'IBM Plex Mono', monospace; font-size:10px; padding:10px; color:var(--muted); font-weight:600;">PAGE ${currentPage} ${pageData.last_page ? 'OF ' + lastPage : ''}</span>`;
-      
-      if (currentPage < lastPage) {
-         btnHtml += `<button class="btn-outline" style="color:var(--black); border-color:var(--border); padding:8px 16px;" onclick="initPresencesApi(${currentPage + 1})">NEXT PAGE</button>`;
-      }
-      pagination.innerHTML = btnHtml;
-    }
-
-  } catch (error) {
-    console.error('API Error:', error);
-    container.innerHTML = `<div class="terminal-alert" style="margin:20px; border-radius:0; border-color:var(--red);">
-      ERR_API_FAILURE<br>Unable to fetch presences datastream.<br>
-      <span style="display:block; margin-top:8px; font-size:10px; color:var(--muted); text-transform:none;">SERVER OUTPUT: ${error.message}</span>
-    </div>`;
-    if (pagination) pagination.innerHTML = '';
+  if (btn.classList.contains('evidence-item')) {
+    const exId = btn.querySelector('.evidence-ex-id')?.innerText.replace('Exhibit ', '').trim() || 'NULL';
+    const exTitle = btn.querySelector('.evidence-ex-title')?.innerText || '';
+    const imgEl = btn.querySelector('.evidence-img');
+    const imgSrc = imgEl ? imgEl.src : null;
+    openLightbox(exId, exTitle, imgSrc);
   }
 }
 
-// ── MEDIA CASUALTIES API INTEGRATION ──
-async function initMediaApi() {
-  const container = document.getElementById('media-api-container');
-  if (!container) return;
-
-  container.innerHTML = `<div style="padding: 20px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase;"><span class="status-pulse red" style="margin-top:8px;"></span> Fetching Node Data...</div>`;
-
-  try {
-    const response = await fetch('https://stopmurderingjournalists.com/api/v1/martyrs');
-
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-    }
-
-    let records = await response.json();
-    
-    // Failsafe extraction in case the API wraps the array inside an object
-    if (!Array.isArray(records)) {
-      records = records.data || Object.values(records);
-    }
-
-    if (!records || records.length === 0) {
-      container.innerHTML = `<div class="terminal-alert">NO RECORDS FOUND</div>`;
-      return;
-    }
-
-    // Dynamically build headers based on attributes (ignoring technical SQL fields and IDs)
-    const keys = Object.keys(records[0]).filter(k => k !== 'id' && k !== 'date_of_martyrdom_sql');
-
-    let html = `
-      <div class="table-header-ctrl">
-        <div class="table-search-box">
-          <input type="text" id="media-search" placeholder="FILTER JOURNALISTS...">
-        </div>
-      </div>
-      <table class="census-table"><thead><tr>`;
-    keys.forEach(k => { 
-      // Clean up keys like 'date_killed' into 'Date Killed'
-      let cleanKey = k.replace(/_/g, ' ');
-      html += `<th style="text-transform: capitalize;">${cleanKey}</th>`; 
-    });
-    html += `</tr></thead><tbody>`;
-
-    // Map rows dynamically to ensure compliance with API's no-hardcoding rule
-    records.forEach(rec => {
-      html += `<tr>`;
-      keys.forEach(k => {
-        let val = rec[k];
-        
-        // Handle nested arrays/objects gracefully
-        if (Array.isArray(val)) {
-          val = val.join(', ');
-        } else if (typeof val === 'object' && val !== null) {
-          val = val.name || val.title || JSON.stringify(val);
-        }
-        
-        // Wrap hyperlinks and images automatically
-        if (typeof val === 'string' && val.startsWith('http')) {
-          if (val.match(/\.(jpeg|jpg|gif|png)$/i)) {
-            val = `<img src="${val}" alt="Portrait" style="max-height:40px; border-radius:2px;">`;
-          } else {
-            val = `<a href="${val}" target="_blank" style="color:var(--red); text-decoration:underline;">View Source</a>`;
-          }
-        }
-        
-        html += `<td><span style="${k.includes('name') ? 'font-weight:bold; color:var(--black);' : ''}">${val !== undefined && val !== null && val !== '' ? val : '-'}</span></td>`;
-      });
-      html += `</tr>`;
-    });
-    html += `</tbody></table>`;
-
-    container.innerHTML = html;
-    attachTableSearch('media-api-container', 'media-search');
-
-  } catch (error) {
-    console.error('API Error:', error);
-    container.innerHTML = `<div class="terminal-alert" style="margin:20px; border-radius:0; border-color:var(--red);">
-      ERR_API_FAILURE<br>Unable to fetch media casualty datastream.<br>
-      <span style="display:block; margin-top:8px; font-size:10px; color:var(--muted); text-transform:none;">SERVER OUTPUT: ${error.message}</span>
-    </div>`;
-  }
-}
-
-// ── QOL: SCROLL & NAVIGATION UTILITIES ──
-function initQolFeatures() {
-  // Create Back to Top Button
-  if (!document.getElementById('back-to-top')) {
-    const btt = document.createElement('div');
-    btt.id = 'back-to-top';
-    btt.innerHTML = '↑';
-    document.body.appendChild(btt);
-    
-    window.addEventListener('scroll', () => {
-      btt.classList.toggle('visible', window.scrollY > 500);
-    }, { passive: true });
-    
-    btt.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  // Data Point Hash Copying
-  document.addEventListener('click', (e) => {
-    const dp = e.target.closest('.data-point');
-    if (dp && dp.dataset.id) {
-      navigator.clipboard.writeText(dp.dataset.id).then(() => {
-        const originalText = dp.innerText;
-        dp.innerText = 'ID_COPIED';
-        setTimeout(() => dp.innerText = originalText, 1000);
-      });
-    }
-  });
-}
-
-// ── INIT ──
 document.addEventListener('DOMContentLoaded', () => {
   syncSidebars();
   initQolFeatures();
-  initTechForPalestineData(); // Fetch global live statistics
-  initRedditStream();        // Polling r/news
+  initTechForPalestineData(); 
+  initRedditStream();        
   initTimelineFilter();
   initSearch();
   initMapTooltips();
   injectRealImages();
   document.body.addEventListener('click', handleGlobalClicks);
 
-  // Select Balfour Declaration by default on initialization
   const firstMandate = document.querySelector('.bm-list-item');
   if (firstMandate) firstMandate.click();
 
-  // Click outside mobile menu to close
   document.addEventListener('click', (e) => {
     if (document.body.classList.contains('mobile-menu-open')) {
       const isClickInsideMenu = e.target.closest('.topnav-links') || e.target.closest('.sidebar') || e.target.closest('.mobile-menu-btn');
-      if (!isClickInsideMenu) {
-        toggleMobileMenu();
-      }
+      if (!isClickInsideMenu) toggleMobileMenu();
     }
   });
 
-  // Hotkeys & Listeners
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       closeModal();
       closeSearch();
       closeLightbox();
     }
-    // 'S' key for Search
     if ((e.key === 's' || e.key === 'S') && !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
       e.preventDefault();
       openSearch();
@@ -956,277 +965,4 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   console.log('ARCHIVE.PS // MONOLITH_OS: OPERATIONAL');
-  });
-  
-  // ── INFRASTRUCTURE DAMAGE API (PAGINATED) ──
-  let cachedInfraData = null; // Store data to avoid refetching on page change
-  
-  async function initInfrastructureApi(page = 1) {
-    const container = document.getElementById('infra-api-container');
-    const pagination = document.getElementById('infra-pagination');
-    const pageSize = 20;
-  
-    if (!container) return;
-    if (page === 1) {
-      container.innerHTML = `<div class="skeleton-wrap"><div class="skeleton-row"></div><div class="skeleton-row"></div><div class="skeleton-row"></div></div>`;
-    }
-  
-    try {
-      if (!cachedInfraData) {
-        const response = await fetch('https://data.techforpalestine.org/api/v3/infrastructure-damaged.json');
-        if (!response.ok) throw new Error('OFFLINE');
-        const rawData = await response.json();
-        
-        // Filter for unique significant updates only
-        const uniqueData = [];
-        let lastHash = "";
-        for (let i = rawData.length - 1; i >= 0; i--) {
-          const d = rawData[i];
-          const hash = `${d.residential?.ext_destroyed}|${d.educational_buildings?.ext_damaged}|${d.places_of_worship?.ext_mosques_destroyed}`;
-          if (hash !== lastHash) {
-            uniqueData.push(d);
-            lastHash = hash;
-          }
-        }
-        cachedInfraData = uniqueData;
-      }
-  
-      const totalPages = Math.ceil(cachedInfraData.length / pageSize);
-      const start = (page - 1) * pageSize;
-      const pagedData = cachedInfraData.slice(start, start + pageSize);
-  
-      let html = `
-        <div class="table-header-ctrl">
-          <div class="table-search-box">
-            <input type="text" id="infra-search" placeholder="FILTER BY DATE OR SECTOR...">
-          </div>
-        </div>
-        <div style="overflow-x:auto;">
-          <table class="census-table">
-            <thead>
-              <tr>
-                <th>Report Date</th>
-                <th>Residential (Destroyed)</th>
-                <th>Educational Units</th>
-                <th>Places of Worship</th>
-              </tr>
-            </thead>
-            <tbody>`;
-      
-      pagedData.forEach(day => {
-        html += `<tr>
-          <td><span style="font-family:mono; font-size:11px;">${day.report_date}</span></td>
-          <td style="color:var(--red); font-weight:bold;">${(day.residential?.ext_destroyed || 0).toLocaleString()}</td>
-          <td>${(day.educational_buildings?.ext_damaged || 0).toLocaleString()}</td>
-          <td>${(day.places_of_worship?.ext_mosques_destroyed || 0).toLocaleString()}</td>
-        </tr>`;
-      });
-      
-      html += `</tbody></table></div>`;
-      container.innerHTML = html;
-      attachTableSearch('infra-api-container', 'infra-search');
-  
-      // Pagination UI
-      if (pagination) {
-        pagination.innerHTML = `
-          <button class="btn-outline" style="padding:8px 16px; border-color:var(--border);" onclick="initInfrastructureApi(${page - 1})" ${page <= 1 ? 'disabled' : ''}>PREV</button>
-          <span style="font-family:mono; font-size:10px; color:var(--muted);">PAGE ${page} OF ${totalPages}</span>
-          <button class="btn-outline" style="padding:8px 16px; border-color:var(--border);" onclick="initInfrastructureApi(${page + 1})" ${page >= totalPages ? 'disabled' : ''}>NEXT</button>
-        `;
-      }
-  
-    } catch (e) { 
-      container.innerHTML = `<div class="terminal-alert">ERR_INFRA_STREAM_OFFLINE: UNABLE TO SYNC SATELLITE TELEMETRY</div>`; 
-    }
-  }
-  
-  // ── MARTYRS NAMES REGISTRY (Killed in Gaza) ──
-  async function initKilledNamesApi(page = 1) {
-    const container = document.getElementById('names-registry-container');
-    const pagination = document.getElementById('names-pagination');
-    if (!container) return;
-    container.innerHTML = `<div class="status-pulse red" style="padding:20px; font-family:mono; font-size:10px;">ACCESSING ARCHIVAL NAMES LIST...</div>`;
-    try {
-      const response = await fetch(`https://data.techforpalestine.org/api/v2/killed-in-gaza/page-${page}.json`);
-      const records = await response.json();
-      let html = `
-        <div class="table-header-ctrl">
-          <div class="table-search-box">
-            <input type="text" id="martyrs-search" placeholder="FILTER BY NAME...">
-          </div>
-        </div>
-        <table class="census-table"><thead><tr><th>Name (Arabic)</th><th>English Translation</th><th>Age</th><th>Sex</th></tr></thead><tbody>`;
-      records.forEach(rec => {
-        const sex = rec.sex ? rec.sex.toUpperCase() : 'N/A';
-        html += `<tr><td>${rec.name}</td><td><strong>${rec.en_name}</strong></td><td>${rec.age || 'N/A'}</td><td>${sex}</td></tr>`;
-      });
-      html += `</tbody></table>`;
-      container.innerHTML = html;
-      attachTableSearch('names-registry-container', 'martyrs-search');
-      pagination.innerHTML = `
-        <button class="btn-outline" style="padding:8px 16px; border-color:var(--border);" onclick="initKilledNamesApi(${page - 1})" ${page <= 1 ? 'disabled' : ''}>PREV</button>
-        <span style="font-family:mono; font-size:10px; color:var(--muted); padding:0 10px;">PAGE ${page}</span>
-        <button class="btn-outline" style="padding:8px 16px; border-color:var(--border);" onclick="initKilledNamesApi(${page + 1})">NEXT</button>`;
-    } catch (e) { container.innerHTML = `<div class="terminal-alert">ERR_NAMES_STREAM_OFFLINE</div>`; }
-  }
-  
-  // ── DAILY CASUALTY LOGS (Gaza & West Bank) ──
-  async function initDailyCasualtiesApi() {
-    const container = document.getElementById('daily-log-container');
-    if (!container) return;
-    container.innerHTML = `<div class="status-pulse red" style="padding:20px; font-family:mono; font-size:10px;">SYNCING DAILY LOGS...</div>`;
-    try {
-      const response = await fetch('https://data.techforpalestine.org/api/v2/casualties_daily.json');
-      const data = await response.json();
-      const recent = data.slice(-15).reverse();
-      let html = `<table class="census-table"><thead><tr><th>Report Date</th><th>Killed (Cum)</th><th>Injured (Cum)</th><th>Children</th></tr></thead><tbody>`;
-      recent.forEach(day => {
-        html += `<tr><td>${day.report_date}</td><td style="color:var(--red); font-weight:bold;">${day.killed_cum.toLocaleString()}</td><td>${day.injured_cum.toLocaleString()}</td><td>${day.killed_children_cum?.toLocaleString() || '--'}</td></tr>`;
-      });
-      html += `</tbody></table>`;
-      container.innerHTML = html;
-    } catch (e) { container.innerHTML = `<div class="terminal-alert">ERR_CASUALTY_STREAM_OFFLINE</div>`; }
-  }
-  
-  // ── ARCHIVE REGISTRY (Culture & Resources) ──
-  async function fetchRegistryData(category, btnEl) {
-    const container = document.getElementById('registry-api-container');
-    if (!container) return;
-    if (btnEl) {
-      document.querySelectorAll('.timeline-filters .btn-outline').forEach(b => b.classList.remove('active'));
-      btnEl.classList.add('active');
-    }
-    container.innerHTML = `<div class="status-pulse red" style="padding:20px; font-family:mono; font-size:10px;">QUERYING ${category.toUpperCase()} NODE...</div>`;
-    try {
-      const response = await fetch(`https://palestine-api.viethere.com/api/v1/${category}`).catch(() => null);
-      let records = [];
-      if (response && response.ok) {
-        const rawData = await response.json();
-        records = Array.isArray(rawData) ? rawData : (rawData.data || Object.values(rawData));
-      } else {
-        // CONNECTION FAILED FALLBACK
-        const cache = {
-          organizations: [
-            { name: "PCRF", description: "Palestine Children's Relief Fund.", type: "Medical", link: "https://www.pcrf.net" },
-            { name: "Al-Haq", description: "Independent human rights organization.", type: "Human Rights", link: "https://www.alhaq.org" },
-            { name: "BDS Movement", description: "Boycott, Divestment, Sanctions campaign.", type: "Advocacy", link: "https://bdsmovement.net" }
-          ],
-          books: [
-            { title: "The Hundred Years' War on Palestine", author: "Rashid Khalidi", link: "#" },
-            { title: "The Ethnic Cleansing of Palestine", author: "Ilan Pappé", link: "#" }
-          ],
-          movies: [
-            { title: "Farha", director: "Darin J. Sallam", link: "https://www.netflix.com" },
-            { title: "Born in Gaza", director: "Hernán Zin", link: "#" }
-          ]
-        };
-        records = cache[category] || [];
-      }
-      let html = `<table class="census-table"><thead><tr>`;
-      if (category === 'organizations') {
-        html += `<th>Organization</th><th>Description</th><th>Focus</th><th>Access</th></tr></thead><tbody>`;
-        records.forEach(rec => { html += `<tr><td><strong style="color:var(--black);">${rec.name}</strong></td><td>${rec.description || '-'}</td><td><span class="exhibit-tag">${rec.type || 'NGO'}</span></td><td><a href="${rec.link}" target="_blank" class="detention-btn">Link</a></td></tr>`; });
-      } else {
-        html += `<th>Title</th><th>Creator</th><th>Access</th></tr></thead><tbody>`;
-        records.forEach(rec => { html += `<tr><td><strong style="color:var(--black);">${rec.title}</strong></td><td>${rec.author || rec.director || '-'}</td><td><a href="${rec.link}" target="_blank" class="detention-btn">View</a></td></tr>`; });
-      }
-      container.innerHTML = html + `</tbody></table>`;
-          } catch (e) { container.innerHTML = `<div class="terminal-alert">ERR_REGISTRY_HANDSHAKE_FAILED</div>`; }
-        }
-      
-        // ── REDDIT INTELLIGENCE STREAM (12HR POLLING) ──
-        const REDDIT_POLL_MS = 12 * 60 * 60 * 1000;
-        
-        async function initRedditStream() {
-          const container = document.getElementById('reddit-uploads-container');
-          if (!container) return;
-        
-          const lastFetch = localStorage.getItem('reddit_last_fetch');
-          const cachedData = localStorage.getItem('reddit_cache');
-        
-          // Use cache if within 12-hour window
-          if (lastFetch && cachedData && (Date.now() - lastFetch < REDDIT_POLL_MS)) {
-            renderRedditCards(JSON.parse(cachedData));
-          } else {
-            fetchRedditData();
-          }
-          
-          setInterval(fetchRedditData, REDDIT_POLL_MS);
-        }
-        
-        function fetchWithTimeout(url, options = {}, timeout = 8000) {
-          return Promise.race([
-            fetch(url, options),
-            new Promise((_, reject) =>
-              setTimeout(() => reject(new Error('TIMEOUT')), timeout)
-            )
-          ]);
-        }
-        
-        async function fetchRedditData() {
-          const container = document.getElementById('reddit-uploads-container');
-          try {
-            const url = 'https://blackened-worker.hadi-nashat.workers.dev';
-            
-            // Directly fetching from the worker node which handles CORS and formatting
-            const response = await fetchWithTimeout(url, {}, 8000);
-        
-            if (!response.ok) throw new Error('NETWORK_FAILURE');
-            
-            const posts = await response.json();
-            
-            // Select only the first 3 posts for the UI grid
-            const limitedPosts = posts.slice(0, 3);
-            
-            localStorage.setItem('reddit_cache', JSON.stringify(limitedPosts));
-            localStorage.setItem('reddit_last_fetch', Date.now());
-            
-            renderRedditCards(limitedPosts);
-          } catch (err) {
-            console.warn('OS_STREAM: Intelligence node unreachable:', err);
-            if (container && !container.querySelector('.reddit-card')) {
-              const errorType = err.message === 'TIMEOUT' ? 'ERR_STREAM_TIMEOUT' : 'ERR_NEWS_STREAM_OFFLINE';
-              container.innerHTML = `<div class="terminal-alert" style="grid-column: span 3;">${errorType}: CONNECTION_FAILURE</div>`;
-            }
-          }
-        }
-        
-        function renderRedditCards(posts) {
-          const container = document.getElementById('reddit-uploads-container');
-          if (!container) return;
-        
-          let html = '';
-          const themes = ['var(--red)', 'var(--amber)', 'var(--green-light)'];
-        
-          posts.forEach((post, i) => {
-            // Worker returns ISO timestamp in 'created' field
-            const date = new Date(post.created);
-            const timeStr = `${date.getUTCHours().toString().padStart(2, '0')}:${date.getUTCMinutes().toString().padStart(2, '0')}_UTC`;
-            const color = themes[i % themes.length];
-            
-            // Thumbnails are served directly via the 'thumbnail' field
-            const thumbHtml = post.thumbnail 
-              ? `<div style="width:100%; height:220px; background:url('${post.thumbnail}') center/cover no-repeat; margin-bottom:12px; border:1px solid var(--border); opacity:0.9;"></div>`
-              : `<div style="width:100%; height:220px; background:var(--border); display:flex; align-items:center; justify-content:center; margin-bottom:12px; border:1px solid var(--border); font-family:mono; font-size:10px; color:var(--muted); opacity:0.5;">NO_VISUAL_FEED</div>`;
-        
-            html += `
-              <a href="${post.url}" target="_blank" class="reddit-card" style="text-decoration:none; color:inherit;">
-                <div style="padding:16px; border:1px solid var(--border); background:white; height:100%; transition: border-color 0.2s; cursor:pointer; display:flex; flex-direction:column; min-height:440px;" 
-                     onmouseover="this.style.borderColor='${color}'" onmouseout="this.style.borderColor='var(--border)'">
-                  <div style="font-family:'IBM Plex Mono',monospace; font-size:8px; color:${color}; margin-bottom:12px;">
-                    [ REDDIT_LOG: ${timeStr} ]
-                  </div>
-                  ${thumbHtml}
-                  <div style="font-size:12px; font-weight:600; margin-bottom:8px; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; line-height:1.3; flex-grow:1;">
-                    ${post.title}
-                  </div>
-                  <div style="display:flex; justify-content:space-between; align-items:center; font-size:9px; color:var(--muted); text-transform:uppercase; margin-top:auto; padding-top:12px; border-top:1px solid rgba(0,0,0,0.05);">
-                    <span>DATA_NODE: R_VIOLENCE</span>
-                    <span style="color:${color}; font-weight:bold;">SCORE: ${post.score}</span>
-                  </div>
-                </div>
-              </a>`;
-          });
-        
-          container.innerHTML = html;
-        }
+});

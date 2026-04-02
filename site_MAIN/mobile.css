@@ -68,18 +68,25 @@ p, .cyber-log, .data-block-content, .case-indictment-text, .hero-subtitle {
 
 .sidebar {
   display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  text-align: left !important;
   position: fixed !important;
-  top: 0 !important; /* Sidebar covers full height when open */
+  top: 70px !important; /* Start exactly below header to prevent z-index overlap bugs */
   left: -100% !important;
   width: 280px !important;
-  height: 100vh !important;
+  height: calc(100vh - 70px) !important;
   background: var(--cream) !important;
   border-right: 1px solid var(--border) !important;
-  z-index: 20000 !important; /* Stays above the fixed topnav */
+  border-top: 1px solid var(--border) !important;
+  z-index: 20000 !important; 
   transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
   padding: 24px 16px !important;
   margin: 0 !important;
   overflow-y: auto !important;
+  overflow-x: hidden !important; /* Prevent horizontal scrolling */
+  touch-action: pan-y !important; /* Strictly lock touch gestures to vertical panning */
+  overscroll-behavior: contain !important; /* Stop the elastic 'bounce' dragging effect */
 }
 
 .sidebar.active {
@@ -95,7 +102,10 @@ p, .cyber-log, .data-block-content, .case-indictment-text, .hero-subtitle {
   min-height: 70px !important; /* Match the .page clearance to prevent layout shifting */
   padding: 12px 16px !important;
   align-items: center !important;
-  z-index: 9999 !important; /* Fixed: Keeps header strictly under sidebar */
+  z-index: 9999 !important; /* Keep under sidebar */
+}
+.topnav.expanded {
+  z-index: 30000 !important; /* Bring expanded header above sidebar */
 }
 
 .topnav-logo {
@@ -202,6 +212,39 @@ p, .cyber-log, .data-block-content, .case-indictment-text, .hero-subtitle {
 }
 
 .case-no-block { text-align: left !important; }
+
+/* Fit tabs on screen (2x2 Grid) for The Founding Mandates on Hero Page */
+#page-mandate div[style*="200px 1fr"] {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 16px !important;
+}
+
+#page-mandate .bm-list {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important; /* Creates a clean 2x2 grid */
+  gap: 8px !important;
+  margin-bottom: 0 !important;
+}
+
+#page-mandate .bm-list-item {
+  width: 100% !important;
+  border-left: 1px solid var(--border) !important;
+  border-bottom: 3px solid transparent !important;
+  text-align: center !important;
+  padding: 10px 4px !important;
+  margin-bottom: 0 !important;
+  font-size: 9px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1.2 !important;
+}
+
+#page-mandate .bm-list-item.active {
+  border-left-color: var(--border) !important;
+  border-bottom-color: var(--red) !important;
+}
 
 /* Keep search forms contained */
 .census-filter-wrap {
