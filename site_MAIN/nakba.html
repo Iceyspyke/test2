@@ -1,25 +1,33 @@
 <div id="page-nakba" class="page">
-<aside class="sidebar" data-autosidebar></aside>
-<div class="main">
-  <div class="page-header">
-    <div class="page-header-label">Compilation</div>
-    <h1 class="page-header-title">The Chronology of Occupation &amp; Resistance</h1>
-    <p class="page-header-text">An unyielding ledger of the historical process. This document maps the displacement and the enduring resilience of the Palestinian people from the early 20th century to the present.</p>
-  </div>
+  <aside class="sidebar" data-autosidebar></aside>
 
+  <main class="main">
+    <header class="page-header">
+      <div class="page-header-label">Compilation</div>
+      <h1 class="page-header-title">The Chronology of Occupation &amp; Resistance</h1>
+      <p class="page-header-text">
+        An unyielding ledger of the historical process. This document maps the displacement and the enduring resilience of the Palestinian people from the early 20th century to the present.
+      </p>
+    </header>
 
-  <div class="data-block" style="margin-bottom: 40px;">
-    <div class="data-block-header"><span>METHODOLOGY</span><span>TIMELINE PARAMETERS</span></div>
-    <div class="data-block-content">The following chronological ledger cross-references British imperial documents, UN mandates, declassified military directives, and verified oral histories. It establishes the legal and physical mechanisms used to alter the demographic and territorial reality of Palestine over the course of a century.</div>
-  </div>
+    <section class="data-block mb-40">
+      <div class="data-block-header">
+        <span>METHODOLOGY</span>
+        <span>TIMELINE PARAMETERS</span>
+      </div>
+      <div class="data-block-content">
+        The following chronological ledger cross-references British imperial documents, UN mandates, declassified military directives, and verified oral histories. It establishes the legal and physical mechanisms used to alter the demographic and territorial reality of Palestine over the course of a century.
+      </div>
+    </section>
 
-  <div class="timeline-filters">
+    <section class="timeline-filters">
       <div class="filter-group">
-        <label class="filter-label">Search Archive</label>
+        <label class="filter-label" for="tl-search">Search Archive</label>
         <input type="text" id="tl-search" class="filter-input" placeholder="Keyword (e.g., Resolution, Military)...">
       </div>
+      
       <div class="filter-group">
-        <label class="filter-label">Era / Decade</label>
+        <label class="filter-label" for="tl-decade">Era / Decade</label>
         <select id="tl-decade" class="filter-select">
           <option value="all">All Eras</option>
           <option value="1910">1910s — Imperial Era</option>
@@ -35,8 +43,9 @@
           <option value="2020">2020s — Current Era</option>
         </select>
       </div>
+      
       <div class="filter-group">
-        <label class="filter-label">Classification Type</label>
+        <label class="filter-label" for="tl-type">Classification Type</label>
         <select id="tl-type" class="filter-select">
           <option value="all">All Classifications</option>
           <option value="diplomatic">Diplomatic Accord</option>
@@ -45,230 +54,372 @@
           <option value="systemic">Systemic Settlement</option>
         </select>
       </div>
-    </div>
 
-    <div class="timeline" id="timeline-container">
+      <div class="filter-group">
+        <button type="button" id="tl-reset" class="btn-outline">Reset Filters</button>
+      </div>
+    </section>
+
+    <section class="timeline" id="timeline-container">
       <div class="timeline-line"></div>
       <div class="no-results" id="tl-no-results">No records match the current operational parameters.</div>
       
-      <div class="timeline-item" data-decade="1910" data-type="diplomatic">
+      <article class="timeline-item" data-year="1916" data-type="diplomatic">
         <div class="tl-content-left">
           <div class="tl-exhibit">Exhibit 000-A</div>
+          <time datetime="1916" class="visually-hidden">1916</time>
           <h3 class="tl-title">Sykes-Picot Agreement</h3>
-          <p class="tl-text">A secret treaty between the UK and France detailing the dissection and carving up of the Ottoman Empire, establishing the geopolitical architecture for a century of regional instability.</p>
-          <a class="tl-btn">View Documented Evidence ↗</a>
+          <p class="tl-text">
+            A secret treaty between the UK and France detailing the dissection and carving up of the Ottoman Empire, establishing the geopolitical architecture for a century of regional instability.
+          </p>
+          <a class="tl-btn" href="https://www.thebeiruter.com/article/how-a-secret-agreement-destabilised-the-middle-east/143" target="_blank" rel="noopener noreferrer">
+            Learn More ↗
+          </a>
         </div>
-        <div class="tl-center"><div class="tl-diamond black"><div class="tl-diamond-inner" style="font-family:'IBM Plex Mono',monospace;font-size:6px;color:rgba(255,255,255,0.6);">16</div></div></div>
-        <div class="tl-content-right" style="padding-top:4px;">
-          <img class="tl-img" src="https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=260&h=140&fit=crop&q=60" alt="Diplomats" loading="lazy">
+        <div class="tl-center">
+          <div class="tl-diamond black">
+            <div class="tl-diamond-inner tl-year-text" aria-hidden="true">16</div>
+          </div>
         </div>
-      </div>
+        <div class="tl-content-right pt-4">
+          <img class="tl-img" src="https://dl6pgk4f88hky.cloudfront.net/2021/06/5071992592_fdd772fee8_o.jpg?w=260&h=140&fit=crop&q=60" alt="Historical photograph of diplomats negotiating the Sykes-Picot Agreement" loading="lazy">
+        </div>
+      </article>
       
-      <div class="timeline-item" data-decade="1910" data-type="diplomatic">
-        <div class="tl-content-left" style="padding-top:4px;">
-          <img class="tl-img" src="https://images.unsplash.com/photo-1569937756447-121bb8e7a083?w=260&h=140&fit=crop&q=60" alt="Historical document" loading="lazy" style="margin-left:auto;">
+      <article class="timeline-item" data-year="1917" data-type="diplomatic">
+        <div class="tl-content-left pt-4">
+          <img class="tl-img ml-auto" src="https://www.aljazeera.com/wp-content/uploads/2010/11/201011613937441876_20.jpeg?w=260&h=140&fit=crop&q=60" alt="The original Balfour Declaration document" loading="lazy">
         </div>
-        <div class="tl-center"><div class="tl-diamond green"><div class="tl-diamond-inner"></div></div></div>
+        <div class="tl-center">
+          <div class="tl-diamond green">
+            <div class="tl-diamond-inner"></div>
+          </div>
+        </div>
         <div class="tl-content-right">
           <div class="tl-exhibit">Exhibit 001</div>
+          <time datetime="1917" class="visually-hidden">1917</time>
           <h3 class="tl-title">Balfour Declaration</h3>
-          <p class="tl-text">A 67-word letter from the British government promising a national home for the Jewish people in Palestine, entirely bypassing the consent of the native Arab majority population.</p>
-          <a class="tl-btn">View Documented Evidence ↗</a>
+          <p class="tl-text">
+            A 67-word letter from the British government promising a national home for the Jewish people in Palestine, entirely bypassing the consent of the native Arab majority population.
+          </p>
+          <a class="tl-btn" href="https://www.aljazeera.com/features/2018/11/2/more-than-a-century-on-the-balfour-declaration-explained" target="_blank" rel="noopener noreferrer">
+            Learn More ↗
+          </a>
         </div>
-      </div>
+      </article>
 
-      <!-- 1936 -->
-      <div class="timeline-item" data-decade="1930" data-type="military">
-        <div class="tl-content-left" style="padding-top:4px;">
-          <img class="tl-img" src="https://images.unsplash.com/photo-1595979937005-7a58d0b6da1f?w=260&h=140&fit=crop&q=60" alt="Historical landscape" loading="lazy" style="margin-left:auto;">
+      <article class="timeline-item" data-year="1936" data-type="military">
+        <div class="tl-content-left pt-4">
+          <img class="tl-img ml-auto" src="https://upload.wikimedia.org/wikipedia/commons/4/4c/030Arab.jpg?w=260&h=140&fit=crop&q=60" alt="Palestinian Arab revolutionaries during the 1936 Great Revolt" loading="lazy">
         </div>
-        <div class="tl-center"><div class="tl-diamond black"><div class="tl-diamond-inner" style="font-family:'IBM Plex Mono',monospace;font-size:6px;color:rgba(255,255,255,0.6);">36</div></div></div>
+        <div class="tl-center">
+          <div class="tl-diamond black">
+            <div class="tl-diamond-inner tl-year-text" aria-hidden="true">36</div>
+          </div>
+        </div>
         <div class="tl-content-right">
           <div class="tl-exhibit">Exhibit 014</div>
+          <time datetime="1936" class="visually-hidden">1936</time>
           <h3 class="tl-title">The Great Arab Revolt</h3>
-          <p class="tl-text">A nationalist uprising by Palestinian Arabs against British colonial administration, demanding independence and an end to unrestricted Jewish immigration.</p>
-          <a class="tl-btn">View Documented Evidence ↗</a>
+          <p class="tl-text">
+            A nationalist uprising by Palestinian Arabs against British colonial administration, demanding independence and an end to unrestricted Jewish immigration.
+          </p>
+          <a class="tl-btn" href="https://www.middleeasteye.net/news/palestine-strike-history-explained-revolt" target="_blank" rel="noopener noreferrer">
+            Learn More ↗
+          </a>
         </div>
-      </div>
+      </article>
 
-      <!-- 1947 -->
-      <div class="timeline-item" data-decade="1940" data-type="diplomatic">
+      <article class="timeline-item" data-year="1947" data-type="diplomatic">
         <div class="tl-content-left">
           <div class="tl-exhibit">Exhibit 022</div>
+          <time datetime="1947" class="visually-hidden">1947</time>
           <h3 class="tl-title">UN Resolution 181</h3>
-          <p class="tl-text">The UN Partition Plan proposing to divide Mandatory Palestine into independent Arab and Jewish states. Arab Palestinians, the majority, rejected a plan that allocated 56% to the Jewish minority.</p>
-          <a class="tl-btn">View Documented Evidence ↗</a>
+          <p class="tl-text">
+            The UN Partition Plan proposing to divide Mandatory Palestine into independent Arab and Jewish states. Arab Palestinians, the majority, rejected a plan that allocated 56% to the Jewish minority.
+          </p>
+          <a class="tl-btn" href="https://decolonizepalestine.com/myth/had-palestinians-accepted-the-1947-partition-plan-they-would-have-had-a-state-by-now/" target="_blank" rel="noopener noreferrer">
+            Learn More ↗
+          </a>
         </div>
-        <div class="tl-center"><div class="tl-diamond black"><div class="tl-diamond-inner" style="font-family:'IBM Plex Mono',monospace;font-size:6px;color:rgba(255,255,255,0.6);">47</div></div></div>
-        <div class="tl-content-right" style="padding-top:4px;">
-          <img class="tl-img" src="https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=260&h=140&fit=crop&q=60" alt="Court proceedings" loading="lazy">
+        <div class="tl-center">
+          <div class="tl-diamond black">
+            <div class="tl-diamond-inner tl-year-text" aria-hidden="true">47</div>
+          </div>
         </div>
-      </div>
+        <div class="tl-content-right pt-4">
+          <img class="tl-img" src="https://www.middleeastmonitor.com/wp-content/uploads/2021/11/website_thumbnail.00_00_33_14.Still001-3.jpg?w=260&h=140&fit=crop&q=60" alt="UN General Assembly during the voting for Resolution 181" loading="lazy">
+        </div>
+      </article>
 
-      <!-- 1948 Nakba -->
-      <div class="timeline-item" data-decade="1940" data-type="military">
-        <div class="tl-content-left" style="padding-top:4px;">
-          <img class="tl-img" src="https://images.unsplash.com/photo-1580191947416-62d35a55e71d?w=260&h=140&fit=crop&q=60" alt="Ruins" loading="lazy" style="margin-left:auto;">
+      <article class="timeline-item" data-year="1948" data-type="military">
+        <div class="tl-content-left pt-4">
+          <img class="tl-img ml-auto" src="https://solidarity-us.org/files/deir_yassin_masacre.jpg?w=260&h=140&fit=crop&q=60" alt="Ruins of buildings after the Deir Yassin massacre" loading="lazy">
         </div>
-        <div class="tl-center"><div class="tl-diamond red"><div class="tl-diamond-inner"></div></div></div>
+        <div class="tl-center">
+          <div class="tl-diamond red">
+            <div class="tl-diamond-inner"></div>
+          </div>
+        </div>
         <div class="tl-content-right">
           <div class="tl-exhibit">Exhibit 042-A</div>
+          <time datetime="1948" class="visually-hidden">1948</time>
           <h3 class="tl-title">Deir Yassin Massacre</h3>
-          <p class="tl-text">Paramilitary Zionist groups (Irgun and Lehi) attacked the village of Deir Yassin near Jerusalem, killing over 100 civilians including women and children, accelerating the mass exodus of Palestinians.</p>
-          <a class="tl-btn">View Documented Evidence ↗</a>
+          <p class="tl-text">
+            Paramilitary Zionist groups (Irgun and Lehi) attacked the village of Deir Yassin near Jerusalem, killing over 100 civilians including women and children, accelerating the mass exodus of Palestinians.
+          </p>
+          <a class="tl-btn" href="https://www.middleeasteye.net/opinion/crimes-1948-jewish-fighters-speak-out" target="_blank" rel="noopener noreferrer">
+            Learn More ↗
+          </a>
         </div>
-      </div>
+      </article>
 
-      <div class="timeline-item" data-decade="1940" data-type="displacement">
+      <article class="timeline-item" data-year="1948" data-type="displacement">
         <div class="tl-content-left">
-          <div class="tl-exhibit" style="color:var(--red);">Exhibit 046</div>
+          <div class="tl-exhibit text-red">Exhibit 046</div>
+          <time datetime="1948" class="visually-hidden">1948</time>
           <h3 class="tl-title">The Nakba (The Catastrophe)</h3>
-          <p class="tl-text">Over 700,000 Palestinians fled or were forcibly expelled from their homes by advancing militias. 530+ villages were depopulated, bulldozed, and erased from the map to prevent return.</p>
-          <a class="tl-btn">View Documented Evidence ↗</a>
+          <p class="tl-text">
+            Over 700,000 Palestinians fled or were forcibly expelled from their homes by advancing militias. 530+ villages were depopulated, bulldozed, and erased from the map to prevent return.
+          </p>
+          <a class="tl-btn" href="https://www.aljazeera.com/news/2022/5/15/nakba-mapping-palestinian-villages-destroyed-by-israel-in-1948" target="_blank" rel="noopener noreferrer">
+            Learn More ↗
+          </a>
         </div>
-        <div class="tl-center"><div class="tl-diamond red"><div class="tl-diamond-inner" style="background:var(--red);border-radius:1px;"></div></div></div>
-        <div class="tl-content-right" style="padding-top:4px;">
-          <img class="tl-img" src="https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=260&h=140&fit=crop&q=60" alt="Displacement" loading="lazy">
+        <div class="tl-center">
+          <div class="tl-diamond red">
+            <div class="tl-diamond-inner bg-red rounded-1"></div>
+          </div>
         </div>
-      </div>
+        <div class="tl-content-right pt-4">
+          <img class="tl-img" src="https://arabcenterdc.org/wp-content/uploads/2018/05/nakba-man-camp-800-2-768x432.png?w=260&h=140&fit=crop&q=60" alt="Palestinian refugees fleeing during the 1948 Nakba" loading="lazy">
+        </div>
+      </article>
 
-      <!-- 1948 Lydda -->
-      <div class="timeline-item" data-decade="1940" data-type="military">
+      <article class="timeline-item" data-year="1948" data-type="military">
         <div class="tl-content-left">
           <div class="tl-exhibit">Exhibit 048-L</div>
+          <time datetime="1948" class="visually-hidden">1948</time>
           <h3 class="tl-title">Lydda Death March</h3>
-          <p class="tl-text">During Operation Larlar, thousands of residents of Lydda and Ramle were forcibly expelled in mid-summer heat. Hundreds died of exhaustion and dehydration on the walk to the West Bank.</p>
-          <a class="tl-btn">View Documented Evidence ↗</a>
+          <p class="tl-text">
+            During Operation Larlar, thousands of residents of Lydda and Ramle were forcibly expelled in mid-summer heat. Hundreds died of exhaustion and dehydration on the walk to the West Bank.
+          </p>
+          <a class="tl-btn" href="https://www.palquest.org/en/highlight/24073/lydda-9-13-july-1948" target="_blank" rel="noopener noreferrer">
+            Learn More ↗
+          </a>
         </div>
-        <div class="tl-center"><div class="tl-diamond red"><div class="tl-diamond-inner"></div></div></div>
-        <div class="tl-content-right" style="padding-top:4px;">
-          <img class="tl-img" src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=260&h=140&fit=crop&q=60" alt="Displacement" loading="lazy">
+        <div class="tl-center">
+          <div class="tl-diamond red">
+            <div class="tl-diamond-inner"></div>
+          </div>
         </div>
-      </div>
+        <div class="tl-content-right pt-4">
+          <img class="tl-img" src="https://static.972mag.com/www/uploads/2021/06/D277-017.jpg?w=260&h=140&fit=crop&q=60" alt="Palestinians forced into the Lydda Death March" loading="lazy">
+        </div>
+      </article>
 
-      <!-- 1967 -->
-      <div class="timeline-item" data-decade="1950" data-type="military">
+      <article class="timeline-item" data-year="1956" data-type="military">
         <div class="tl-content-left">
           <div class="tl-exhibit">Exhibit 052</div>
+          <time datetime="1956" class="visually-hidden">1956</time>
           <h3 class="tl-title">Kafr Qasim Massacre</h3>
-          <p class="tl-text">Israeli border police executed 48 unarmed Palestinian citizens of Israel (including 23 children) returning from work, enforcing a curfew the villagers were completely unaware of.</p>
-          <a class="tl-btn">View Documented Evidence ↗</a>
+          <p class="tl-text">
+            Israeli border police executed 48 unarmed Palestinian citizens of Israel (including 23 children) returning from work, enforcing a curfew the villagers were completely unaware of.
+          </p>
+          <a class="tl-btn" href="https://www.middleeastmonitor.com/20211029-remembering-israels-massacre-of-palestinians-in-kafr-qasem/" target="_blank" rel="noopener noreferrer">
+            Learn More ↗
+          </a>
         </div>
-        <div class="tl-center"><div class="tl-diamond black"><div class="tl-diamond-inner" style="font-family:'IBM Plex Mono',monospace;font-size:6px;color:rgba(255,255,255,0.6);">56</div></div></div>
-        <div class="tl-content-right" style="padding-top:4px;">
-          <img class="tl-img" src="https://images.unsplash.com/photo-1519677584237-752f8853252e?w=260&h=140&fit=crop&q=60" alt="Border" loading="lazy">
+        <div class="tl-center">
+          <div class="tl-diamond black">
+            <div class="tl-diamond-inner tl-year-text" aria-hidden="true">56</div>
+          </div>
         </div>
-      </div>
+        <div class="tl-content-right pt-4">
+          <img class="tl-img" src="https://english.wafa.ps/image/NewsThumbImg/Default/e395a7eb-3e9b-4409-b902-59beb69a0482.jpg?w=260&h=140&fit=crop&q=60" alt="Israeli border police enforcing the boundary" loading="lazy">
+        </div>
+      </article>
 
-      <div class="timeline-item" data-decade="1960" data-type="military">
-        <div class="tl-content-left" style="padding-top:4px;">
-          <img class="tl-img" src="https://images.unsplash.com/photo-1508739773434-c26b3d09e071?w=260&h=140&fit=crop&q=60" alt="Territory" loading="lazy" style="margin-left:auto;">
+      <article class="timeline-item" data-year="1967" data-type="military">
+        <div class="tl-content-left pt-4">
+          <img class="tl-img ml-auto" src="https://www.aljazeera.com/wp-content/uploads/2016/06/6a127c43bd1e484987cf84d573e68e01_18.jpeg?w=260&h=140&fit=crop&q=60" alt="Map representing the territories occupied in 1967" loading="lazy">
         </div>
-        <div class="tl-center"><div class="tl-diamond black"><div class="tl-diamond-inner" style="font-family:'IBM Plex Mono',monospace;font-size:6px;color:rgba(255,255,255,0.6);">67</div></div></div>
+        <div class="tl-center">
+          <div class="tl-diamond black">
+            <div class="tl-diamond-inner tl-year-text" aria-hidden="true">67</div>
+          </div>
+        </div>
         <div class="tl-content-right">
           <div class="tl-exhibit">Exhibit 077</div>
+          <time datetime="1967" class="visually-hidden">1967</time>
           <h3 class="tl-title">The Six-Day War (Al-Naksa)</h3>
-          <p class="tl-text">Israel occupies the West Bank, Gaza Strip, East Jerusalem, and the Golan Heights. Another 300,000 Palestinians are displaced. The military occupation of the territories officially begins.</p>
-          <a class="tl-btn">View Documented Evidence ↗</a>
+          <p class="tl-text">
+            Israel occupies the West Bank, Gaza Strip, East Jerusalem, and the Golan Heights. Another 300,000 Palestinians are displaced. The military occupation of the territories officially begins.
+          </p>
+          <a class="tl-btn" href="https://www.aljazeera.com/features/2018/6/4/the-naksa-how-israel-occupied-the-whole-of-palestine-in-1967" target="_blank" rel="noopener noreferrer">
+            Learn More ↗
+          </a>
         </div>
-      </div>
+      </article>
 
-      <div class="timeline-item" data-decade="1970" data-type="systemic">
+      <article class="timeline-item" data-year="1976" data-type="systemic">
         <div class="tl-content-left">
           <div class="tl-exhibit">Exhibit 091</div>
+          <time datetime="1976" class="visually-hidden">1976</time>
           <h3 class="tl-title">Land Day Protests</h3>
-          <p class="tl-text">Following the state announcement to expropriate thousands of dunams of Palestinian land for Jewish settlements in the Galilee, strikes erupted. Six unarmed Palestinians were killed by security forces.</p>
-          <a class="tl-btn">View Documented Evidence ↗</a>
+          <p class="tl-text">
+            Following the state announcement to expropriate thousands of dunams of Palestinian land for Jewish settlements in the Galilee, strikes erupted. Six unarmed Palestinians were killed by security forces.
+          </p>
+          <a class="tl-btn" href="https://arab.news/yvw5w" target="_blank" rel="noopener noreferrer">
+            Learn More ↗
+          </a>
         </div>
-        <div class="tl-center"><div class="tl-diamond black"><div class="tl-diamond-inner" style="font-family:'IBM Plex Mono',monospace;font-size:6px;color:rgba(255,255,255,0.6);">76</div></div></div>
-        <div class="tl-content-right" style="padding-top:4px;">
-          <img class="tl-img" src="https://images.unsplash.com/photo-1539635278303-d4002c07eae3?w=260&h=140&fit=crop&q=60" alt="Protest" loading="lazy">
+        <div class="tl-center">
+          <div class="tl-diamond black">
+            <div class="tl-diamond-inner tl-year-text" aria-hidden="true">76</div>
+          </div>
         </div>
-      </div>
+        <div class="tl-content-right pt-4">
+          <img class="tl-img" src="https://static.972mag.com/www/uploads/2026/03/D509-097-1200x802.jpg?w=260&h=140&fit=crop&q=60" alt="Palestinians protesting land confiscation during Land Day" loading="lazy">
+        </div>
+      </article>
 
-      <div class="timeline-item" data-decade="1980" data-type="military">
-        <div class="tl-content-left" style="padding-top:4px;">
-          <img class="tl-img" src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=260&h=140&fit=crop&q=60" alt="Refugees" loading="lazy" style="margin-left:auto;">
+      <article class="timeline-item" data-year="1982" data-type="military">
+        <div class="tl-content-left pt-4">
+          <img class="tl-img ml-auto" src="https://prc.org.uk/upload/news/2021/sabra.png?w=260&h=140&fit=crop&q=60" alt="Devastation in the Sabra and Shatila refugee camps" loading="lazy">
         </div>
-        <div class="tl-center"><div class="tl-diamond red"><div class="tl-diamond-inner"></div></div></div>
+        <div class="tl-center">
+          <div class="tl-diamond red">
+            <div class="tl-diamond-inner"></div>
+          </div>
+        </div>
         <div class="tl-content-right">
           <div class="tl-exhibit">Exhibit 104</div>
+          <time datetime="1982" class="visually-hidden">1982</time>
           <h3 class="tl-title">Sabra and Shatila Massacre</h3>
-          <p class="tl-text">Following the invasion of Lebanon, the IDF cordoned off two Palestinian refugee camps and illuminated them with flares while allied Phalangist militias massacred between 2,000 and 3,500 civilians over two days.</p>
-          <a class="tl-btn">View Documented Evidence ↗</a>
+          <p class="tl-text">
+            Following the invasion of Lebanon, the IDF cordoned off two Palestinian refugee camps and illuminated them with flares while allied Phalangist militias massacred between 2,000 and 3,500 civilians over two days.
+          </p>
+          <a class="tl-btn" href="https://www.sciencespo.fr/mass-violence-war-massacre-resistance/fr/document/sabra-and-chatila.html" target="_blank" rel="noopener noreferrer">
+            Learn More ↗
+          </a>
         </div>
-      </div>
+      </article>
 
-      <!-- 1987 First Intifada -->
-      <div class="timeline-item" data-decade="1980" data-type="military">
+      <article class="timeline-item" data-year="1987" data-type="military">
         <div class="tl-content-left">
           <div class="tl-exhibit">Exhibit 112</div>
+          <time datetime="1987" class="visually-hidden">1987</time>
           <h3 class="tl-title">The First Intifada</h3>
-          <p class="tl-text">A popular Palestinian uprising against the Israeli military occupation. Characterized by civil disobedience, general strikes, and stone-throwing. Israeli military response included collective punishment and mass detention.</p>
-          <a class="tl-btn">View Documented Evidence ↗</a>
+          <p class="tl-text">
+            A popular Palestinian uprising against the Israeli military occupation. Characterized by civil disobedience, general strikes, and stone-throwing. Israeli military response included collective punishment and mass detention.
+          </p>
+          <a class="tl-btn" href="https://www.aljazeera.com/news/2003/12/9/the-first-intifada" target="_blank" rel="noopener noreferrer">
+            Learn More ↗
+          </a>
         </div>
-        <div class="tl-center"><div class="tl-diamond black"><div class="tl-diamond-inner" style="font-family:'IBM Plex Mono',monospace;font-size:6px;color:rgba(255,255,255,0.6);">87</div></div></div>
-        <div class="tl-content-right" style="padding-top:4px;">
-          <img class="tl-img" src="https://images.unsplash.com/photo-1539635278303-d4002c07eae3?w=260&h=140&fit=crop&q=60" alt="Protest" loading="lazy">
+        <div class="tl-center">
+          <div class="tl-diamond black">
+            <div class="tl-diamond-inner tl-year-text" aria-hidden="true">87</div>
+          </div>
         </div>
-      </div>
+        <div class="tl-content-right pt-4">
+          <img class="tl-img" src="https://www.israelhayom.com/wp-content/uploads/2020/12/D510-086.jpg?w=260&h=140&fit=crop&q=60" alt="Palestinian youth protesting during the First Intifada" loading="lazy">
+        </div>
+      </article>
 
-      <!-- 2000 Second Intifada -->
-      <div class="timeline-item" data-decade="1990" data-type="diplomatic">
-        <div class="tl-content-left" style="padding-top:4px;">
-          <img class="tl-img" src="https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=260&h=140&fit=crop&q=60" alt="Diplomatic" loading="lazy" style="margin-left:auto;">
+      <article class="timeline-item" data-year="1993" data-type="diplomatic">
+        <div class="tl-content-left pt-4">
+          <img class="tl-img ml-auto" src="https://static01.nyt.com/images/2023/11/01/multimedia/30schmemann-mtfv/30schmemann-mtfv-superJumbo-v2.jpg?w=260&h=140&fit=crop&q=60" alt="Yitzhak Rabin, Bill Clinton, and Yasser Arafat at the Oslo Accords signing" loading="lazy">
         </div>
-        <div class="tl-center"><div class="tl-diamond green"><div class="tl-diamond-inner"></div></div></div>
+        <div class="tl-center">
+          <div class="tl-diamond green">
+            <div class="tl-diamond-inner"></div>
+          </div>
+        </div>
         <div class="tl-content-right">
           <div class="tl-exhibit">Exhibit 150</div>
+          <time datetime="1993" class="visually-hidden">1993</time>
           <h3 class="tl-title">The Oslo Accords</h3>
-          <p class="tl-text">A peace process establishing the Palestinian Authority with limited self-rule. The West Bank is partitioned into Areas A, B, and C, entrenching a deeply fragmented territorial matrix and failing to halt settlement expansion.</p>
-          <a class="tl-btn">View Documented Evidence ↗</a>
+          <p class="tl-text">
+            A peace process establishing the Palestinian Authority with limited self-rule. The West Bank is partitioned into Areas A, B, and C, entrenching a deeply fragmented territorial matrix and failing to halt settlement expansion.
+          </p>
+          <a class="tl-btn" href="https://mondoweiss.net/2023/10/the-oslo-accords-failure-or-betrayal/" target="_blank" rel="noopener noreferrer">
+            Learn More ↗
+          </a>
         </div>
-      </div>
+      </article>
 
-      <div class="timeline-item" data-decade="2000" data-type="military">
+      <article class="timeline-item" data-year="2000" data-type="military">
         <div class="tl-content-left">
           <div class="tl-exhibit">Exhibit 188</div>
+          <time datetime="2000" class="visually-hidden">2000</time>
           <h3 class="tl-title">Second Intifada &amp; Wall Construction</h3>
-          <p class="tl-text">Following the collapse of Camp David, a second uprising begins. Construction of the 700km Separation Wall commences, effectively annexing 9.4% of the West Bank. The ICJ later rules the wall illegal.</p>
-          <a class="tl-btn">View Documented Evidence ↗</a>
+          <p class="tl-text">
+            Following the collapse of Camp David, a second uprising begins. Construction of the 700km Separation Wall commences, effectively annexing 9.4% of the West Bank. The ICJ later rules the wall illegal.
+          </p>
+          <a class="tl-btn" href="https://www.aljazeera.com/news/2020/9/28/palestinian-intifada-20-years-later-israeli-occupation-continues" target="_blank" rel="noopener noreferrer">
+            Learn More ↗
+          </a>
         </div>
-        <div class="tl-center"><div class="tl-diamond black"><div class="tl-diamond-inner" style="font-family:'IBM Plex Mono',monospace;font-size:6px;color:rgba(255,255,255,0.6);">00</div></div></div>
-        <div class="tl-content-right" style="padding-top:4px;">
-          <img class="tl-img" src="https://images.unsplash.com/photo-1519677584237-752f8853252e?w=260&h=140&fit=crop&q=60" alt="Checkpoint" loading="lazy">
+        <div class="tl-center">
+          <div class="tl-diamond black">
+            <div class="tl-diamond-inner tl-year-text" aria-hidden="true">00</div>
+          </div>
         </div>
-      </div>
+        <div class="tl-content-right pt-4">
+          <img class="tl-img" src="https://d7rm5xoig729r.cloudfront.net/collectiveaccess/images/2/9/7/63698_ca_object_representations_media_29746_original.jpg?w=260&h=140&fit=crop&q=60" alt="Palestinians waiting at an Israeli military checkpoint" loading="lazy">
+        </div>
+      </article>
 
-      <div class="timeline-item" data-decade="2010" data-type="military">
-        <div class="tl-content-left" style="padding-top:4px;">
-          <img class="tl-img" src="https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=260&h=140&fit=crop&q=60" alt="Rubble" loading="lazy" style="margin-left:auto;">
+      <article class="timeline-item" data-year="2014" data-type="military">
+        <div class="tl-content-left pt-4">
+          <img class="tl-img ml-auto" src="https://www.cidse.org/wp-content/uploads/2015/07/3cc3ea028ec2c5bc49d14fb381a9929f.jpg?w=260&h=140&fit=crop&q=60" alt="Rubble and destroyed buildings in Gaza following Operation Protective Edge" loading="lazy">
         </div>
-        <div class="tl-center"><div class="tl-diamond black"><div class="tl-diamond-inner" style="font-family:'IBM Plex Mono',monospace;font-size:6px;color:rgba(255,255,255,0.6);">14</div></div></div>
+        <div class="tl-center">
+          <div class="tl-diamond black">
+            <div class="tl-diamond-inner tl-year-text" aria-hidden="true">14</div>
+          </div>
+        </div>
         <div class="tl-content-right">
           <div class="tl-exhibit">Exhibit 212</div>
+          <time datetime="2014" class="visually-hidden">2014</time>
           <h3 class="tl-title">Operation Protective Edge</h3>
-          <p class="tl-text">A 50-day military assault on the blockaded Gaza Strip resulting in over 2,200 Palestinian deaths, including 551 children. UN reports document widespread targeting of civilian infrastructure and hospitals.</p>
-          <a class="tl-btn">View Documented Evidence ↗</a>
+          <p class="tl-text">
+            A 50-day military assault on the blockaded Gaza Strip resulting in over 2,200 Palestinian deaths, including 551 children. UN reports document widespread targeting of civilian infrastructure and hospitals.
+          </p>
+          <a class="tl-btn" href="https://www.merip.org/2015/10/operation-protective-edge/" target="_blank" rel="noopener noreferrer">
+            Learn More ↗
+          </a>
         </div>
-      </div>
+      </article>
 
-      <!-- 2023 -->
-      <div class="timeline-item" data-decade="2020" data-type="military">
-          <div class="tl-content-left">
-            <div class="tl-exhibit" style="color:var(--red);">Exhibit 891-CURRENT</div>
-            <h3 class="tl-title">Escalation & ICJ Proceedings</h3>
-            <p class="tl-text">Following an attack on Oct 7 killing 1,139 Israelis, a devastating military assault on Gaza is launched. The bombardment displaces 1.9 million people and triggers formal ICC arrest warrants and a plausible genocide ruling by the ICJ.</p>
-            <a class="tl-btn" onclick="showPage('icj')">View Current ICJ Proceedings ↗</a>
-          </div>
-          <div class="tl-center"><div class="tl-diamond red"><div class="tl-diamond-inner" style="background:var(--red);"></div></div></div>
-          <div class="tl-content-right" style="padding-top:4px;">
-            <img class="tl-img" src="https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=260&h=140&fit=crop&q=60" alt="Destruction" loading="lazy">
+      <article class="timeline-item" data-year="2023" data-type="military">
+        <div class="tl-content-left">
+          <div class="tl-exhibit text-red">Exhibit 891-CURRENT</div>
+          <time datetime="2023" class="visually-hidden">2023</time>
+          <h3 class="tl-title">Escalation &amp; ICJ Proceedings</h3>
+          <p class="tl-text">
+            Following an attack on Oct 7 killing 1,139 Israelis, a devastating military assault on Gaza is launched. The bombardment displaces 1.9 million people and triggers formal ICC arrest warrants and a plausible genocide ruling by the ICJ.
+          </p>
+          <a class="tl-btn" href="https://www.middleeasteye.net/explainers/israels-genocide-gaza-whatever-happened-south-africas-case-icj" target="_blank" rel="noopener noreferrer">
+            Learn More ↗
+          </a>
+        </div>
+        <div class="tl-center">
+          <div class="tl-diamond red">
+            <div class="tl-diamond-inner bg-red"></div>
           </div>
         </div>
-      </div><div style="padding:0 0 40px;display:flex;flex-wrap:wrap;gap:12px;">
-        <button class="btn-primary" onclick="showPage('census')">Open 1948 Depopulation Ledger</button>
-        <button class="btn-outline" style="color:var(--black);border-color:var(--border);" onclick="showPage('british')">British Mandate Records</button>
-      </div>
-  </div>
+        <div class="tl-content-right pt-4">
+          <img class="tl-img" src="https://www.aljazeera.com/wp-content/uploads/2024/02/12043521-1708533159.jpg?resize=730%2C410&quality=80?w=260&h=140&fit=crop&q=60" alt="Massive destruction of civilian infrastructure in Gaza" loading="lazy">
+        </div>
+      </article>
+    </section>
+
+    <div class="action-buttons pb-40 flex-wrap flex-gap-12">
+      <a href="#census" class="btn-primary">Open 1948 Depopulation Ledger</a>
+      <a href="#british" class="btn-outline color-black border-color-border">British Mandate Records</a>
+    </div>
+  </main>
 </div>

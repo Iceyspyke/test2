@@ -1028,6 +1028,25 @@ footer { padding: 40px; border-top: 1px solid var(--border); display: flex; flex
 #page-registry .main { padding: 40px; }
 .registry-title { font-family: 'Playfair Display', serif; font-size: clamp(32px, 5vw, 52px); font-weight: 900; margin-bottom: 16px; }
 
+/* ── REDDIT INTELLIGENCE STREAM ── */
+#reddit-uploads-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+  margin-bottom: 60px;
+}
+.reddit-card > div {
+  min-height: 520px !important; /* Increased from 440px to accommodate thumbnails */
+  justify-content: flex-start !important;
+}
+.reddit-card .sr-desc {
+  flex-grow: 1; /* Push the footer to the bottom */
+  display: -webkit-box;
+  -webkit-line-clamp: 6; /* Allow more text lines since the card is taller */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 /* ── BRITISH MANDATE ── */
 #page-british .main { padding: 40px; }
 .bm-header-title { font-family: 'Playfair Display', serif; font-size: clamp(36px, 5vw, 56px); font-weight: 900; line-height: 1.05; margin-bottom: 16px; color: var(--black); }
@@ -1434,13 +1453,19 @@ footer { padding: 40px; border-top: 1px solid var(--border); display: flex; flex
 /* -- TIMELINE ALIGNMENT FIX -- */
 .timeline-filters {
   display: flex;
-  justify-content: flex-end;
-  align-items: center;
+  align-items: flex-end;
   gap: 16px;
   width: 100%;
   margin-bottom: 24px;
   box-sizing: border-box;
 }
+/* Pushes the Search box to the far left, leaving the dropdowns on the right */
+.timeline-filters .filter-group:first-child {
+  margin-right: auto;
+  flex-grow: 1;
+  max-width: 400px;
+}
 .timeline-filters input, .timeline-filters select {
   min-width: 160px;
+  width: 100%;
 }
