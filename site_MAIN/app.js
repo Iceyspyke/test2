@@ -1,5 +1,5 @@
 /* ══════════════════════════════════════════
-   ARCHIVE.PS — MONOLITH_OS APPLICATION
+   ISRAELI_VIOLENCE. — MONOLITH_OS APPLICATION
    app.js
 
    REORGANIZED STRUCTURE:
@@ -68,7 +68,7 @@ function executeSwitch(id) {
   document.body.style.overflow = '';
   document.body.classList.remove('mobile-menu-open');
 
-  document.title = `ARCHIVE.PS — ${id.toUpperCase()}_NODE`;
+  document.title = `ISRAELI_VIOLENCE. — ${id.toUpperCase()}_NODE`;
   syncSidebars();
   syncSidebarHighlight(id);
   
@@ -301,26 +301,38 @@ function initTimelineFilter() {
   const search = document.getElementById('tl-search');
   const decade = document.getElementById('tl-decade');
   const type   = document.getElementById('tl-type');
-  if (!search) return;
 
   function filterTimeline() {
-    const q = search.value.toLowerCase();
-    const d = decade.value;
-    const t = type.value;
+    const q = search ? search.value.toLowerCase().trim() : '';
+    const d = decade ? decade.value : 'all';
+    const t = type ? type.value : 'all';
     let visible = 0;
+    
     document.querySelectorAll('.timeline-item').forEach(item => {
       const text = item.innerText.toLowerCase();
-      const show = (!q || text.includes(q)) && (d === 'all' || item.dataset.decade === d) && (t === 'all' || item.dataset.type === t);
-      item.style.display = show ? '' : 'none';
-      if (show) visible++;
+      const itemDecade = item.dataset.decade || 'all';
+      const itemType = item.dataset.type || 'all';
+      
+      const show = (!q || text.includes(q)) && 
+                   (d === 'all' || itemDecade === d) && 
+                   (t === 'all' || itemType === t);
+      
+      // Enforce !important so JS overrides the mobile CSS layout rules
+      if (show) {
+        item.style.removeProperty('display');
+        visible++;
+      } else {
+        item.style.setProperty('display', 'none', 'important');
+      }
     });
+    
     const noResults = document.getElementById('tl-no-results');
     if (noResults) noResults.classList.toggle('visible', visible === 0);
   }
 
-  search.addEventListener('input', filterTimeline);
-  decade.addEventListener('change', filterTimeline);
-  type.addEventListener('change', filterTimeline);
+  if (search) search.addEventListener('input', filterTimeline);
+  if (decade) decade.addEventListener('change', filterTimeline);
+  if (type) type.addEventListener('change', filterTimeline);
 }
 
 function injectTableLabels() {
@@ -350,10 +362,13 @@ function buildAdvancedFilters(table, inputId) {
   let disableSearch = false;
 
   // 1. 1948 Depopulation Ledger (Remove filters, connect to native search bar)
-  if (pageId === 'page-census' || tableId === 'census-master-table' || inputId === 'census-search') {
+  if (tableId === 'census-master-table' || inputId === 'census-search') {
     allowFilters = false;
     inputId = 'census-search'; // Bind explicitly to existing HTML input
   }
+
+ // 1b. Child Names Frequency Table (Bypass completely to prevent overlapping search bars)
+ if (containerId === 'child-names-api-container' || inputId === 'child-names-search') return;
   
   // 2. Names of Identified Martyrs (Bypass completely - handled by custom script below)
   if (containerId === 'names-registry-container') return;
@@ -658,7 +673,6 @@ async function initChildNamesApi() {
       if (Array.isArray(rawData.boys) || Array.isArray(rawData.girls)) {
         if (Array.isArray(rawData.boys)) records = records.concat(rawData.boys);
         if (Array.isArray(rawData.girls)) records = records.concat(rawData.girls);
-        records.sort((a, b) => (b[1] || 0) - (a[1] || 0));
       } else if (Array.isArray(rawData.data)) {
         records = rawData.data;
       } else {
@@ -666,39 +680,135 @@ async function initChildNamesApi() {
       }
     }
 
+    // Sort heavily to extract the true Top 100 combined
+    records.sort((a, b) => {
+      let countA = a.count !== undefined ? a.count : (a.value !== undefined ? a.value : a[1] || 0);
+      let countB = b.count !== undefined ? b.count : (b.value !== undefined ? b.value : b[1] || 0);
+      return countB - countA;
+    });
+
     if (!records || records.length === 0) throw new Error("No data extracted.");
 
+    // STRICT FILTER: Remove any phantom empty records before building table
+    const validRecords = records.filter(rec => {
+      let n = rec.name || rec.en_name || rec[0];
+      let c = rec.count || rec.value || rec[1];
+      return n && c > 0 && String(n).trim() !== '';
+    });
+
+    const top100 = validRecords.slice(0, 100);
+    const maxCount = Math.max(...top100.map(r => r.count || r.value || r[1] || 0));
+
     let html = `
-      <div class="table-header-ctrl">
-        <div class="table-search-box"><input type="text" id="child-names-search" placeholder="FILTER BY NAME..."></div>
+      <div class="un-header" style="margin-top: 60px; text-align: left;">
+        <h2 class="un-title" style="font-size: 24px;">Child Victim Name Frequency</h2>
+        <div class="hr-header-text" style="margin-bottom: 24px;">Statistical breakdown of the most common first names among documented child casualties.</div>
       </div>
-      <div style="max-height: 400px; overflow-y: auto; border-bottom: 1px solid var(--border); width: 100%;">
-        <table class="census-table" style="display: table; width: 100%; table-layout: auto;">
-          <thead style="position: sticky; top: 0; background: var(--bg); z-index: 10;">
-            <tr style="display: table-row;"><th style="display: table-cell; text-align: left;">First Name</th><th style="display: table-cell; text-align: left;">Frequency</th></tr>
+      <div style="width: 100%; margin-bottom: 16px;">
+          <input type="text" id="child-names-search" placeholder="Search by Name..." style="border: none; padding: 12px 16px; width: 100%; font-family: 'IBM Plex Mono', monospace; font-size: 12px; text-align: left; box-sizing: border-box; background: transparent;">
+        </div>
+      </div>
+      <div style="max-height: 450px; overflow-y: auto; border-bottom: 1px solid var(--border); width: 100%; background: #fafafa;">
+        <table class="census-table" style="width: 100%; border-collapse: collapse; margin-bottom: 0;">
+          <thead style="position: sticky; top: 0; background: #fafafa; z-index: 10; box-shadow: 0 1px 0 var(--border);">
+            <tr>
+              <th style="text-align: left; padding: 16px; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: none;">First Name</th>
+              <th style="text-align: left; padding: 16px; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: none;">Frequency (Visualized)</th>
+            </tr>
           </thead>
-          <tbody style="display: table-row-group;">`;
+          <tbody>`;
     
-    records.slice(0, 100).forEach(rec => { 
+    top100.forEach((rec, idx) => { 
       let rName = rec.name || rec.en_name || rec[0] || 'Unknown';
       let rCount = rec.count || rec.value || rec[1] || 0;
-      html += `<tr style="display: table-row;"><td style="display: table-cell; width: 60%;"><strong style="color:var(--black); text-transform:uppercase;">${rName}</strong></td><td style="display: table-cell; color:var(--red); font-weight:bold;">${rCount}</td></tr>`;
+      let percentage = maxCount > 0 ? (rCount / maxCount) * 100 : 0;
+      let borderBtm = (idx === top100.length - 1) ? 'none' : '1px solid rgba(0,0,0,0.05)';
+      
+      html += `
+        <tr style="border-bottom: ${borderBtm}; transition: background 0.2s;" onmouseover="this.style.background='#fff'" onmouseout="this.style.background='transparent'">
+          <td style="width: 40%; padding: 14px 16px; text-align: left;">
+            <strong style="color:var(--black); text-transform:uppercase; font-size: 13px; letter-spacing: 0.02em;">${rName}</strong>
+          </td>
+          <td style="width: 60%; padding: 14px 16px; position: relative; text-align: left;">
+            <div style="display: flex; align-items: center; width: 100%; height: 100%; justify-content: flex-start;">
+              <div style="flex-grow: 1; background: rgba(0,0,0,0.04); height: 24px; border-radius: 2px; overflow: hidden; margin-right: 12px; position: relative; max-width: 80%;">
+                <div style="position: absolute; left: 0; top: 0; bottom: 0; width: ${percentage}%; background: var(--red); opacity: 0.85;"></div>
+              </div>
+              <span style="color:var(--black); font-weight:bold; font-family: 'IBM Plex Mono', monospace; font-size: 13px; min-width: 40px; text-align: left;">${Number(rCount).toLocaleString()}</span>
+            </div>
+          </td>
+        </tr>`;
     });
     
-    html += `</tbody></table></div><div class="hr-header-text" style="font-size:10px; margin-top:8px;">*Displaying top 100 derived name frequencies.</div>`;
-    container.innerHTML = html;
-    attachTableSearch('child-names-api-container', 'child-names-search');
-  } catch (error) {
+    html += `</tbody></table></div><div class="hr-header-text" style="font-size:10px; margin-top:12px; text-align: left;">*Displaying top 100 derived name frequencies.</div>`;
+      container.innerHTML = html;
+    
+      // Isolate the specific search logic for this customized layout
+      const searchInput = document.getElementById('child-names-search');
+      const tbody = container.querySelector('tbody');
+      if (searchInput && tbody) {
+        searchInput.addEventListener('input', (e) => {
+          const term = e.target.value.toUpperCase();
+          Array.from(tbody.querySelectorAll('tr')).forEach(tr => {
+            const match = tr.innerText.toUpperCase().includes(term);
+            tr.style.setProperty('display', match ? 'table-row' : 'none', 'important');
+          });
+        });
+      }
+    } catch (error) {
     const fallback = [["Tariq", 120], ["Fatima", 105], ["Ahmed", 98], ["Nour", 80], ["Mohammed", 75]];
-    let html = `<div class="terminal-alert" style="border-color:var(--amber); color:var(--amber);">WARNING: SECURE HANDSHAKE FAILED. DISPLAYING ARCHIVAL CACHE.</div>
-      <div class="table-header-ctrl"><div class="table-search-box"><input type="text" id="child-names-search" placeholder="FILTER BY NAME..."></div></div>
-      <table class="census-table" style="display: table; width: 100%;"><thead><tr style="display: table-row;"><th style="display: table-cell; text-align: left;">First Name</th><th style="display: table-cell; text-align: left;">Frequency</th></tr></thead><tbody style="display: table-row-group;">`;
-    fallback.forEach(rec => { html += `<tr style="display: table-row;"><td style="display: table-cell;"><strong style="color:var(--black); text-transform:uppercase;">${rec[0]}</strong></td><td style="display: table-cell; color:var(--red); font-weight:bold;">${rec[1]}</td></tr>`; });
-    html += `</tbody></table>`;
-    container.innerHTML = html;
-    attachTableSearch('child-names-api-container', 'child-names-search');
-  }
-}
+    const maxCount = 120;
+    let html = `<div class="terminal-alert" style="border-color:var(--amber); color:var(--amber); margin-bottom: 16px;">WARNING: SECURE HANDSHAKE FAILED. DISPLAYING ARCHIVAL CACHE.</div>
+      <div class="un-header" style="margin-top: 60px; text-align: left;">
+        <h2 class="un-title" style="font-size: 24px;">Child Victim Name Frequency</h2>
+        <div class="hr-header-text" style="margin-bottom: 24px;">Statistical breakdown of the most common first names among documented child casualties.</div>
+      </div>
+      <div style="width: 100%; margin-bottom: 16px;">
+        <input type="text" id="child-names-search" placeholder="Search by Name..." style="width: 100%; box-sizing: border-box; padding: 12px 16px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; border: 1px solid var(--border); border-radius: 4px; outline: none; background: #fff; color: var(--black);">
+      </div>
+      <div style="max-height: 450px; overflow-y: auto; border-bottom: 1px solid var(--border); width: 100%; background: #fafafa;">
+        <table class="census-table" style="width: 100%; border-collapse: collapse; margin-bottom: 0;">
+          <thead style="position: sticky; top: 0; background: #fafafa; z-index: 10; box-shadow: 0 1px 0 var(--border);">
+            <tr>
+              <th style="text-align: left; padding: 16px; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: none;">First Name</th>
+              <th style="text-align: left; padding: 16px; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: none;">Frequency (Visualized)</th>
+            </tr>
+          </thead>
+          <tbody>`;
+    
+    fallback.forEach((rec, idx) => { 
+      let percentage = (rec[1] / maxCount) * 100;
+      let borderBtm = (idx === fallback.length - 1) ? 'none' : '1px solid rgba(0,0,0,0.05)';
+      html += `
+        <tr style="border-bottom: ${borderBtm}; transition: background 0.2s;" onmouseover="this.style.background='#fff'" onmouseout="this.style.background='transparent'">
+          <td style="width: 40%; padding: 14px 16px; text-align: left;"><strong style="color:var(--black); text-transform:uppercase; font-size: 13px; letter-spacing: 0.02em;">${rec[0]}</strong></td>
+          <td style="width: 60%; padding: 14px 16px; position: relative; text-align: left;">
+            <div style="display: flex; align-items: center; width: 100%; height: 100%; justify-content: flex-start;">
+              <div style="flex-grow: 1; background: rgba(0,0,0,0.04); height: 24px; border-radius: 2px; overflow: hidden; margin-right: 12px; position: relative; max-width: 80%;">
+                <div style="position: absolute; left: 0; top: 0; bottom: 0; width: ${percentage}%; background: var(--amber); opacity: 0.85;"></div>
+              </div>
+              <span style="color:var(--black); font-weight:bold; font-family: 'IBM Plex Mono', monospace; font-size: 13px; min-width: 40px; text-align: left;">${rec[1]}</span>
+            </div>
+          </td>
+        </tr>`;
+            });
+            html += `</tbody></table></div>`;
+            container.innerHTML = html;
+        
+            // Isolate the specific search logic for this customized layout
+            const searchInput = document.getElementById('child-names-search');
+            const tbody = container.querySelector('tbody');
+            if (searchInput && tbody) {
+              searchInput.addEventListener('input', (e) => {
+                const term = e.target.value.toUpperCase();
+                Array.from(tbody.querySelectorAll('tr')).forEach(tr => {
+                  const match = tr.innerText.toUpperCase().includes(term);
+                  tr.style.setProperty('display', match ? 'table-row' : 'none', 'important');
+                });
+              });
+            }
+          }
+        }
 
 // -- Geospatial / Maps --
 async function initMapsApi() {
@@ -850,12 +960,18 @@ async function initMediaApi() {
 }
 
 // -- Infrastructure Damage --
+let infraSortDir = 'desc';
+window.sortInfraTable = function() {
+  infraSortDir = infraSortDir === 'desc' ? 'asc' : 'desc';
+  initInfrastructureApi(1);
+};
+
 async function initInfrastructureApi(page = 1) {
   const container = document.getElementById('infra-api-container');
   const pagination = document.getElementById('infra-pagination');
   const pageSize = 20;
   if (!container) return;
-  if (page === 1) container.innerHTML = `<div class="skeleton-wrap"><div class="skeleton-row"></div><div class="skeleton-row"></div></div>`;
+  if (page === 1 && !cachedInfraData) container.innerHTML = `<div class="skeleton-wrap"><div class="skeleton-row"></div><div class="skeleton-row"></div></div>`;
 
   try {
     if (!cachedInfraData) {
@@ -872,12 +988,22 @@ async function initInfrastructureApi(page = 1) {
       cachedInfraData = uniqueData;
     }
 
-    const totalPages = Math.ceil(cachedInfraData.length / pageSize);
+    // Apply Date Sorting
+    cachedInfraData.sort((a, b) => {
+      let dateA = new Date(a.report_date).getTime() || 0;
+      let dateB = new Date(b.report_date).getTime() || 0;
+      return infraSortDir === 'asc' ? dateA - dateB : dateB - dateA;
+    });
+
+    const totalPages = Math.ceil(cachedInfraData.length / pageSize) || 1;
+    if (page > totalPages) page = totalPages;
     const start = (page - 1) * pageSize;
     const pagedData = cachedInfraData.slice(start, start + pageSize);
 
-    let html = `<div class="table-header-ctrl"><div class="table-search-box"><input type="text" id="infra-search" placeholder="FILTER BY DATE OR SECTOR..."></div></div>
-      <div style="overflow-x:auto;"><table class="census-table"><thead><tr><th>Report Date</th><th>Residential (Destroyed)</th><th>Educational Units</th><th>Places of Worship</th></tr></thead><tbody>`;
+    const sortIcon = infraSortDir === 'asc' ? ' ▲' : ' ▼';
+    let html = `<div style="overflow-x:auto;"><table class="census-table"><thead><tr>
+      <th style="cursor:pointer; user-select:none; transition: color 0.2s;" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color=''" onclick="sortInfraTable()">Report Date${sortIcon}</th>
+      <th>Residential (Destroyed)</th><th>Educational Units</th><th>Places of Worship</th></tr></thead><tbody>`;
     
     pagedData.forEach(day => {
       html += `<tr><td><span style="font-family:mono; font-size:11px;">${day.report_date}</span></td>
@@ -985,9 +1111,9 @@ function renderMartyrsTable() {
 
   if (pagination) {
     pagination.innerHTML = `
-      <button class="btn-outline" style="padding:8px 16px; border-color:var(--border);" onclick="initKilledNamesApi(${martyrsCurrentPage - 1})" ${martyrsCurrentPage <= 1 ? 'disabled' : ''}>PREV</button>
+      <button class="btn-outline" style="padding:8px 16px; border-color:var(--border) ;color: black;" onclick="initKilledNamesApi(${martyrsCurrentPage - 1})" ${martyrsCurrentPage <= 1 ? 'disabled' : ''}>PREV</button>
       <span style="font-family:mono; font-size:10px; color:var(--muted); padding:0 10px;">PAGE ${martyrsCurrentPage} OF ${totalPages}</span>
-      <button class="btn-outline" style="padding:8px 16px; border-color:var(--border);" onclick="initKilledNamesApi(${martyrsCurrentPage + 1})" ${martyrsCurrentPage >= totalPages ? 'disabled' : ''}>NEXT</button>`;
+      <button class="btn-outline" style="padding:8px 16px; border-color:var(--border); color: black;" onclick="initKilledNamesApi(${martyrsCurrentPage + 1})" ${martyrsCurrentPage >= totalPages ? 'disabled' : ''}>NEXT</button>`;
   }
   
   if (typeof injectTableLabels === 'function') injectTableLabels();
@@ -1159,7 +1285,7 @@ function renderRedditCards(posts) {
             ${post.title}
           </div>
           <div style="display:flex; justify-content:space-between; align-items:center; font-size:9px; color:var(--muted); text-transform:uppercase; margin-top:auto; padding-top:12px; border-top:1px solid rgba(0,0,0,0.05);">
-            <span>DATA_NODE: R_VIOLENCE</span>
+            <span>SOURCE: r/ISRAELI_VIOLENCE</span>
             <span style="color:${color}; font-weight:bold;">SCORE: ${post.score}</span>
           </div>
         </div>
@@ -1308,5 +1434,5 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  console.log('ARCHIVE.PS // MONOLITH_OS: OPERATIONAL');
+  console.log('ISRAELI_VIOLENCE. // MONOLITH_OS: OPERATIONAL');
 });

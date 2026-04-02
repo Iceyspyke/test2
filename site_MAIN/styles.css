@@ -1,5 +1,5 @@
 /* ══════════════════════════════════════════
-   ARCHIVE.PS — MONOLITH_OS STYLESHEET
+   ISRAELI_VIOLENCE. — MONOLITH_OS STYLESHEET
    styles.css
 ════════════════════════════════════════════ */
 
@@ -1430,4 +1430,17 @@ footer { padding: 40px; border-top: 1px solid var(--border); display: flex; flex
   0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(45,107,79,0.7); }
   70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(45,107,79,0); }
   100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(45,107,79,0); }
+}
+/* -- TIMELINE ALIGNMENT FIX -- */
+.timeline-filters {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  margin-bottom: 24px;
+  box-sizing: border-box;
+}
+.timeline-filters input, .timeline-filters select {
+  min-width: 160px;
 }

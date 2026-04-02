@@ -1,5 +1,5 @@
 /* ══════════════════════════════════════════
-   ARCHIVE.PS — MOBILE EXCLUSIVE STYLESHEET
+   ISRAELI_VIOLENCE. — MOBILE EXCLUSIVE STYLESHEET
    mobile.css (Loads only on widths < 768px)
 ════════════════════════════════════════════ */
 
@@ -318,3 +318,78 @@ p, .cyber-log, .data-block-content, .case-indictment-text, .hero-subtitle {
 
 /* Enforce full width for UN buttons to prevent overflow */
 .un-res-action { width: 100% !important; text-align: center !important; }
+/* ══════════════════════════════════════════
+   MOBILE BUG FIXES & UI ENFORCEMENTS
+════════════════════════════════════════════ */
+
+/* 1. Prevent iOS Auto-Zoom on Inputs */
+input[type="text"], input[type="search"], select, textarea {
+  font-size: 16px !important;
+}
+
+/* 2. Enforce Strict Full-Width on Mobile Cards */
+.infra-card, .detention-stat-box, .siege-card, .warrant-card, .media-card, .data-block {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+/* 3. ICC Card Content Alignment */
+.warrant-card {
+  align-items: flex-start !important;
+  text-align: left !important;
+  padding: 16px !important;
+}
+.warrant-body { width: 100% !important; box-sizing: border-box !important; }
+
+/* 4. Full Width Search Box (HR & Others) */
+.table-header-ctrl, .table-search-box, .table-search-box input {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* 5. Archive Registry / Timeline Button Wrap Fix */
+.timeline-filters {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+  justify-content: space-between !important;
+}
+.timeline-filters button, .timeline-filters select, .timeline-filters input {
+  flex: 1 1 calc(50% - 10px) !important;
+  min-width: 120px !important;
+  margin: 0 !important;
+}
+
+/* 6. Preserve Table Headers for Clickable Sorting on Mobile */
+/* Re-exposes the <thead> on specific interactive tables so mobile users can click them */
+#names-registry-container .census-table thead, 
+#child-names-api-container .census-table thead,
+#infra-api-container .census-table thead {
+  display: table-header-group !important;
+}
+#names-registry-container .census-table tr,
+#child-names-api-container .census-table tr,
+#infra-api-container .census-table tr {
+  display: table-row !important;
+  border: none !important;
+  margin-bottom: 0 !important;
+}
+#names-registry-container .census-table th, 
+#names-registry-container .census-table td,
+#child-names-api-container .census-table th,
+#child-names-api-container .census-table td,
+#infra-api-container .census-table th,
+#infra-api-container .census-table td {
+  display: table-cell !important;
+  padding: 12px 8px !important;
+  border-bottom: 1px solid var(--border) !important;
+}
+#names-registry-container .census-table td::before,
+#child-names-api-container .census-table td::before,
+#infra-api-container .census-table td::before {
+  display: none !important; /* Hide injected CSS pseudo-labels */
+}
