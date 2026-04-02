@@ -93,6 +93,7 @@ function executeSwitch(id) {
   setTimeout(() => {
     if (id === 'nakba') initTimelineFilter();
     injectTableLabels();
+    initAllStaticTables();
   }, 300);
 }
 
@@ -333,39 +334,267 @@ function injectTableLabels() {
   });
 }
 
-function attachTableSearch(containerId, inputId) { 
-  injectTableLabels(); 
-}
+function buildAdvancedFilters(table, inputId) {
+  if (!table || table.dataset.filtersInjected) return;
+  table.dataset.filtersInjected = "true";
 
-window.filterCensusTable = function() {}; // Prevent undefined error from inline oninput
+  const pageNode = table.closest('.page');
+  const containerNode = table.closest('div[id]');
+  const pageId = pageNode ? pageNode.id : '';
+  const containerId = containerNode ? containerNode.id : '';
+  const tableId = table.id || '';
+  const tableClass = table.className || '';
 
-document.addEventListener('input', (e) => {
-  const searchMap = {
-    'census-search': 'census-master-table',
-    'martyrs-search': 'names-registry-container',
-    'presences-search': 'presences-api-container',
-    'media-search': 'media-api-container',
-    'infra-search': 'infra-api-container',
-    'child-names-search': 'child-names-api-container'
-  };
-  const targetId = searchMap[e.target.id];
-  if (targetId) {
-    const filter = e.target.value.toUpperCase();
-    const containerOrTable = document.getElementById(targetId);
-    if (containerOrTable) {
-       const table = containerOrTable.tagName === 'TABLE' ? containerOrTable : containerOrTable.querySelector('table');
-       if (table) {
-         table.querySelectorAll('tbody tr').forEach(tr => {
-           if (tr.innerText.toUpperCase().includes(filter)) {
-             tr.style.removeProperty('display');
-           } else {
-             tr.style.setProperty('display', 'none', 'important');
-           }
-         });
-       }
+  let allowFilters = true;
+  let allowedColumns = null; 
+  let disableSearch = false;
+
+  // 1. 1948 Depopulation Ledger (Remove filters, connect to native search bar)
+  if (pageId === 'page-census' || tableId === 'census-master-table' || inputId === 'census-search') {
+    allowFilters = false;
+    inputId = 'census-search'; // Bind explicitly to existing HTML input
+  }
+  
+  // 2. Names of Identified Martyrs (Bypass completely - handled by custom script below)
+  if (containerId === 'names-registry-container') return;
+  
+  // 3. Human Rights Investigations (Remove filters)
+  if (pageId === 'page-hr' || tableClass.includes('hr-table')) allowFilters = false;
+  
+  // 4. Movement & Access Control (Remove search and filters)
+  if (pageId === 'page-movement' || tableClass.includes('checkpoint-table') || containerId === 'presences-api-container') {
+    allowFilters = false; disableSearch = true;
+  }
+  
+  // 5. Military Court & Detention Registry (Remove Search + Filters)
+  if (pageId === 'page-detention' || tableClass.includes('detention-table')) {
+    allowFilters = false; disableSearch = true;
+  }
+  
+  // 6. Civilian Infrastructure Damage (Remove Search + Filters)
+  if (containerId === 'infra-api-container' || pageId === 'page-infrastructure') {
+    allowFilters = false; disableSearch = true;
+  }
+  
+  // 7. Press Casualty Ledger (Keep Method of Martyrdom and Location)
+  if (containerId === 'media-api-container' || pageId === 'page-media') {
+    allowedColumns = ['method of martyrdom', 'location'];
+  }
+  
+  // 8. System Integrations Registry / Surveillance (Remove Search + Filters)
+  if (pageId === 'page-surveillance') {
+    allowFilters = false; disableSearch = true;
+  }
+  
+  // 9. Munitions Forensic Registry / Arms (Remove Search + Filters)
+  if (pageId === 'page-arms') {
+    allowFilters = false; disableSearch = true;
+  }
+  
+  // 10. Archive Registry (Remove Search + Filters)
+  if (containerId === 'registry-api-container' || pageId === 'page-registry') {
+    allowFilters = false; disableSearch = true;
+  }
+
+  // -- FIND OR CREATE SEARCH UI --
+  let ctrl = null;
+  let searchBox = null;
+  
+  if (inputId) {
+    searchBox = document.getElementById(inputId);
+    if (searchBox) ctrl = searchBox.closest('.table-header-ctrl');
+  }
+
+  // Aggressive DOM traversal to find existing search bars and prevent duplicates
+  if (!ctrl) {
+    if (table.previousElementSibling?.classList.contains('table-header-ctrl')) {
+      ctrl = table.previousElementSibling;
+    } else if (table.parentElement?.previousElementSibling?.classList.contains('table-header-ctrl')) {
+      ctrl = table.parentElement.previousElementSibling;
+    } else {
+      const sibling = table.parentElement?.querySelector('.table-header-ctrl');
+      if (sibling) ctrl = sibling;
     }
   }
-});
+  
+  if (ctrl && !searchBox) {
+    searchBox = ctrl.querySelector('input[type="text"], input[type="search"]');
+  }
+
+  // If this table is blacklisted from both search and filters, execute hide and abort
+  if (!allowFilters && disableSearch) {
+    if (ctrl) ctrl.style.display = 'none';
+    else if (searchBox) searchBox.style.display = 'none';
+    return;
+  }
+
+  const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.innerText.trim());
+  if (headers.length === 0) return;
+
+  // Build the search box natively if it wasn't disabled
+  if (!ctrl && !disableSearch) {
+    ctrl = document.createElement('div');
+    ctrl.className = 'table-header-ctrl';
+    ctrl.style.flexDirection = 'column';
+    ctrl.style.alignItems = 'flex-start';
+    
+    const searchWrap = document.createElement('div');
+    searchWrap.className = 'table-search-box';
+    searchWrap.style.width = '100%';
+    searchWrap.style.maxWidth = '100%';
+    
+    searchBox = document.createElement('input');
+    searchBox.type = 'text';
+    searchBox.placeholder = 'GLOBAL SEARCH...';
+    searchBox.style.width = '100%';
+    
+    searchWrap.appendChild(searchBox);
+    ctrl.appendChild(searchWrap);
+    table.parentNode.insertBefore(ctrl, table);
+  } else if (disableSearch && ctrl) {
+    const searchWrap = ctrl.querySelector('.table-search-box');
+    if (searchWrap) searchWrap.style.display = 'none';
+    else if (searchBox) searchBox.style.display = 'none';
+  }
+
+  // Wrapper for generated dropdown filters
+  const filterWrap = document.createElement('div');
+  filterWrap.className = 'advanced-filters';
+  filterWrap.style.display = 'flex';
+  filterWrap.style.flexWrap = 'wrap';
+  filterWrap.style.gap = '10px';
+  filterWrap.style.marginTop = (ctrl?.querySelector('.table-search-box')?.style.display !== 'none' && !disableSearch) ? '12px' : '0';
+  filterWrap.style.width = '100%';
+  filterWrap.style.alignItems = 'center';
+
+  const rows = Array.from(table.querySelectorAll('tbody tr'));
+  const colValues = headers.map(() => new Set());
+  
+  rows.forEach(tr => {
+    const tds = tr.querySelectorAll('td');
+    tds.forEach((td, i) => {
+      if (td && td.innerText) colValues[i].add(td.innerText.trim());
+    });
+  });
+
+  const selects = [];
+  
+  if (allowFilters) {
+    headers.forEach((header, i) => {
+      const hMatch = header.toLowerCase();
+      
+      // Auto-exclude links or sources
+      if (hMatch.includes('source') || hMatch.includes('link') || hMatch.includes('access')) return;
+
+      // Apply specific column inclusion constraints
+      if (allowedColumns) {
+        const isAllowed = allowedColumns.some(c => hMatch.includes(c.toLowerCase()));
+        if (!isAllowed) return;
+      }
+
+      if (colValues[i].size > 1 && colValues[i].size <= 25) {
+        const select = document.createElement('select');
+        select.className = 'filter-select column-filter';
+        select.dataset.colIndex = i;
+        select.style.padding = '8px';
+        select.style.fontSize = '10px';
+        select.style.fontFamily = 'monospace';
+        select.style.border = '1px solid var(--border)';
+        select.style.background = '#fff';
+        select.style.color = 'var(--text)';
+        select.style.maxWidth = '200px';
+        
+        const defaultOpt = document.createElement('option');
+        defaultOpt.value = '';
+        defaultOpt.innerText = `ALL ${header.toUpperCase()}`;
+        select.appendChild(defaultOpt);
+
+        Array.from(colValues[i]).sort().forEach(val => {
+          const opt = document.createElement('option');
+          opt.value = val;
+          opt.innerText = val.length > 30 ? val.substring(0, 30) + '...' : val;
+          select.appendChild(opt);
+        });
+
+        filterWrap.appendChild(select);
+        selects.push(select);
+      }
+    });
+  }
+
+  if (selects.length > 0) {
+    const resetBtn = document.createElement('button');
+    resetBtn.className = 'btn-outline';
+    resetBtn.innerText = 'RESET FILTERS';
+    resetBtn.style.padding = '8px 12px';
+    resetBtn.style.fontSize = '10px';
+    resetBtn.style.borderColor = 'var(--border)';
+    resetBtn.style.color = 'var(--black)';
+    resetBtn.onclick = () => {
+      if (searchBox) searchBox.value = '';
+      selects.forEach(s => s.value = '');
+      applyFilters();
+    };
+    filterWrap.appendChild(resetBtn);
+    if (ctrl) ctrl.appendChild(filterWrap);
+  }
+
+  function applyFilters() {
+    const globalTerm = (searchBox ? searchBox.value.toUpperCase() : '');
+    
+    rows.forEach(tr => {
+      let match = true;
+      const tds = tr.querySelectorAll('td');
+      
+      for (let select of selects) {
+        const colIdx = select.dataset.colIndex;
+        const val = select.value;
+        if (val !== '' && tds[colIdx] && tds[colIdx].innerText.trim() !== val) {
+          match = false;
+          break;
+        }
+      }
+
+      if (match && globalTerm) {
+        if (!tr.innerText.toUpperCase().includes(globalTerm)) {
+          match = false;
+        }
+      }
+
+      if (match) {
+        tr.style.removeProperty('display');
+      } else {
+        tr.style.setProperty('display', 'none', 'important');
+      }
+    });
+  }
+
+  if (searchBox) {
+    searchBox.addEventListener('input', applyFilters);
+  }
+  selects.forEach(s => s.addEventListener('change', applyFilters));
+}
+
+// Override attachTableSearch to utilize advanced filtering
+function attachTableSearch(containerId, inputId) { 
+  injectTableLabels(); 
+  const container = document.getElementById(containerId);
+  if (container) {
+    const table = container.tagName === 'TABLE' ? container : container.querySelector('table');
+    if (table) buildAdvancedFilters(table, inputId);
+  }
+}
+
+// Function to automatically attach filters to native HTML tables (e.g. HR, Detainees)
+function initAllStaticTables() {
+  document.querySelectorAll('table').forEach(table => {
+    if (!table.dataset.filtersInjected) {
+      buildAdvancedFilters(table, null);
+    }
+  });
+}
+
+window.filterCensusTable = function() {}; // Prevent undefined error from old inline oninput
 
 
 /* ──────────────────────────────────────────
@@ -551,8 +780,7 @@ async function initPresencesApi(page = 1) {
       return;
     }
 
-    let html = `<div class="table-header-ctrl"><div class="table-search-box"><input type="text" id="presences-search" placeholder="FILTER DEPLOYMENTS..."></div></div>
-      <table class="census-table"><thead><tr><th>Date Entered</th><th>Date Exited</th><th>Military Unit</th><th>Area / Location</th><th>Verification Source</th></tr></thead><tbody>`;
+    let html = `<table class="census-table"><thead><tr><th>Date Entered</th><th>Date Exited</th><th>Military Unit</th><th>Area / Location</th><th>Verification Source</th></tr></thead><tbody>`;
 
     records.forEach(rec => {
       const dateEnter = rec.date_entered_display || '-';
@@ -670,28 +898,144 @@ async function initInfrastructureApi(page = 1) {
   } catch (e) { container.innerHTML = `<div class="terminal-alert">ERR_INFRA_STREAM_OFFLINE: UNABLE TO SYNC SATELLITE TELEMETRY</div>`; }
 }
 
-// -- Martyrs Names Registry --
+// -- Martyrs Names Registry (Full Data, Client-Side Paginated & Sortable) --
+let cachedMartyrsData = null;
+let filteredMartyrsData = null;
+let martyrsCurrentPage = 1;
+const martyrsPageSize = 100;
+let martyrsSort = { col: null, dir: 'asc' };
+
 async function initKilledNamesApi(page = 1) {
   const container = document.getElementById('names-registry-container');
-  const pagination = document.getElementById('names-pagination');
   if (!container) return;
-  container.innerHTML = `<div class="status-pulse red" style="padding:20px; font-family:mono; font-size:10px;">ACCESSING ARCHIVAL NAMES LIST...</div>`;
-  try {
-    const response = await fetch(`https://data.techforpalestine.org/api/v2/killed-in-gaza/page-${page}.json`);
-    const records = await response.json();
-    let html = `<div class="table-header-ctrl"><div class="table-search-box"><input type="text" id="martyrs-search" placeholder="FILTER BY NAME..."></div></div>
-      <table class="census-table"><thead><tr><th>Name (Arabic)</th><th>English Translation</th><th>Age</th><th>Sex</th></tr></thead><tbody>`;
-    records.forEach(rec => {
-      const sex = rec.sex ? rec.sex.toUpperCase() : 'N/A';
-      html += `<tr><td>${rec.name}</td><td><strong>${rec.en_name}</strong></td><td>${rec.age || 'N/A'}</td><td>${sex}</td></tr>`;
-    });
-    container.innerHTML = html + `</tbody></table>`;
-    attachTableSearch('names-registry-container', 'martyrs-search');
-    pagination.innerHTML = `<button class="btn-outline" style="padding:8px 16px; border-color:var(--border);" onclick="initKilledNamesApi(${page - 1})" ${page <= 1 ? 'disabled' : ''}>PREV</button>
-      <span style="font-family:mono; font-size:10px; color:var(--muted); padding:0 10px;">PAGE ${page}</span>
-      <button class="btn-outline" style="padding:8px 16px; border-color:var(--border);" onclick="initKilledNamesApi(${page + 1})">NEXT</button>`;
-  } catch (e) { container.innerHTML = `<div class="terminal-alert">ERR_NAMES_STREAM_OFFLINE<br><span style="font-size:10px;">${e.message}</span></div>`; }
+  
+  if (!cachedMartyrsData) {
+    container.innerHTML = `<div class="status-pulse red" style="padding:20px; font-family:mono; font-size:10px; line-height:1.5;">ACCESSING FULL ARCHIVAL NAMES LIST...<br><span style="opacity:0.7;">(Downloading complete ledger, this may take a moment)</span></div>`;
+    try {
+      const response = await fetch(`https://data.techforpalestine.org/api/v2/killed-in-gaza.json`);
+      if (!response.ok) throw new Error('API Offline');
+      cachedMartyrsData = await response.json();
+      filteredMartyrsData = [...cachedMartyrsData];
+    } catch (e) { 
+      container.innerHTML = `<div class="terminal-alert">ERR_NAMES_STREAM_OFFLINE<br><span style="font-size:10px;">${e.message}</span></div>`; 
+      return;
+    }
+  }
+
+  martyrsCurrentPage = page;
+  renderMartyrsTable();
 }
+
+function renderMartyrsTable() {
+  const container = document.getElementById('names-registry-container');
+  const pagination = document.getElementById('names-pagination');
+  if (!container || !filteredMartyrsData) return;
+
+  const totalPages = Math.ceil(filteredMartyrsData.length / martyrsPageSize) || 1;
+  if (martyrsCurrentPage > totalPages) martyrsCurrentPage = totalPages;
+  if (martyrsCurrentPage < 1) martyrsCurrentPage = 1;
+
+  const start = (martyrsCurrentPage - 1) * martyrsPageSize;
+  const pagedData = filteredMartyrsData.slice(start, start + martyrsPageSize);
+
+  const sortIcon = (col) => martyrsSort.col === col ? (martyrsSort.dir === 'asc' ? ' ▲' : ' ▼') : ' ↕';
+
+  let html = `
+    <table class="census-table">
+      <thead style="position: sticky; top: 0; background: var(--bg); z-index: 10;">
+        <tr>
+          <th style="cursor:pointer; user-select:none; transition: color 0.2s;" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color=''" onclick="sortMartyrs('name')">Name (Arabic)${sortIcon('name')}</th>
+          <th style="cursor:pointer; user-select:none; transition: color 0.2s;" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color=''" onclick="sortMartyrs('en_name')">English Translation${sortIcon('en_name')}</th>
+          <th style="cursor:pointer; user-select:none; transition: color 0.2s;" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color=''" onclick="sortMartyrs('age')">Age${sortIcon('age')}</th>
+          <th style="cursor:pointer; user-select:none; transition: color 0.2s;" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color=''" onclick="sortMartyrs('sex')">Sex${sortIcon('sex')}</th>
+        </tr>
+      </thead>
+      <tbody>`;
+
+  if (pagedData.length === 0) {
+    html += `<tr><td colspan="4" style="text-align:center; padding:20px; color:var(--muted);">NO MATCHING RECORDS FOUND</td></tr>`;
+  } else {
+    pagedData.forEach(rec => {
+      const sex = rec.sex ? rec.sex.toUpperCase() : 'N/A';
+      const age = rec.age !== null && rec.age !== undefined ? rec.age : 'N/A';
+      html += `<tr><td>${rec.name}</td><td><strong style="color:var(--black);">${rec.en_name}</strong></td><td>${age}</td><td>${sex}</td></tr>`;
+    });
+  }
+  html += `</tbody></table>`;
+
+  // Preserve existing search input value
+  const existingSearch = document.getElementById('martyrs-search');
+  const currentSearchVal = existingSearch ? existingSearch.value : '';
+
+  const searchHtml = `
+    <div class="table-header-ctrl">
+      <div class="table-search-box">
+        <input type="text" id="martyrs-search" placeholder="GLOBAL SEARCH..." oninput="handleMartyrsSearch(this.value)" value="${currentSearchVal}">
+      </div>
+    </div>`;
+
+  container.innerHTML = searchHtml + `<div style="max-height: 600px; overflow-y: auto; border-bottom: 1px solid var(--border); width: 100%;">` + html + `</div>`;
+  
+  const newSearch = document.getElementById('martyrs-search');
+  if (newSearch && currentSearchVal) {
+    newSearch.focus();
+    const len = newSearch.value.length;
+    newSearch.setSelectionRange(len, len);
+  }
+
+  if (pagination) {
+    pagination.innerHTML = `
+      <button class="btn-outline" style="padding:8px 16px; border-color:var(--border);" onclick="initKilledNamesApi(${martyrsCurrentPage - 1})" ${martyrsCurrentPage <= 1 ? 'disabled' : ''}>PREV</button>
+      <span style="font-family:mono; font-size:10px; color:var(--muted); padding:0 10px;">PAGE ${martyrsCurrentPage} OF ${totalPages}</span>
+      <button class="btn-outline" style="padding:8px 16px; border-color:var(--border);" onclick="initKilledNamesApi(${martyrsCurrentPage + 1})" ${martyrsCurrentPage >= totalPages ? 'disabled' : ''}>NEXT</button>`;
+  }
+  
+  if (typeof injectTableLabels === 'function') injectTableLabels();
+}
+
+window.handleMartyrsSearch = function(val) {
+  const term = val.toLowerCase();
+  filteredMartyrsData = cachedMartyrsData.filter(rec => {
+    return (rec.name && rec.name.toLowerCase().includes(term)) || 
+           (rec.en_name && rec.en_name.toLowerCase().includes(term)) ||
+           (rec.sex && rec.sex.toLowerCase() === term) ||
+           (rec.age !== null && String(rec.age) === term);
+  });
+  martyrsCurrentPage = 1;
+  
+  if (martyrsSort.col) sortMartyrs(martyrsSort.col, true);
+  else renderMartyrsTable();
+};
+
+window.sortMartyrs = function(col, preserveDir = false) {
+  if (!preserveDir) {
+    if (martyrsSort.col === col) {
+      martyrsSort.dir = martyrsSort.dir === 'asc' ? 'desc' : 'asc';
+    } else {
+      martyrsSort.col = col;
+      martyrsSort.dir = 'asc';
+    }
+  }
+
+  filteredMartyrsData.sort((a, b) => {
+    let valA = a[col];
+    let valB = b[col];
+
+    if (col === 'age') {
+      valA = valA !== null && valA !== undefined && valA !== '' ? Number(valA) : -1;
+      valB = valB !== null && valB !== undefined && valB !== '' ? Number(valB) : -1;
+      return martyrsSort.dir === 'asc' ? valA - valB : valB - valA;
+    } else {
+      valA = valA ? String(valA).toLowerCase() : '';
+      valB = valB ? String(valB).toLowerCase() : '';
+      if (valA < valB) return martyrsSort.dir === 'asc' ? -1 : 1;
+      if (valA > valB) return martyrsSort.dir === 'asc' ? 1 : -1;
+      return 0;
+    }
+  });
+
+  renderMartyrsTable();
+};
 
 // -- Daily Casualty Logs --
 async function initDailyCasualtiesApi() {
