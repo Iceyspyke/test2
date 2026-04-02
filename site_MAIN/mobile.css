@@ -258,18 +258,8 @@ p, .cyber-log, .data-block-content, .case-indictment-text, .hero-subtitle {
   border-bottom-color: var(--red) !important;
 }
 
-/* Keep search forms contained */
-.census-filter-wrap {
-  flex-direction: column;
-  align-items: stretch;
-  width: 100% !important;
-  box-sizing: border-box !important;
-}
-.census-search-input { width: 100% !important; }
-
 /* Fix Global Search Overlay */
 .search-overlay { padding: 70px 16px 16px !important; }
-.search-input { font-size: 16px !important; }
 .search-prompt { font-size: 16px !important; margin-right: 8px !important; }
 
 /* ── 4. TABLE TO CARD CONVERSION ── */
@@ -344,11 +334,17 @@ input[type="text"], input[type="search"], select, textarea {
 }
 .warrant-body { width: 100% !important; box-sizing: border-box !important; }
 
-/* 4. Full Width Search Box (HR & Others) */
-.table-header-ctrl, .table-search-box, .table-search-box input {
+/* 4. Full Width Search & Filter Boxes */
+.table-header-ctrl, .table-search-box, .table-search-box input, 
+.census-filter-wrap, .census-search-input {
   width: 100% !important;
   max-width: 100% !important;
   box-sizing: border-box !important;
+}
+
+.census-filter-wrap {
+  flex-direction: column !important;
+  align-items: stretch !important;
 }
 
 /* 5. Archive Registry / Timeline Button Wrap Fix */
