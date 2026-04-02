@@ -301,6 +301,7 @@ function initTimelineFilter() {
   const search = document.getElementById('tl-search');
   const decade = document.getElementById('tl-decade');
   const type   = document.getElementById('tl-type');
+  const resetBtn = document.getElementById('tl-reset');
 
   function filterTimeline() {
     const q = search ? search.value.toLowerCase().trim() : '';
@@ -310,14 +311,21 @@ function initTimelineFilter() {
     
     document.querySelectorAll('.timeline-item').forEach(item => {
       const text = item.innerText.toLowerCase();
-      const itemDecade = item.dataset.decade || 'all';
+      
+      const itemYear = item.dataset.year;
+      let itemDecade = 'all';
+      if (itemYear) {
+        itemDecade = (Math.floor(parseInt(itemYear) / 10) * 10).toString();
+      } else if (item.dataset.decade) {
+        itemDecade = item.dataset.decade; 
+      }
+
       const itemType = item.dataset.type || 'all';
       
       const show = (!q || text.includes(q)) && 
                    (d === 'all' || itemDecade === d) && 
                    (t === 'all' || itemType === t);
       
-      // Enforce !important so JS overrides the mobile CSS layout rules
       if (show) {
         item.style.removeProperty('display');
         visible++;
@@ -333,6 +341,15 @@ function initTimelineFilter() {
   if (search) search.addEventListener('input', filterTimeline);
   if (decade) decade.addEventListener('change', filterTimeline);
   if (type) type.addEventListener('change', filterTimeline);
+  
+  if (resetBtn) {
+    resetBtn.addEventListener('click', () => {
+      if (search) search.value = '';
+      if (decade) decade.value = 'all';
+      if (type) type.value = 'all';
+      filterTimeline();
+    });
+  }
 }
 
 function injectTableLabels() {
@@ -1380,6 +1397,16 @@ function pingMapSite(type, siteId) {
    7. INITIALIZATION & EVENTS
 ─────────────────────────────────────────── */
 function handleGlobalClicks(e) {
+  const spaLink = e.target.closest('a[href^="#"]');
+  if (spaLink) {
+    const targetId = spaLink.getAttribute('href').substring(1);
+    if (PAGE_MAP[targetId]) {
+      e.preventDefault();
+      showPage(targetId);
+      return;
+    }
+  }
+
   const btn = e.target.closest('.btn-request, .siege-card-action, .btn-view-register, .urgent-link, .proc-download, .tl-btn, .hr-btn, .evidence-item, .un-res-action, .detention-btn, .cyber-log-btn');
   if (!btn) return;
 
@@ -1388,7 +1415,9 @@ function handleGlobalClicks(e) {
     return;
   }
 
-  e.preventDefault();
+  if (!(btn.tagName === 'A' && btn.getAttribute('target') === '_blank')) {
+    e.preventDefault();
+  }
 
   if (btn.classList.contains('btn-request')) return;
 
