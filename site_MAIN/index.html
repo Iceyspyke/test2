@@ -16,7 +16,7 @@
     <a class="topnav-logo" href="#" onclick="showPage('mandate'); return false;">ISRAELI_VIOLENCE.</a>
     <ul class="topnav-links">
       <li><a id="nav-mandate" class="active" onclick="showPage('mandate'); return false;">Home</a></li>
-      <li><a id="nav-icj" onclick="showPage('icj'); return false;">Legal Actions</a></li>
+      <li><a id="nav-gaza" onclick="showPage('gaza'); return false;">Gaza</a></li>
       <li><a id="nav-siege" onclick="showPage('siege'); return false;">Systemic Impact</a></li>
       <li><a id="nav-hr" onclick="showPage('hr'); return false;">Human Rights</a></li>
       <li><a id="nav-maps" onclick="showPage('maps'); return false;">Forensics</a></li>
@@ -508,6 +508,7 @@
     // ── DYNAMIC PAGE LOADER ──
     // Loads page HTML from pages/*.html if available, otherwise uses inline pages
     const PAGE_FILES = {
+      gaza: 'gaza.html',
       nakba: 'nakba.html',
       chronology: 'chronology.html',
       icj: 'icj.html',

@@ -422,6 +422,23 @@ input[type="text"], input[type="search"], select, textarea {
   align-items: stretch !important;
 }
 
+/* Timeline specific folder-grid horizontal fix */
+#page-chronology .folder-grid {
+  flex-direction: row !important;
+  gap: 8px !important;
+}
+#page-chronology .folder-card {
+  width: 50% !important;
+  padding: 12px !important;
+}
+#page-chronology .folder-card-title {
+  font-size: 14px !important;
+}
+#page-chronology .folder-card-text {
+  font-size: 11px !important;
+  margin-bottom: 8px !important;
+}
+
 /* 5. Archive Registry / Timeline Button Wrap Fix */
 .timeline-filters {
   display: flex !important;

@@ -4,7 +4,7 @@
 ════════════════════════════════════════════ */
 
 const PAGE_MAP = {
-  mandate: 'page-mandate', nakba: 'page-nakba', chronology: 'page-chronology', icj: 'page-icj', hr: 'page-hr',
+  gaza: 'page-gaza', mandate: 'page-mandate', nakba: 'page-nakba', chronology: 'page-chronology', icj: 'page-icj', hr: 'page-hr',
   case: 'page-case', siege: 'page-siege', maps: 'page-maps', testimonies: 'page-testimonies',
   british: 'page-british', census: 'page-census', icc: 'page-icc', un: 'page-un',
   detention: 'page-detention', media: 'page-media', arms: 'page-arms', medical: 'page-medical',
@@ -14,7 +14,7 @@ const PAGE_MAP = {
 };
 
 const NAV_MAP = {
-  mandate: 'nav-mandate', nakba: 'nav-nakba', icj: 'nav-icj', hr: 'nav-hr',
+  gaza: 'nav-gaza', mandate: 'nav-mandate', nakba: 'nav-nakba', icj: 'nav-icj', hr: 'nav-hr',
   case: 'nav-icj', icc: 'nav-icc'
 };
 
@@ -51,6 +51,8 @@ let martyrsCurrentPage = 1;
 const martyrsPageSize = 100;
 let martyrsSort = { col: null, dir: 'asc' };
 let infraSortDir = 'desc';
+let cachedDailyLogs = null;
+let dailyLogSortDir = 'desc';
 
 /* ── 1. ROUTING & NAVIGATION ── */
 function showPage(id) { executeSwitch(id); }
@@ -83,12 +85,13 @@ function executeSwitch(id) {
   if (typeof bindTfpData === 'function') bindTfpData();
   
   const triggers = {
+    'gaza': () => { initDailyCasualtiesApi(); initChildNamesApi(); initKilledNamesApi(1); initInfrastructureApi(1); initMediaApi(); },
     'maps': () => initMapsApi(),
     'movement': () => initPresencesApi(1),
     'census': () => { initChildNamesApi(); initKilledNamesApi(1); },
     'media': () => initMediaApi(),
     'registry': () => fetchRegistryData('organizations'),
-    'infrastructure': () => initInfrastructureApi(),
+    'infrastructure': () => { initInfrastructureApi(); initGoogleMap(); },
     'hr': () => initDailyCasualtiesApi(),
     'icj': () => { if (typeof bindTfpData === 'function') bindTfpData(); }
   };
@@ -785,6 +788,48 @@ async function initMediaApi() {
   }
 }
 
+// ── GOOGLE MAPS SATELLITE INITIALIZATION ──
+function initGoogleMap() {
+  const mapContainer = document.getElementById('gaza-satellite-map');
+  if (!mapContainer) return;
+
+  // Load API if not present
+  if (!window.google || !window.google.maps) {
+    const script = document.createElement('script');
+    // Using standard library loading; replace YOUR_API_KEY with a valid key for live deployment
+    script.src = `https://maps.googleapis.com/maps/api/js?callback=renderGazaMap`;
+    script.async = true;
+    script.defer = true;
+    document.head.appendChild(script);
+  } else {
+    renderGazaMap();
+  }
+}
+
+window.renderGazaMap = function() {
+  const mapContainer = document.getElementById('gaza-satellite-map');
+  if (!mapContainer) return;
+
+  const gazaCoords = { lat: 31.43, lng: 34.38 };
+  const map = new google.maps.Map(mapContainer, {
+    zoom: 11,
+    center: gazaCoords,
+    mapTypeId: 'satellite',
+    streetViewControl: false,
+    mapTypeControl: false,
+    styles: [
+      { "elementType": "labels", "stylers": [{ "visibility": "on" }] },
+      { "featureType": "administrative", "elementType": "labels.text.fill", "stylers": [{ "color": "#ffffff" }] }
+    ]
+  });
+
+  const marker = new google.maps.Marker({
+    position: gazaCoords,
+    map: map,
+    title: "GAZA_STRIP_NODE"
+  });
+};
+
 // RESTORED: Infrastructure Damage
 window.sortInfraTable = function() {
   infraSortDir = infraSortDir === 'desc' ? 'asc' : 'desc';
@@ -967,35 +1012,54 @@ window.sortMartyrs = function(col, preserveDir = false) {
 };
 
 // RESTORED: Daily Casualty Logs
+window.sortDailyLogs = function() {
+  dailyLogSortDir = dailyLogSortDir === 'desc' ? 'asc' : 'desc';
+  renderDailyLogsTable();
+};
+
 async function initDailyCasualtiesApi() {
   const container = document.getElementById('daily-log-container');
   if (!container) return;
-  setApiLoading(container, 'SYNCING DAILY LOGS...');
-  try {
-    const response = await fetch('https://data.techforpalestine.org/api/v2/casualties_daily.json');
-    const data = await response.json();
-    
-    // Display all historical data, reversed so newest is at the top
-    const allDays = data.reverse(); 
-    
-    let html = `<div class="table-scroll-wrapper"><table class="census-table" style="margin-bottom:0;"><thead><tr><th>Report Date</th><th>Killed (Cum)</th><th>Injured (Cum)</th><th>Children</th></tr></thead><tbody>`;
-    
-    allDays.forEach(day => {
-      // Add safe fallbacks in case older JSON entries are missing data fields
-      const killed = day.killed_cum ? day.killed_cum.toLocaleString() : '--';
-      const injured = day.injured_cum ? day.injured_cum.toLocaleString() : '--';
-      const children = day.killed_children_cum ? day.killed_children_cum.toLocaleString() : '--';
-      
-      html += `<tr><td><span style="font-family:'IBM Plex Mono', monospace; font-size:11px;">${day.report_date || '--'}</span></td><td style="color:var(--red); font-weight:bold;">${killed}</td><td>${injured}</td><td>${children}</td></tr>`;
-    });
-    
-    container.innerHTML = html + `</tbody></table></div>`;
-    
-    // Attach the search and filter functions to the newly rendered table
-    attachTableSearch('daily-log-container');
-  } catch (e) { 
-    setApiError(container, 'ERR_CASUALTY_STREAM_OFFLINE'); 
+  
+  if (!cachedDailyLogs) {
+    setApiLoading(container, 'SYNCING DAILY LOGS...');
+    try {
+      const response = await fetch('https://data.techforpalestine.org/api/v2/casualties_daily.json');
+      cachedDailyLogs = await response.json();
+    } catch (e) { 
+      setApiError(container, 'ERR_CASUALTY_STREAM_OFFLINE'); 
+      return;
+    }
   }
+  renderDailyLogsTable();
+}
+
+function renderDailyLogsTable() {
+  const container = document.getElementById('daily-log-container');
+  if (!container || !cachedDailyLogs) return;
+
+  const sortedData = [...cachedDailyLogs].sort((a, b) => {
+    let dateA = new Date(a.report_date).getTime() || 0;
+    let dateB = new Date(b.report_date).getTime() || 0;
+    return dailyLogSortDir === 'asc' ? dateA - dateB : dateB - dateA;
+  });
+
+  const sortIcon = dailyLogSortDir === 'asc' ? ' ▲' : ' ▼';
+
+  let html = `<div class="table-scroll-wrapper"><table class="census-table" style="margin-bottom:0;"><thead><tr>
+    <th style="cursor:pointer; user-select:none; transition: color 0.2s;" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color=''" onclick="sortDailyLogs()">Report Date${sortIcon}</th>
+    <th>Killed (Cum)</th><th>Injured (Cum)</th><th>Children</th></tr></thead><tbody>`;
+  
+  sortedData.forEach(day => {
+    const killed = day.killed_cum ? day.killed_cum.toLocaleString() : '--';
+    const injured = day.injured_cum ? day.injured_cum.toLocaleString() : '--';
+    const children = day.killed_children_cum ? day.killed_children_cum.toLocaleString() : '--';
+    
+    html += `<tr><td><span style="font-family:'IBM Plex Mono', monospace; font-size:11px;">${day.report_date || '--'}</span></td><td style="color:var(--red); font-weight:bold;">${killed}</td><td>${injured}</td><td>${children}</td></tr>`;
+  });
+  
+  container.innerHTML = html + `</tbody></table></div>`;
+  attachTableSearch('daily-log-container');
 }
 
 // RESTORED: Archive Registry
