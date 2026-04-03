@@ -1,33 +1,32 @@
 /* Reddit Cards - Forced 3 Columns (Text Overflow Fix) */
 #reddit-uploads-container {
-  display: grid !important;
-  /* minmax(0, 1fr) forces the column to shrink even if text is long */
-  grid-template-columns: repeat(3, minmax(0, 1fr)) !important; 
-  gap: 6px !important; 
-  padding: 0 16px !important;
-  box-sizing: border-box !important;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)); 
+  gap: 6px; 
+  padding: 0 16px;
+  box-sizing: border-box;
 }
 
 .reddit-card {
-  display: flex !important; 
-  flex-direction: column !important; 
-  width: 100% !important; 
-  min-width: 0 !important; /* CRUCIAL: Allows card to shrink below text size */
-  box-sizing: border-box !important; 
-  height: auto !important; 
-  min-height: 0 !important;
-  padding: 6px !important; 
-  overflow: hidden !important;
+  display: flex; 
+  flex-direction: column; 
+  width: 100%; 
+  min-width: 0;
+  box-sizing: border-box; 
+  height: auto; 
+  min-height: 0;
+  padding: 6px; 
+  overflow: hidden;
 }
 
 /* Make sure images/thumbnails scale to fit */
 .reddit-card img,
 .reddit-card video {
-  width: 100% !important;
-  height: auto !important;
-  max-width: 100% !important;
-  object-fit: cover !important;
-  flex-shrink: 0 !important;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  object-fit: cover;
+  flex-shrink: 0;
 }
 
 /* Aggressively force all text elements inside to break */
@@ -35,27 +34,27 @@
 .reddit-card a, 
 .reddit-card span, 
 .reddit-card p { 
-  display: block !important;
-  width: 100% !important;
-  min-width: 0 !important;
-  white-space: normal !important; /* Prevents single-line stretching */
-  overflow-wrap: anywhere !important; /* Strongest text wrapping */
-  word-break: break-word !important; 
-  font-size: 10px !important; 
-  line-height: 1.3 !important;
+  display: block;
+  width: 100%;
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word; 
+  font-size: 10px; 
+  line-height: 1.3;
 }
 
 /* Limit the post title to 4 lines so the cards don't become massively tall */
 .reddit-card .reddit-title {
-  display: -webkit-box !important;
-  -webkit-line-clamp: 4 !important; /* Change this number to show more/less text */
-  -webkit-box-orient: vertical !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  margin-bottom: 4px !important;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 4px;
 }
 
 .reddit-card .reddit-meta .score { 
-  margin-top: 4px !important; 
-  font-weight: bold !important;
+  margin-top: 4px; 
+  font-weight: bold;
 }

@@ -597,17 +597,10 @@
       executeSwitch(id);
     }
 
-    // ── SIDEBAR AUTO-INJECT ──
-    // Populate all sidebars from template on load
+    // ── DYNAMIC INJECTION OBSERVER ──
+    // Observe dynamically loaded pages for sidebars and footers
     document.addEventListener('DOMContentLoaded', () => {
       const tmpl = document.getElementById('sidebar-template');
-      document.querySelectorAll('.sidebar').forEach(sb => {
-        if (!sb.children.length && tmpl) {
-          sb.appendChild(tmpl.content.cloneNode(true));
-        }
-      });
-
-      // Also patch dynamically loaded pages
       const observer = new MutationObserver(mutations => {
         const footerTmpl = document.getElementById('footer-template');
         mutations.forEach(m => {

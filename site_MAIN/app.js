@@ -22,6 +22,25 @@ const REDDIT_POLL_MS = 2 * 60 * 60 * 1000;
 
 // Global State
 let tfpSummaryData = null;
+
+// Reusable UI state functions for API loading/errors
+function renderPagination(currentPage, totalPages, callbackName) {
+  const prevDisabled = currentPage <= 1 ? 'disabled' : '';
+  const nextDisabled = currentPage >= totalPages ? 'disabled' : '';
+  return `
+    <button class="btn-outline" style="padding:8px 16px; border-color:var(--border); color:black;" onclick="${callbackName}(${currentPage - 1})" ${prevDisabled}>PREV</button>
+    <span style="font-family:'IBM Plex Mono', monospace; font-size:10px; color:var(--muted); padding:0 10px;">PAGE ${currentPage} OF ${totalPages}</span>
+    <button class="btn-outline" style="padding:8px 16px; border-color:var(--border); color:black;" onclick="${callbackName}(${currentPage + 1})" ${nextDisabled}>NEXT</button>
+  `;
+}
+
+function setApiLoading(container, text = 'Fetching Node Data...') {
+  if (container) container.innerHTML = `<div style="padding: 20px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase;"><span class="status-pulse red" style="margin-top:8px;"></span> ${text}</div>`;
+}
+
+function setApiError(container, msg = 'ERR_API_FAILURE<br>Unable to fetch datastream.') {
+  if (container) container.innerHTML = `<div class="terminal-alert" style="margin:20px; border-radius:0; border-color:var(--red);">${msg}</div>`;
+}
 let audioContext;
 let displacementMapsData = [];
 let mapsApiInitialized = false;
@@ -109,17 +128,9 @@ function toggleHeaderLinks() {
 
 function toggleMobileMenu() {
   const sidebar = document.querySelector('.page.active .sidebar');
-  const isActive = document.body.classList.contains('mobile-menu-open');
-  
-  if (isActive) {
-    if (sidebar) sidebar.classList.remove('active');
-    document.body.style.overflow = '';
-    document.body.classList.remove('mobile-menu-open');
-  } else {
-    if (sidebar) sidebar.classList.add('active');
-    document.body.style.overflow = 'hidden';
-    document.body.classList.add('mobile-menu-open');
-  }
+  const isActive = document.body.classList.toggle('mobile-menu-open');
+  if (sidebar) sidebar.classList.toggle('active', isActive);
+  document.body.style.overflow = isActive ? 'hidden' : '';
 }
 
 function syncSidebars() {
@@ -229,18 +240,25 @@ function initSearch() {
     
     if (term.length > 0) {
       let foundCount = 0;
+      let firstMatch = null;
+      
       results.forEach(item => {
         const title = item.querySelector('.sr-title')?.innerText.toLowerCase() || '';
         const desc = item.querySelector('.sr-desc')?.innerText.toLowerCase() || '';
         const meta = item.querySelector('.sr-meta')?.innerText.toLowerCase() || '';
         const isMatch = title.includes(term) || desc.includes(term) || meta.includes(term);
+        
         item.style.display = isMatch ? 'block' : 'none';
-        if (isMatch) foundCount++;
+        item.style.borderColor = '';
+        
+        if (isMatch) {
+          foundCount++;
+          if (!firstMatch) firstMatch = item;
+        }
       });
+      
       resultsBlock.classList.toggle('active', foundCount > 0);
-      results.forEach(r => r.style.borderColor = '');
-      const first = results.find(r => r.style.display === 'block');
-      if (first) first.style.borderColor = 'var(--red)';
+      if (firstMatch) firstMatch.style.borderColor = 'var(--red)';
     } else {
       resultsBlock.classList.remove('active');
       results.forEach(item => { item.style.display = 'block'; item.style.borderColor = ''; });
@@ -283,12 +301,16 @@ function initTimelineFilter() {
     document.querySelectorAll('.timeline-item').forEach(item => {
       const text = item.innerText.toLowerCase();
       const itemYear = item.dataset.year;
-      let itemDecade = itemYear ? (Math.floor(parseInt(itemYear) / 10) * 10).toString() : (item.dataset.decade || 'all');
+      const itemDecade = itemYear ? (Math.floor(parseInt(itemYear) / 10) * 10).toString() : (item.dataset.decade || 'all');
       const itemType = item.dataset.type || 'all';
       
       const show = (!q || text.includes(q)) && (d === 'all' || itemDecade === d) && (t === 'all' || itemType === t);
-      if (show) { item.style.removeProperty('display'); visible++; } 
-      else { item.style.setProperty('display', 'none', 'important'); }
+      if (show) { 
+        item.style.display = ''; 
+        visible++; 
+      } else { 
+        item.style.display = 'none'; 
+      }
     });
     
     const noResults = document.getElementById('tl-no-results');
@@ -328,17 +350,29 @@ function buildAdvancedFilters(table, inputId) {
   const tableId = table.id || '';
   const tableClass = table.className || '';
 
+  const noRender = ['child-names-api-container', 'names-registry-container', 'child-names-search'];
+  const noFilterPages = ['page-hr', 'page-movement', 'page-detention', 'page-infrastructure', 'page-surveillance', 'page-arms', 'page-registry'];
+  const noFilterClasses = ['hr-table', 'checkpoint-table', 'detention-table'];
+  const noFilterContainers = ['presences-api-container', 'infra-api-container', 'registry-api-container'];
+
+  if (noRender.includes(containerId) || noRender.includes(inputId)) return;
+
   let allowFilters = true;
   let allowedColumns = null; 
   let disableSearch = false;
 
-  if (tableId === 'census-master-table' || inputId === 'census-search') { allowFilters = false; inputId = 'census-search'; }
-  if (containerId === 'child-names-api-container' || inputId === 'child-names-search' || containerId === 'names-registry-container') return;
-  if (pageId === 'page-hr' || tableClass.includes('hr-table')) allowFilters = false;
-  if (pageId === 'page-movement' || tableClass.includes('checkpoint-table') || containerId === 'presences-api-container' || pageId === 'page-detention' || tableClass.includes('detention-table') || containerId === 'infra-api-container' || pageId === 'page-infrastructure' || pageId === 'page-surveillance' || pageId === 'page-arms' || containerId === 'registry-api-container' || pageId === 'page-registry') {
+  if (tableId === 'census-master-table' || inputId === 'census-search') { 
+    allowFilters = false; inputId = 'census-search'; 
+  }
+  if (pageId === 'page-hr' || noFilterClasses.some(c => tableClass.includes(c))) {
+    allowFilters = false;
+  }
+  if (noFilterPages.includes(pageId) || noFilterContainers.includes(containerId)) {
     allowFilters = false; disableSearch = true;
   }
-  if (containerId === 'media-api-container' || pageId === 'page-media') allowedColumns = ['method of martyrdom', 'location'];
+  if (containerId === 'media-api-container' || pageId === 'page-media') {
+    allowedColumns = ['method of martyrdom', 'location'];
+  }
 
   let ctrl = null, searchBox = null;
   if (inputId) { searchBox = document.getElementById(inputId); if (searchBox) ctrl = searchBox.closest('.table-header-ctrl'); }
@@ -411,7 +445,6 @@ function buildAdvancedFilters(table, inputId) {
         const select = document.createElement('select');
         select.className = 'filter-select column-filter';
         select.dataset.colIndex = i;
-        select.style.cssText = 'padding:8px; font-size:10px; font-family:monospace; border:1px solid var(--border); background:#fff; max-width:200px;';
         
         select.appendChild(new Option(`ALL ${header.toUpperCase()}`, ''));
         Array.from(colValues[i]).sort().forEach(val => select.appendChild(new Option(val.length > 30 ? val.substring(0, 30) + '...' : val, val)));
@@ -424,9 +457,8 @@ function buildAdvancedFilters(table, inputId) {
 
   if (selects.length > 0) {
     const resetBtn = document.createElement('button');
-    resetBtn.className = 'btn-outline border-darker';
+    resetBtn.className = 'btn-reset-filters';
     resetBtn.innerText = 'RESET FILTERS';
-    resetBtn.style.cssText = 'color:black; padding:8px 12px; font-size:10px; border-color:black;';
     resetBtn.onclick = () => { if (searchBox) searchBox.value = ''; selects.forEach(s => s.value = ''); applyFilters(); };
     filterWrap.appendChild(resetBtn);
     if (ctrl) ctrl.appendChild(filterWrap);
@@ -504,7 +536,7 @@ function bindTfpData() {
 async function initChildNamesApi() {
   const container = document.getElementById('child-names-api-container');
   if (!container) return;
-  container.innerHTML = `<div style="padding: 20px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase;"><span class="status-pulse red" style="margin-top:8px;"></span> Accessing Child Casualty Datastream...</div>`;
+  setApiLoading(container, 'Accessing Child Casualty Datastream...');
 
   try {
     const response = await fetch('https://data.techforpalestine.org/api/v2/killed-in-gaza/child-name-counts-en.json');
@@ -540,18 +572,20 @@ async function initChildNamesApi() {
 
     let html = `
       <div class="un-header" style="margin-top: 60px; text-align: left;">
-        <h2 class="un-title" style="font-size: 24px;">Child Victim Name Frequency</h2>
+        <h2 class="un-title" style="font-size: 24px; margin-bottom: 16px;">Child Victim Name Frequency</h2>
         <div class="hr-header-text" style="margin-bottom: 24px;">Statistical breakdown of the most common first names among documented child casualties.</div>
       </div>
-      <div style="width: 100%; margin-bottom: 16px;">
-          <input type="text" id="child-names-search" placeholder="Search by Name..." style="border: none; padding: 12px 16px; width: 100%; font-family: 'IBM Plex Mono', monospace; font-size: 12px; text-align: left; box-sizing: border-box; background: transparent;">
+      <div class="table-header-ctrl" style="margin-bottom: 16px;">
+        <div class="table-search-box">
+          <input type="text" id="child-names-search" placeholder="SEARCH BY NAME...">
+        </div>
       </div>
-      <div style="max-height: 450px; overflow-y: auto; border-bottom: 1px solid var(--border); width: 100%; background: #fafafa;">
-        <table class="census-table" style="width: 100%; border-collapse: collapse; margin-bottom: 0;">
-          <thead style="position: sticky; top: 0; background: #fafafa; z-index: 10; box-shadow: 0 1px 0 var(--border);">
+      <div class="table-scroll-wrapper sm">
+        <table class="census-table" style="margin-bottom: 0;">
+          <thead>
             <tr>
-              <th style="text-align: left; padding: 16px; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: none;">First Name</th>
-              <th style="text-align: left; padding: 16px; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: none;">Frequency (Visualized)</th>
+              <th>First Name</th>
+              <th>Frequency (Visualized)</th>
             </tr>
           </thead>
           <tbody>`;
@@ -560,17 +594,16 @@ async function initChildNamesApi() {
       let rName = rec.name || rec.en_name || rec[0] || 'Unknown';
       let rCount = rec.count || rec.value || rec[1] || 0;
       let percentage = maxCount > 0 ? (rCount / maxCount) * 100 : 0;
-      let borderBtm = (idx === top100.length - 1) ? 'none' : '1px solid rgba(0,0,0,0.05)';
       
       html += `
-        <tr style="border-bottom: ${borderBtm}; transition: background 0.2s;" onmouseover="this.style.background='#fff'" onmouseout="this.style.background='transparent'">
-          <td style="width: 40%; padding: 14px 16px; text-align: left;"><strong style="color:var(--black); text-transform:uppercase; font-size: 13px; letter-spacing: 0.02em;">${rName}</strong></td>
-          <td style="width: 60%; padding: 14px 16px; position: relative; text-align: left;">
-            <div style="display: flex; align-items: center; width: 100%; height: 100%; justify-content: flex-start;">
-              <div style="flex-grow: 1; background: rgba(0,0,0,0.04); height: 24px; border-radius: 2px; overflow: hidden; margin-right: 12px; position: relative; max-width: 80%;">
-                <div style="position: absolute; left: 0; top: 0; bottom: 0; width: ${percentage}%; background: var(--red); opacity: 0.85;"></div>
+        <tr>
+          <td style="width: 40%;"><strong style="text-transform:uppercase; letter-spacing: 0.02em;">${rName}</strong></td>
+          <td style="width: 60%;">
+            <div style="display: flex; align-items: center; width: 100%;">
+              <div style="flex-grow: 1; background: rgba(0,0,0,0.04); height: 24px; margin-right: 12px; position: relative; max-width: 80%;">
+                <div style="position: absolute; left: 0; top: 0; bottom: 0; width: ${percentage}%; background: var(--red);"></div>
               </div>
-              <span style="color:var(--black); font-weight:bold; font-family: 'IBM Plex Mono', monospace; font-size: 13px; min-width: 40px; text-align: left;">${Number(rCount).toLocaleString()}</span>
+              <span style="font-weight:bold; font-family: 'IBM Plex Mono', monospace; min-width: 40px;">${Number(rCount).toLocaleString()}</span>
             </div>
           </td>
         </tr>`;
@@ -654,7 +687,7 @@ async function initPresencesApi(page = 1) {
   const container = document.getElementById('presences-api-container');
   const pagination = document.getElementById('presences-pagination');
   if (!container) return;
-  container.innerHTML = `<div style="padding: 20px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase;"><span class="status-pulse red" style="margin-top:8px;"></span> Fetching Node Data...</div>`;
+  setApiLoading(container, 'Fetching Node Data...');
 
   try {
     const response = await fetch(`https://movements.genocide.live/api/v1/presences?page=${page}`).catch(() => fetch(`/api/v1/presences?page=${page}`));
@@ -691,14 +724,10 @@ async function initPresencesApi(page = 1) {
     if (pagination) {
       const currentPage = pageData.current_page || page;
       const lastPage = pageData.last_page || (records.length >= 100 ? currentPage + 1 : currentPage);
-      let btnHtml = '';
-      if (currentPage > 1) btnHtml += `<button class="btn-outline" style="color: black !important; border-color: black !important; padding:8px 16px;" onclick="initPresencesApi(${currentPage - 1})">PREV PAGE</button>`;
-      btnHtml += `<span style="font-family:'IBM Plex Mono', monospace; font-size:10px; padding:10px; color:var(--muted); font-weight:600;">PAGE ${currentPage} ${pageData.last_page ? 'OF ' + lastPage : ''}</span>`;
-      if (currentPage < lastPage) btnHtml += `<button class="btn-outline" style="color:var(--black); border-color:var(--border); padding:8px 16px;" onclick="initPresencesApi(${currentPage + 1})">NEXT PAGE</button>`;
-      pagination.innerHTML = btnHtml;
+      pagination.innerHTML = renderPagination(currentPage, lastPage, 'initPresencesApi');
     }
   } catch (error) {
-    container.innerHTML = `<div class="terminal-alert" style="margin:20px; border-radius:0; border-color:var(--red);">ERR_API_FAILURE<br>Unable to fetch presences datastream.<br><span style="display:block; margin-top:8px; font-size:10px; color:var(--muted); text-transform:none;">SERVER OUTPUT: ${error.message}</span></div>`;
+    setApiError(container, `ERR_API_FAILURE<br>Unable to fetch presences datastream.<br><span style="display:block; margin-top:8px; font-size:10px; color:var(--muted); text-transform:none;">SERVER OUTPUT: ${error.message}</span>`);
     if (pagination) pagination.innerHTML = '';
   }
 }
@@ -707,7 +736,7 @@ async function initPresencesApi(page = 1) {
 async function initMediaApi() {
   const container = document.getElementById('media-api-container');
   if (!container) return;
-  container.innerHTML = `<div style="padding: 20px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase;"><span class="status-pulse red" style="margin-top:8px;"></span> Fetching Node Data...</div>`;
+  setApiLoading(container, 'Fetching Node Data...');
 
   try {
     const response = await fetch('https://stopmurderingjournalists.com/api/v1/martyrs');
@@ -739,7 +768,7 @@ async function initMediaApi() {
     container.innerHTML = html + `</tbody></table>`;
     attachTableSearch('media-api-container', 'media-search');
   } catch (error) {
-    container.innerHTML = `<div class="terminal-alert" style="margin:20px; border-radius:0; border-color:var(--red);">ERR_API_FAILURE<br>Unable to fetch media casualty datastream.</div>`;
+    setApiError(container, 'ERR_API_FAILURE<br>Unable to fetch media casualty datastream.');
   }
 }
 
@@ -783,12 +812,12 @@ async function initInfrastructureApi(page = 1) {
     const pagedData = cachedInfraData.slice(start, start + pageSize);
 
     const sortIcon = infraSortDir === 'asc' ? ' ▲' : ' ▼';
-    let html = `<div style="overflow-x:auto;"><table class="census-table"><thead><tr>
-      <th style="cursor:pointer; user-select:none; transition: color 0.2s;" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color=''" onclick="sortInfraTable()">Report Date${sortIcon}</th>
+    let html = `<div class="table-scroll-wrapper"><table class="census-table" style="margin-bottom:0;"><thead><tr>
+      <th class="sortable-header" onclick="sortInfraTable()">Report Date${sortIcon}</th>
       <th>Residential (Destroyed)</th><th>Educational Units</th><th>Places of Worship</th></tr></thead><tbody>`;
     
     pagedData.forEach(day => {
-      html += `<tr><td><span style="font-family:mono; font-size:11px;">${day.report_date}</span></td>
+      html += `<tr><td><span style="font-family:'IBM Plex Mono', monospace; font-size:11px;">${day.report_date}</span></td>
         <td style="color:var(--red); font-weight:bold;">${(day.residential?.ext_destroyed || 0).toLocaleString()}</td>
         <td>${(day.educational_buildings?.ext_damaged || 0).toLocaleString()}</td>
         <td>${(day.places_of_worship?.ext_mosques_destroyed || 0).toLocaleString()}</td></tr>`;
@@ -798,11 +827,8 @@ async function initInfrastructureApi(page = 1) {
     attachTableSearch('infra-api-container', 'infra-search');
 
     if (pagination) {
-      pagination.innerHTML = `
-        <button class="btn-outline" style="padding:8px 16px; border-color:black !important;" onclick="initInfrastructureApi(${page - 1})" ${page <= 1 ? 'disabled' : ''}>PREV</button>
-        <span style="font-family:mono; font-size:10px; color:black !important;">PAGE ${page} OF ${totalPages}</span>
-        <button class="btn-outline" style="padding:8px 16px; border-color: black !important;" onclick="initInfrastructureApi(${page + 1})" ${page >= totalPages ? 'disabled' : ''}>NEXT</button>`;
-    }
+    pagination.innerHTML = renderPagination(martyrsCurrentPage, totalPages, 'initKilledNamesApi');
+  }
   } catch (e) { container.innerHTML = `<div class="terminal-alert">ERR_INFRA_STREAM_OFFLINE: UNABLE TO SYNC SATELLITE TELEMETRY</div>`; }
 }
 
@@ -812,7 +838,7 @@ async function initKilledNamesApi(page = 1) {
   if (!container) return;
   
   if (!cachedMartyrsData) {
-    container.innerHTML = `<div class="status-pulse red" style="padding:20px; font-family:mono; font-size:10px; line-height:1.5;">ACCESSING FULL ARCHIVAL NAMES LIST...<br><span style="opacity:0.7;">(Downloading complete ledger, this may take a moment)</span></div>`;
+    setApiLoading(container, `ACCESSING FULL ARCHIVAL NAMES LIST...<br><span style="opacity:0.7;">(Downloading complete ledger, this may take a moment)</span>`);
     try {
       const response = await fetch(`https://data.techforpalestine.org/api/v2/killed-in-gaza.json`);
       if (!response.ok) throw new Error('API Offline');
@@ -874,7 +900,7 @@ function renderMartyrsTable() {
       </div>
     </div>`;
 
-  container.innerHTML = searchHtml + `<div style="max-height: 600px; overflow-y: auto; border-bottom: 1px solid var(--border); width: 100%;">` + html + `</div>`;
+  container.innerHTML = searchHtml + `<div class="table-scroll-wrapper">` + html + `</div>`;
   
   const newSearch = document.getElementById('martyrs-search');
   if (newSearch && currentSearchVal) {
@@ -930,7 +956,7 @@ window.sortMartyrs = function(col, preserveDir = false) {
 async function initDailyCasualtiesApi() {
   const container = document.getElementById('daily-log-container');
   if (!container) return;
-  container.innerHTML = `<div class="status-pulse red" style="padding:20px; font-family:mono; font-size:10px;">SYNCING DAILY LOGS...</div>`;
+  setApiLoading(container, 'SYNCING DAILY LOGS...');
   try {
     const response = await fetch('https://data.techforpalestine.org/api/v2/casualties_daily.json');
     const data = await response.json();
@@ -940,7 +966,7 @@ async function initDailyCasualtiesApi() {
       html += `<tr><td>${day.report_date}</td><td style="color:var(--red); font-weight:bold;">${day.killed_cum.toLocaleString()}</td><td>${day.injured_cum.toLocaleString()}</td><td>${day.killed_children_cum?.toLocaleString() || '--'}</td></tr>`;
     });
     container.innerHTML = html + `</tbody></table>`;
-  } catch (e) { container.innerHTML = `<div class="terminal-alert">ERR_CASUALTY_STREAM_OFFLINE</div>`; }
+  } catch (e) { setApiError(container, 'ERR_CASUALTY_STREAM_OFFLINE'); }
 }
 
 // RESTORED: Archive Registry
@@ -951,7 +977,7 @@ async function fetchRegistryData(category, btnEl) {
     document.querySelectorAll('.timeline-filters .btn-outline').forEach(b => b.classList.remove('active'));
     btnEl.classList.add('active');
   }
-  container.innerHTML = `<div class="status-pulse red" style="padding:20px; font-family:mono; font-size:10px;">QUERYING ${category.toUpperCase()} NODE...</div>`;
+  setApiLoading(container, `QUERYING ${category.toUpperCase()} NODE...`);
   try {
     const response = await fetch(`https://palestine-api.viethere.com/api/v1/${category}`).catch(() => null);
     let records = [];
@@ -978,7 +1004,7 @@ async function fetchRegistryData(category, btnEl) {
       records.forEach(rec => { html += `<tr><td><strong style="color:var(--black);">${rec.title}</strong></td><td>${rec.author || rec.director || '-'}</td><td><a href="${rec.link}" target="_blank" class="detention-btn">View</a></td></tr>`; });
     }
     container.innerHTML = html + `</tbody></table>`;
-  } catch (e) { container.innerHTML = `<div class="terminal-alert">ERR_REGISTRY_HANDSHAKE_FAILED</div>`; }
+  } catch (e) { setApiError(container, 'ERR_REGISTRY_HANDSHAKE_FAILED'); }
 }
 
 // RESTORED: Reddit Intelligence Stream
@@ -1038,16 +1064,16 @@ function renderRedditCards(posts) {
 
     html += `
       <a href="${post.url}" target="_blank" class="reddit-card" style="text-decoration:none; color:inherit;">
-        <div style="padding:16px; border:1px solid var(--border); background:white; height:100%; transition: border-color 0.2s; cursor:pointer; display:flex; flex-direction:column; min-height:440px;" 
+        <div class="reddit-card-inner" style="transition: border-color 0.2s; border-color: var(--border);" 
              onmouseover="this.style.borderColor='${color}'" onmouseout="this.style.borderColor='var(--border)'">
-          <div style="font-family:'IBM Plex Mono',monospace; font-size:8px; color:${color}; margin-bottom:12px;">[ REDDIT_LOG: ${timeStr} ]</div>
+          <div class="reddit-log-tag" style="color:${color};">[ REDDIT_LOG: ${timeStr} ]</div>
           ${thumbHtml}
-          <div style="font-size:12px; font-weight:600; margin-bottom:8px; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; line-height:1.3; flex-grow:1;">
+          <div class="reddit-title">
             ${post.title}
           </div>
-          <div style="display:flex; justify-content:space-between; align-items:center; font-size:9px; color:var(--muted); text-transform:uppercase; margin-top:auto; padding-top:12px; border-top:1px solid rgba(0,0,0,0.05);">
+          <div class="reddit-footer">
             <span>SOURCE: r/ISRAELI_VIOLENCE</span>
-            <span style="color:${color}; font-weight:bold;">SCORE: ${post.score}</span>
+            <span class="score" style="color:${color};">SCORE: ${post.score}</span>
           </div>
         </div>
       </a>`;
