@@ -60,13 +60,15 @@ function executeSwitch(id) {
   document.querySelectorAll('.topnav-links a').forEach(a => a.classList.remove('active'));
 
   const pageEl = document.getElementById(PAGE_MAP[id] || 'page-' + id);
-  const navEl  = document.getElementById(NAV_MAP[id] || 'nav-mandate');
+  const navEl = NAV_MAP[id] ? document.getElementById(NAV_MAP[id]) : null;
 
   if (pageEl) { pageEl.classList.add('active'); window.scrollTo(0, 0); }
   if (navEl) navEl.classList.add('active');
 
   const topnavWrap = document.querySelector('.topnav');
   if (topnavWrap) topnavWrap.classList.remove('expanded');
+  const topnavLinks = document.querySelector('.topnav-links');
+  if (topnavLinks) topnavLinks.classList.remove('active');
   document.querySelectorAll('.sidebar').forEach(s => { 
     s.classList.remove('active'); 
     const clone = s.querySelector('.mobile-topnav-clone'); 
@@ -74,9 +76,8 @@ function executeSwitch(id) {
   });
   document.body.style.overflow = '';
   document.body.classList.remove('mobile-menu-open');
-
+  
   document.title = `ISRAELI_VIOLENCE. — ${id.toUpperCase()}_NODE`;
-  syncSidebars();
   syncSidebarHighlight(id);
   
   if (typeof bindTfpData === 'function') bindTfpData();
@@ -124,6 +125,8 @@ function switchMandateDoc(docId, element) {
 function toggleHeaderLinks() {
   const topnav = document.querySelector('.topnav');
   if (topnav) topnav.classList.toggle('expanded');
+  const links = document.querySelector('.topnav-links');
+  if (links) links.classList.toggle('active');
 }
 
 function toggleMobileMenu() {
@@ -196,9 +199,9 @@ function initQolFeatures() {
     const dp = e.target.closest('.data-point');
     if (dp && dp.dataset.id) {
       navigator.clipboard.writeText(dp.dataset.id).then(() => {
-        const originalText = dp.innerText;
+        if (!dp.dataset.originalText) dp.dataset.originalText = dp.innerText;
         dp.innerText = 'ID_COPIED';
-        setTimeout(() => dp.innerText = originalText, 1000);
+        setTimeout(() => dp.innerText = dp.dataset.originalText, 1000);
       });
     }
   });
@@ -431,7 +434,9 @@ function buildAdvancedFilters(table, inputId) {
   
   rows.forEach(tr => {
     const tds = tr.querySelectorAll('td');
-    tds.forEach((td, i) => { if (td && td.innerText) colValues[i].add(td.innerText.trim()); });
+    tds.forEach((td, i) => { 
+      if (td && td.innerText && colValues[i]) colValues[i].add(td.innerText.trim()); 
+    });
   });
 
   const selects = [];
@@ -790,6 +795,7 @@ async function initInfrastructureApi(page = 1) {
       const response = await fetch('https://data.techforpalestine.org/api/v3/infrastructure-damaged.json');
       if (!response.ok) throw new Error('OFFLINE');
       const rawData = await response.json();
+      if (!Array.isArray(rawData)) throw new Error('Invalid Data Structure');
       const uniqueData = [];
       let lastHash = "";
       for (let i = rawData.length - 1; i >= 0; i--) {
@@ -920,9 +926,9 @@ function renderMartyrsTable() {
 window.handleMartyrsSearch = function(val) {
   const term = val.toLowerCase();
   filteredMartyrsData = cachedMartyrsData.filter(rec => {
-    return (rec.name && rec.name.toLowerCase().includes(term)) || 
-           (rec.en_name && rec.en_name.toLowerCase().includes(term)) ||
-           (rec.sex && rec.sex.toLowerCase() === term) ||
+    return (rec.name && String(rec.name).toLowerCase().includes(term)) || 
+           (rec.en_name && String(rec.en_name).toLowerCase().includes(term)) ||
+           (rec.sex && String(rec.sex).toLowerCase() === term) ||
            (rec.age !== null && String(rec.age) === term);
   });
   martyrsCurrentPage = 1;
@@ -1019,6 +1025,7 @@ async function fetchRedditData() {
     if (!response.ok) throw new Error('NETWORK_FAILURE');
     
     const posts = await response.json();
+    if (!Array.isArray(posts)) throw new Error('INVALID_DATA_STRUCTURE');
     const limitedPosts = posts.slice(0, 3);
     
     localStorage.setItem('reddit_cache', JSON.stringify(limitedPosts));
@@ -1083,13 +1090,13 @@ function renderRedditCards(posts) {
 
 
 /* ── 5. AUDIO & TELEMETRY UTILITIES ── */
-function initAudio() {
+async function initAudio() {
   if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
-  if (audioContext.state === 'suspended') audioContext.resume();
+  if (audioContext.state === 'suspended') await audioContext.resume();
 }
 
-function playAudio(btn) {
-  initAudio();
+async function playAudio(btn) {
+  await initAudio();
   const playerUi = btn.parentElement.querySelector('.audio-ui');
   if (!playerUi) return;
   
@@ -1156,10 +1163,12 @@ function handleGlobalClicks(e) {
   if (!btn) return;
 
   if (btn.getAttribute('onclick')?.includes('showPage')) {
-    if (btn.tagName === 'A' && btn.getAttribute('href') === '#') e.preventDefault();
+    e.preventDefault();
     return;
   }
-  if (!(btn.tagName === 'A' && btn.getAttribute('target') === '_blank')) e.preventDefault();
+  if (btn.tagName !== 'A' || btn.getAttribute('href') === '#' || !btn.getAttribute('href')) {
+    e.preventDefault();
+  }
   
   if (btn.classList.contains('evidence-item')) {
     openLightbox(
