@@ -363,6 +363,16 @@ p, .cyber-log, .data-block-content, .case-indictment-text, .hero-subtitle {
   word-wrap: break-word !important;
 }
 
+/* Center text inside the converted Human Rights table cards on mobile */
+.hr-table tr td {
+  text-align: center !important;
+  max-width: 100% !important; /* Overrides the inline 320px constraint preventing center alignment */
+}
+
+.hr-table tr td::before {
+  text-align: center !important;
+}
+
 .hr-table td::before, .detention-table td::before, .compliance-table td::before, 
 .checkpoint-table td::before, .census-table td::before, #registry-master-table td::before {
   content: attr(data-label);
@@ -399,6 +409,12 @@ input[type="text"], input[type="search"], select, textarea {
   box-sizing: border-box !important;
   display: flex !important;
   flex-direction: column !important;
+}
+
+/* Center text inside Human Rights page cards on mobile */
+#page-hr .siege-card {
+  text-align: center !important;
+  align-items: center !important;
 }
 
 /* 3. ICC Card Content Alignment */

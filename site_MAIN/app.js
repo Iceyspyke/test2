@@ -4,7 +4,7 @@
 ════════════════════════════════════════════ */
 
 const PAGE_MAP = {
-  gaza: 'page-gaza', mandate: 'page-mandate', nakba: 'page-nakba', chronology: 'page-chronology', icj: 'page-icj', hr: 'page-hr',
+  wb: 'page-wb', westbank: 'page-wb', gaza: 'page-gaza', mandate: 'page-mandate', nakba: 'nav-nakba', chronology: 'page-chronology', icj: 'page-icj', hr: 'page-hr',
   case: 'page-case', siege: 'page-siege', maps: 'page-maps', testimonies: 'page-testimonies',
   british: 'page-british', census: 'page-census', icc: 'page-icc', un: 'page-un',
   detention: 'page-detention', media: 'page-media', arms: 'page-arms', medical: 'page-medical',
@@ -14,8 +14,8 @@ const PAGE_MAP = {
 };
 
 const NAV_MAP = {
-  gaza: 'nav-gaza', mandate: 'nav-mandate', nakba: 'nav-nakba', icj: 'nav-icj', hr: 'nav-hr',
-  case: 'nav-icj', icc: 'nav-icc'
+  wb: 'nav-wb', gaza: 'nav-gaza', mandate: 'nav-mandate', nakba: 'nav-nakba', icj: 'nav-icj', hr: 'nav-hr',
+  case: 'nav-icj', icc: 'nav-icc', westbank: 'nav-wb'
 };
 
 const REDDIT_POLL_MS = 2 * 60 * 60 * 1000;
@@ -85,6 +85,8 @@ function executeSwitch(id) {
   if (typeof bindTfpData === 'function') bindTfpData();
   
   const triggers = {
+    'wb': () => { fetchWestBankRedditData(); },
+    'westbank': () => { fetchWestBankRedditData(); },
     'gaza': () => { initDailyCasualtiesApi(); initChildNamesApi(); initKilledNamesApi(1); initInfrastructureApi(1); initMediaApi(); },
     'maps': () => initMapsApi(),
     'movement': () => initPresencesApi(1),
@@ -1167,6 +1169,66 @@ function renderRedditCards(posts) {
           </div>
           <div class="reddit-footer">
             <span>SOURCE: r/ISRAELI_VIOLENCE</span>
+            <span class="score" style="color:${color};">SCORE: ${post.score}</span>
+          </div>
+        </div>
+      </a>`;
+  });
+  container.innerHTML = html;
+}
+
+// ── WEST BANK OSINT STREAM (SETTLERS FLAIR) ──
+async function fetchWestBankRedditData() {
+  const container = document.getElementById('wb-reddit-container');
+  if (!container) return;
+  
+  // Reset container to show loading state if it was empty or had an error
+  container.innerHTML = `<div class="skeleton-wrap" style="height:100px; grid-column: span 3; opacity: 0.5; font-family:'IBM Plex Mono', monospace; font-size:10px; padding:20px;">[ ACCESSING OSINT_NODE: SETTLERS... ]</div>`;
+  
+  try {
+    const workerLink = 'https://blackened-worker.hadi-nashat.workers.dev/?feed=settlers';
+    
+    const response = await fetchWithTimeout(workerLink, {}, 8000);
+    if (!response.ok) throw new Error(`HTTP_${response.status}`);
+    
+    const posts = await response.json();
+    if (!Array.isArray(posts)) throw new Error('INVALID_DATA_STRUCTURE');
+    
+    if (posts.length === 0) {
+        container.innerHTML = `<div class="terminal-alert" style="grid-column: span 3;">STATUS: NO_FLAIRED_POSTS_FOUND</div>`;
+        return;
+    }
+
+    renderWestBankRedditCards(posts);
+  } catch (err) {
+    container.innerHTML = `<div class="terminal-alert" style="grid-column: span 3; border-color: var(--red);">ERR_OSINT_STREAM_OFFLINE: ${err.message}</div>`;
+  }
+}
+
+function renderWestBankRedditCards(posts) {
+  const container = document.getElementById('wb-reddit-container');
+  if (!container) return;
+  let html = '';
+  const themes = ['var(--red)', 'var(--amber)', 'var(--black)', 'var(--green-light)'];
+
+  posts.forEach((post, i) => {
+    const date = new Date(post.created);
+    const timeStr = `${date.getUTCHours().toString().padStart(2, '0')}:${date.getUTCMinutes().toString().padStart(2, '0')}_UTC`;
+    const color = themes[i % themes.length];
+    
+    const thumbHtml = post.thumbnail 
+      ? `<div style="width:100%; height:220px; background:url('${post.thumbnail}') center/cover no-repeat; margin-bottom:12px; border:1px solid var(--border); opacity:0.9;"></div>`
+      : `<div style="width:100%; height:220px; background:var(--border); display:flex; align-items:center; justify-content:center; margin-bottom:12px; border:1px solid var(--border); font-family:'IBM Plex Mono', monospace; font-size:10px; color:var(--muted); opacity:0.5;">NO_VISUAL_FEED</div>`;
+
+    html += `
+      <a href="${post.url}" target="_blank" class="reddit-card" style="text-decoration:none; color:inherit; display:block;">
+        <div class="reddit-card-inner" style="transition: border-color 0.2s; border-color: var(--border);" 
+             onmouseover="this.style.borderColor='${color}'" onmouseout="this.style.borderColor='var(--border)'">
+          <div class="reddit-log-tag" style="color:${color}; font-weight:600;">[ FLAIR: SETTLERS // ${timeStr} ]</div>
+          ${thumbHtml}
+          <div class="reddit-title">${post.title}</div>
+          <div class="reddit-footer">
+            <span>r/ISRAELI_VIOLENCE</span>
             <span class="score" style="color:${color};">SCORE: ${post.score}</span>
           </div>
         </div>

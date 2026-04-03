@@ -1,0 +1,480 @@
+<div id="page-wb" class="page">
+  <style>
+	/* MOBILE FIXES */
+	@media (max-width: 767px) {
+
+	  * { box-sizing: border-box !important; }
+
+	  .main { 
+		padding: 0 !important; 
+		width: 100% !important; 
+		overflow-x: hidden !important;
+	  }
+
+	  /* Sections, headers, generic padding */
+	  .section, .page-header, section[style*="padding"], section[style*="margin"] {
+		padding-left: 20px !important;
+		padding-right: 20px !important;
+		padding-top: 80px !important;
+		padding-bottom: 60px !important;
+		margin: 0 !important;
+		width: 100% !important;
+		display: flex !important;
+		flex-direction: column !important;
+	  }
+
+	  /* Buttons */
+	  .btn-outline, .btn-primary, .btn-view-register, .cyber-log-btn {
+		width: 100% !important;
+		display: block !important;
+		margin: 20px 0 !important;
+		padding: 16px !important;
+		text-align: center !important;
+	  }
+
+	  /* Info / alert / data blocks */
+	  .terminal-alert, .urgent-card, .data-block, .cyber-log, .casualty-card {
+		margin: 40px 0 !important;
+		padding: 30px 20px !important;
+		width: 100% !important;
+	  }
+
+	  /* Section footer alignment */
+	  .section div[style*="text-align: right"] {
+		text-align: center !important;
+		margin: 40px 0 60px 0 !important;
+	  }
+
+	  /* Table responsive */
+	  .hr-table, .hr-table tbody, .hr-table tr {
+		display: block !important;
+		width: 100% !important;
+	  }
+	  .hr-table thead { display: none !important; }
+	  .hr-table td {
+		display: block !important;
+		width: 100% !important;
+		padding: 20px !important;
+		border-bottom: 1px solid var(--border) !important;
+		text-align: left !important;
+		white-space: normal !important;
+		overflow-wrap: break-word !important;
+		margin-bottom: 30px !important;
+	  }
+	  .hr-table td::before {
+		content: attr(data-label);
+		display: block;
+		font-family: 'IBM Plex Mono', monospace;
+		font-size: 10px;
+		color: var(--muted);
+		text-transform: uppercase;
+		margin-bottom: 10px;
+		font-weight: 700;
+		letter-spacing: 1px;
+	  }
+	  .hr-table tr {
+		border: 1px solid var(--border) !important;
+		border-top: 5px solid var(--black) !important;
+		margin-bottom: 60px !important;
+		background: #fff !important;
+	  }
+
+	  /* Testimony / affidavits */
+	  .testimony-list {
+		display: flex !important;
+		flex-direction: column !important;
+		gap: 80px !important;
+		margin-top: 50px !important;
+		margin-bottom: 80px !important;
+	  }
+	  .testimony-item {
+		padding-bottom: 40px !important;
+		border-bottom: 2px solid var(--border) !important;
+	  }
+	  .testimony-meta {
+		flex-direction: column !important;
+		align-items: flex-start !important;
+		gap: 15px !important;
+		margin-bottom: 35px !important;
+	  }
+	  .testimony-meta span { display: block !important; width: 100% !important; }
+	  .testimony-quote { font-size: 20px !important; line-height: 1.6 !important; margin: 25px 0 !important; }
+	  .testimony-author { margin-top: 30px !important; font-weight: 700 !important; }
+
+	  /* Grid layouts → vertical stack */
+	  .folder-grid, .media-grid, .infra-grid, .folder-card-bottom, 
+	  .detention-stats-grid, .bm-grid, #wb-reddit-container, .forensic-grid {
+		display: flex !important;
+		flex-direction: column !important;
+		width: 100% !important;
+		gap: 40px !important;
+		margin-bottom: 40px !important;
+	  }
+
+	  /* Internal cards → full width */
+	  .folder-card, .folder-card-sm, .media-card, .arms-card, 
+	  .infra-card, .detention-stat-box, .skeleton-wrap, .cult-archive-card, .folder-card-bottom {
+		width: 100% !important;
+		margin: 0 !important;
+	  }
+
+	  /* Page headers / section titles */
+	  .page-header-title { font-size: 36px !important; line-height: 1.1 !important; margin-bottom: 30px !important; }
+	  .section-title { font-size: 28px !important; margin-bottom: 40px !important; }
+
+	  /* Cyber-log / data block text */
+	  .cyber-log, .data-block-content { font-size: 13px !important; line-height: 1.7 !important; white-space: pre-wrap !important; }
+
+	}
+  </style>
+
+  <aside class="sidebar" data-autosidebar></aside>
+
+  <div class="main">
+
+	<!-- Page Header -->
+	<div class="page-header">
+	  <div class="page-header-label">NODE: 44-WB // CLASSIFICATION: APARTHEID & ANNEXATION</div>
+	  <h1 class="page-header-title">WEST BANK & JERUSALEM</h1>
+	  <p class="page-header-text">Documenting the systematic fragmentation of Palestinian territory through military occupation, illegal settlement expansion, and state-sanctioned settler terrorism.</p>
+	</div>
+
+	<!-- Terminal Alert -->
+	<div class="terminal-alert">
+	  AREA C DE FACTO ANNEXATION PROTOCOL ONGOING. Accelerated land confiscation and forced displacement detected. Military law applies exclusively to the occupied population, fulfilling international legal thresholds for Apartheid.
+	</div>
+
+	<!-- Section: Matrix of Control -->
+	<section class="section">
+	  <h2 class="section-title">The Matrix of Control</h2>
+	  <div class="section-rule"></div>
+
+	  <div class="folder-card-bottom">
+		<div class="folder-card-sm">
+		  <div class="folder-card-label">AREA A (18%)</div>
+		  <div class="folder-card-sm-title">Fragmented Enclaves</div>
+		  <p class="folder-card-sm-text">Nominal Palestinian Authority control. Subject to regular, violent Israeli military incursions, administrative overrides, and economic strangulation.</p>
+		</div>
+		<div class="folder-card-sm">
+		  <div class="folder-card-label" style="color: var(--amber);">AREA B (22%)</div>
+		  <div class="folder-card-sm-title">Joint Control</div>
+		  <p class="folder-card-sm-text">Palestinian civil administration, complete Israeli security control. Severe restrictions on structural development and expansion.</p>
+		</div>
+		<div class="folder-card-sm dark" style="border-top: 3px solid var(--red);">
+		  <div class="folder-card-label" style="color: var(--red);">AREA C (60%)</div>
+		  <div class="folder-card-sm-title">Total Israeli Control</div>
+		  <p class="folder-card-sm-text">Site of all illegal Israeli settlements. 99% of Palestinian building permit applications are rejected to ensure demographic engineering.</p>
+		</div>
+	  </div>
+
+	  <div class="casualty-card">
+		<h3 class="casualty-title">Demographic Warfare & Control Metrics</h3>
+		<div class="casualty-stats">
+		  <div class="casualty-row">
+			<span class="casualty-row-label">Total Illegal Settlers (West Bank + East Jerusalem)</span>
+			<span class="casualty-row-val red">750,000+</span>
+		  </div>
+		  <div class="casualty-row">
+			<span class="casualty-row-label">Military Checkpoints & Physical Barriers</span>
+			<span class="casualty-row-val">645+</span>
+		  </div>
+		  <div class="casualty-row">
+			<span class="casualty-row-label">Conviction Rate for Palestinians in Military Courts</span>
+			<span class="casualty-row-val">99.7%</span>
+		  </div>
+		  <div class="casualty-row">
+			<span class="casualty-row-label">Water Resources Controlled by Israel</span>
+			<span class="casualty-row-val">80%</span>
+		  </div>
+		</div>
+	  </div>
+	</section>
+
+	<!-- Section: Settler Violence -->
+	<section class="section" style="background:#F7F5F0;">
+	  <h2 class="section-title">Settler Violence & State Complicity</h2>
+	  <div class="section-rule"></div>
+
+	  <div class="media-grid">
+		<div class="media-card blackout">
+		  <div class="media-card-body">
+			<span class="media-card-meta">INCIDENT // POGROM</span>
+			<h3 class="media-card-title">Huwara & Town Sieges</h3>
+			<p class="media-card-text">Coordinated arson, property destruction, and armed assaults on Palestinian towns by hundreds of settlers, operating with the protection, and often active participation, of the IDF.</p>
+			<a class="btn-view-register">Access Footage →</a>
+		  </div>
+		</div>
+
+		<div class="arms-card" style="border-top-color: var(--green-light);">
+		  <div class="arms-meta"><span>ECOLOGICAL WARFARE</span><span>EVID-092</span></div>
+		  <h3 class="arms-card-title">Agricultural Sabotage</h3>
+		  <p class="arms-card-text">Systematic uprooting, burning, and chemical poisoning of ancient olive trees to destroy Palestinian economic independence and sever ancestral land ties.</p>
+		  <div class="arms-stats">
+			<div class="arms-stat-row">
+			  <span>Trees Destroyed (Since 1967)</span>
+			  <span class="arms-stat-val" style="color:var(--green-light);">800,000+</span>
+			</div>
+		  </div>
+		</div>
+
+		<div class="media-card">
+		  <img class="media-card-img" src="https://images.unsplash.com/photo-1590250669229-c812d6a7edc8?q=80&w=800&auto=format&fit=crop" alt="Barbed wire" style="filter:grayscale(1) contrast(1.2) sepia(0.2);">
+		  <div class="media-card-body">
+			<span class="media-card-meta" style="color:var(--black); background:var(--border);">PARAMILITARY</span>
+			<h3 class="media-card-title">Armed Herding Outposts</h3>
+			<p class="media-card-text">Establishment of violent, state-funded outposts used to terrorize indigenous Bedouin communities, restrict grazing access, and force depopulation of Area C.</p>
+		  </div>
+		</div>
+	  </div>
+	</section
+
+	<section class="section" style="padding: 60px 0;">
+	  <h2 class="section-title">The Architecture of Apartheid</h2>
+	  <div class="section-rule"></div>
+	  
+	  <div class="infra-grid">
+		<div class="infra-card" style="border: 1px solid var(--border); background: #fff;">
+		  <div class="infra-sector">INFRA-01</div>
+		  <h3 class="infra-card-title">The Segregation Wall</h3>
+		  <p class="infra-card-text">Deemed illegal by the ICJ. 85% of its route cuts deep into the West Bank, effectively annexing 9.4% of Palestinian territory and separating farmers from their lands.</p>
+		</div>
+		<div class="infra-card" style="border: 1px solid var(--border); background: #fff;">
+		  <div class="infra-sector">INFRA-02</div>
+		  <h3 class="infra-card-title">Segregated Road Networks</h3>
+		  <p class="infra-card-text">A multi-billion dollar highway network bypassing Palestinian towns, linking illegal settlements directly to Israel. Palestinian vehicles are legally barred from entry.</p>
+		</div>
+		<div class="infra-card" style="border: 1px solid var(--border); background: var(--black); color: var(--cream);">
+		  <div class="infra-sector" style="color: var(--red);">LEGAL-01</div>
+		  <h3 class="infra-card-title" style="color:var(--cream);">Dual Legal System</h3>
+		  <p class="infra-card-text" style="color:rgba(255,255,255,0.6);">Israeli settlers are governed by civilian law with full rights. Palestinians living in the exact same territory are subjected to draconian military law without due process.</p>
+		</div>
+		<div class="infra-card" style="border: 1px solid var(--border); background: #fff;">
+		  <div class="infra-sector">INFRA-04</div>
+		  <h3 class="infra-card-title">Movement Control</h3>
+		  <p class="infra-card-text">An arbitrary permit system dictating who can travel for work, medical care, or family visits. Used as a tool for collective punishment and intelligence blackmail.</p>
+		</div>
+	  </div>
+	</section>
+
+	<section class="section" style="padding: 0 0 60px 0;">
+	  <h2 class="section-title">Military Incarceration & Hostage Operations</h2>
+	  <div class="section-rule"></div>
+
+	  <div class="detention-stats-grid">
+		<div class="detention-stat-box">
+		  <div class="detention-stat-label">Administrative Detainees</div>
+		  <div class="detention-stat-val" style="color: var(--red);">3,400+</div>
+		  <p style="font-size: 10px; color: rgba(255,255,255,0.6); margin-top: 8px;">Palestinians held indefinitely without charge, trial, or access to evidence against them. A direct violation of international human rights law.</p>
+		</div>
+		<div class="detention-stat-box" style="border-top-color: var(--green-light);">
+		  <div class="detention-stat-label">Child Prisoners</div>
+		  <div class="detention-stat-val">250+</div>
+		  <p style="font-size: 10px; color: rgba(255,255,255,0.6); margin-top: 8px;">Israel is the only country in the world that systematically prosecutes children in military tribunals. Confessions frequently obtained through physical coercion.</p>
+		</div>
+		<div class="detention-stat-box" style="border-top-color: var(--muted);">
+		  <div class="detention-stat-label">Military Raid Frequency</div>
+		  <div class="detention-stat-val">Nightly</div>
+		  <p style="font-size: 10px; color: rgba(255,255,255,0.6); margin-top: 8px;">Heavily armed military incursions into civilian homes during sleeping hours. Designed to inflict psychological terror and assert dominance over the occupied population.</p>
+		</div>
+	  </div>
+	</section>
+
+	<section class="section" style="background:#F7F5F0; padding: 60px 40px; margin: 0 -40px 60px -40px;">
+	  <h2 class="section-title">Resource Theft & Economic Strangulation</h2>
+	  <div class="section-rule"></div>
+
+	  <div class="folder-grid" style="grid-template-columns: 1fr 1fr;">
+		<div class="folder-card">
+		  <div class="folder-card-label" style="color: #2b7bb9;">HYDROLOGICAL CONTROL</div>
+		  <h3 class="folder-card-title">Water Apartheid</h3>
+		  <p class="folder-card-text">Israel controls all water resources in the West Bank through the state company Mekorot. Illegal settlements receive continuous, unlimited water supply and lush agricultural irrigation, while neighboring Palestinian towns face severe artificial shortages, forced to buy back their own extracted water at inflated prices.</p>
+		  <div class="forensic-grid" style="grid-template-columns: 1fr 1fr; margin-top: 16px; border-top: 1px solid var(--border); padding-top: 16px;">
+			<div class="forensic-item">
+			  <span class="forensic-item-label">Settler Water Use</span>
+			  <span class="forensic-item-val" style="font-size: 16px;">300L / day</span>
+			</div>
+			<div class="forensic-item">
+			  <span class="forensic-item-label">Palestinian Water Use</span>
+			  <span class="forensic-item-val" style="font-size: 16px; color: var(--red);">73L / day</span>
+			</div>
+		  </div>
+		</div>
+
+		<div class="folder-card dark">
+		  <div class="folder-card-label">ECONOMIC SABOTAGE</div>
+		  <h3 class="folder-card-title">Tax Revenue Extortion</h3>
+		  <p class="folder-card-text">Under the Paris Protocol, Israel collects customs taxes on behalf of the Palestinian Authority. The Israeli government routinely freezes or completely withholds hundreds of millions of dollars in Palestinian tax revenues as a mechanism of political blackmail and collective punishment, paralyzing the public sector and health services.</p>
+		  <a class="folder-link" style="margin-top: 24px;">View World Bank Report →</a>
+		</div>
+	  </div>
+	</section>
+
+	<section class="section" style="padding: 0 0 60px 0;">
+	  <div class="page-header-label">TACTICAL ESCALATION</div>
+	  <h2 class="section-title">Urban Siege & Aerial Warfare</h2>
+	  <div class="section-rule"></div>
+
+	  <div class="urgent-card" style="margin-bottom: 24px;">
+		<div class="urgent-label">CRITICAL ESCALATION (POST OCT-7)</div>
+		<div class="urgent-text">The Israeli military has reintroduced aerial bombardments and combat drone strikes in the West Bank for the first time since the Second Intifada, fundamentally shifting the paradigm of engagement from policing to full-scale militarized combat operations against civilian population centers.</div>
+	  </div>
+
+	  <div class="bm-grid" style="grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 0;">
+		<div class="cult-archive-card">
+		  <div class="cult-archive-node">REFUGEE CAMP TARGETING</div>
+		  <h3 class="cult-archive-title">Jenin & Nur Shams</h3>
+		  <p class="cult-archive-text">Extended multi-day sieges of densely populated refugee camps involving D9 armored bulldozers. The military strategy intentionally targets civilian infrastructure: tearing up paved roads, destroying water mains, and severing electricity and internet lines to enact collective punishment on the camp's residents.</p>
+		</div>
+		<div class="cult-archive-card" style="border-top-color: var(--amber);">
+		  <div class="cult-archive-node">MEDICAL OBSTRUCTION</div>
+		  <h3 class="cult-archive-title">Targeting Paramedics</h3>
+		  <p class="cult-archive-text">Systematic obstruction of Palestinian Red Crescent society ambulances during military raids. Paramedics are routinely denied access to the wounded, fired upon with live ammunition, or detained, directly violating the Geneva Conventions regarding the protection of medical personnel in conflict zones.</p>
+		</div>
+	  </div>
+	</section>
+
+	<section class="section" style="padding: 0 0 60px 0;">
+	  <h2 class="section-title">Digital Apartheid & Biometrics</h2>
+	  <div class="section-rule"></div>
+	  
+	  <div class="cyber-log">
+		&gt; SYSTEM_ID: RED_WOLF / BLUE_WOLF<br>
+		&gt; LOCATION: HEBRON (H2) & MAJOR CHECKPOINTS<br>
+		&gt; STATUS: EXPERIMENTAL SURVEILLANCE ACTIVE<br>
+		<br>
+		&gt; ANALYSIS: The Israeli military utilizes Hebron as a testing ground for experimental biometric surveillance technology. Systems like "Red Wolf" utilize facial recognition at checkpoints without Palestinian consent. Soldiers are gamified via the "Blue Wolf" app to take non-consensual photos of Palestinians, including children, to build a massive, unregulated biometric database. Freedom of movement is dictated by algorithms.
+		<br>
+		<button class="cyber-log-btn">Access Amnesty International Report</button>
+	  </div>
+	</section>
+
+	<section class="section" style="padding: 0 0 60px 0;">
+	  <div class="page-header-label">GEOSPATIAL MAPPING</div>
+	  <h2 class="section-title">Settlement Expansion & The E1 Corridor</h2>
+	  <div class="section-rule"></div>
+
+	  <div class="folder-geo" style="border: 1px solid var(--border); background: #fff; padding: 24px;">
+		<div class="folder-card-label" style="color: var(--red); margin-bottom: 12px;">STRATEGIC BIFURCATION</div>
+		<div class="geo-map-img" style="height: 250px; margin-bottom: 20px;">
+		  <img src="https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=1000&auto=format&fit=crop" style="filter: grayscale(1) contrast(1.5) brightness(0.8);" alt="Satellite Map Placeholder">
+		</div>
+		<h3 class="folder-card-title" style="font-size: 24px;">The E1 Annexation Plan</h3>
+		<p class="folder-card-text">The E1 master plan involves building thousands of settlement units east of Jerusalem. Execution of this plan physically bisects the West Bank, separating the northern and southern cantons and isolating East Jerusalem. This geospatial engineering permanently eliminates the physical possibility of a contiguous, viable Palestinian state.</p>
+		<div style="display: flex; gap: 12px; margin-top: 16px;">
+		  <button class="btn-primary">View Satellite Timelapse</button>
+		  <button class="btn-outline" style="color: var(--black); border-color: var(--black);">Download GIS Shapefiles</button>
+		</div>
+	  </div>
+	</section>
+
+	<section class="section" style="padding: 0 0 60px 0;">
+	  <h2 class="section-title">Demolition & Confiscation Logs</h2>
+	  <div class="section-rule"></div>
+	  
+	  <div class="data-block">
+		<div class="data-block-header"><span>// SYNC_LOG: MIL_DEMOLITIONS</span><span>HASH: 0x8A9F2</span></div>
+		<div class="data-block-content">
+> EXECUTING QUERY...
+> FILTER: PUNITIVE & ADMINISTRATIVE DEMOLITIONS
+> REGION: AREA C & EAST JERUSALEM
+> STATUS: 1,128 STRUCTURES DESTROYED IN PREVIOUS 12 MONTHS.
+> DISPLACED: 2,249 INDIVIDUALS.
+> VIOLATION: FOURTH GENEVA CONVENTION, ART. 53 (DESTRUCTION OF PROPERTY).
+> VIOLATION: ROME STATUTE, ART. 8(2)(a)(iv) (WAR CRIMES).
+		</div>
+	  </div>
+
+	  <div class="table-scroll-wrapper">
+		<table class="hr-table">
+		  <thead>
+			<tr>
+			  <th>Date</th>
+			  <th>Location</th>
+			  <th>Structure Type</th>
+			  <th>Pretext / Justification</th>
+			  <th>Displaced/Impacted</th>
+			</tr>
+		  </thead>
+		  <tbody>
+			<tr>
+			  <td data-label="Date">[LIVE FEED]</td>
+			  <td data-label="Location">Masafer Yatta</td>
+			  <td data-label="Structure Type">Primary School & Solar Array</td>
+			  <td data-label="Pretext / Justification">Lack of Military Permit</td>
+			  <td data-label="Displaced/Impacted"><span class="map-data-val red">45 Children</span></td>
+			</tr>
+			<tr>
+			  <td data-label="Date">[LIVE FEED]</td>
+			  <td data-label="Location">Silwan, East Jerusalem</td>
+			  <td data-label="Structure Type">Multi-story Residential Block</td>
+			  <td data-label="Pretext / Justification">Urban Zoning Violation</td>
+			  <td data-label="Displaced/Impacted"><span class="map-data-val red">22 Persons</span></td>
+			</tr>
+			<tr>
+			  <td data-label="Date">[ARCHIVE]</td>
+			  <td data-label="Location">Jordan Valley</td>
+			  <td data-label="Structure Type">Agricultural Infrastructure / Wells</td>
+			  <td data-label="Pretext / Justification">State Land Confiscation</td>
+			  <td data-label="Displaced/Impacted"><span class="map-data-val red">3 Families</span></td>
+			</tr>
+			<tr>
+			  <td data-label="Date">[ARCHIVE]</td>
+			  <td data-label="Location">Khan al-Ahmar (Env.)</td>
+			  <td data-label="Structure Type">Bedouin Encampment</td>
+			  <td data-label="Pretext / Justification">Firing Zone Declaration</td>
+			  <td data-label="Displaced/Impacted"><span class="map-data-val red">70 Persons</span></td>
+			</tr>
+		  </tbody>
+		</table>
+	  </div>
+	  
+	  <div style="margin-top: 16px; text-align: right;">
+		<button class="btn-outline" style="color: var(--black); border-color: var(--black);">DOWNLOAD FULL LEDGER [CSV]</button>
+	  </div>
+	</section>
+
+	<section class="section" style="padding: 0 0 60px 0;">
+	  <h2 class="section-title">Verified Affidavits</h2>
+	  <div class="section-rule"></div>
+
+	  <div class="testimony-list">
+		<div class="testimony-item verified">
+		  <div class="testimony-meta">
+			<span><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="var(--green-light)" stroke-width="2"><path d="M20 6L9 17l-5-5"></path></svg> VERIFIED AFFIDAVIT</span>
+			<span>DATE: OCT 2023</span>
+			<span>LOC: WADI AL-SIQ</span>
+		  </div>
+		  <blockquote class="testimony-quote">
+			"They stripped us to our underwear, tied our hands with wire, and beat us with pipes for hours. They put cigarettes out on us. They told us if we didn't leave our village by morning, they would kill us all. These were settlers we recognized, but they were wearing IDF uniforms and carrying army-issued M16s."
+		  </blockquote>
+		  <div class="testimony-author">A.M. (Identity redacted for security)</div>
+		  <div class="testimony-context">Bedouin community leader displaced during the accelerated ethnic cleansing of Area C following October 7th.</div>
+		</div>
+
+		<div class="testimony-item">
+		  <div class="testimony-meta">
+			<span><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> LOGGED: DCI-P</span>
+			<span>DATE: MAR 2022</span>
+			<span>LOC: OFER MILITARY PRISON</span>
+		  </div>
+		  <blockquote class="testimony-quote">
+			"They arrested me at 3:00 AM. They blew the door off the hinges. They blindfolded me and threw me on the floor of the jeep. In the interrogation room, they hit me every time I fell asleep. They made me sign a paper in Hebrew that I couldn't read. I was 14."
+		  </blockquote>
+		  <div class="testimony-author">Tariq S.</div>
+		  <div class="testimony-context">Child prisoner subjected to military detention and solitary confinement.</div>
+		</div>
+	  </div>
+	</section>
+
+	<section class="section" style="background:#F7F5F0; padding: 60px 40px; margin: 0 -40px;">
+	  <div class="page-header-label" style="color: var(--red);">OSINT STREAM // R/ISRAELI_VIOLENCE</div>
+	  <h2 class="section-title">Reddit: Settler Violence</h2>
+	  <div class="section-rule"></div>
+
+	  <div id="wb-reddit-container" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:24px; margin-bottom:60px;">
+		<div class="skeleton-wrap" style="height:100px; grid-column: span 3; opacity: 0.5; font-family:'IBM Plex Mono', monospace; font-size:10px; padding:20px;">[ ACCESSING OSINT_NODE: SETTLERS... ]</div>
+	  </div>
+	</section>
+
+  </div>
+</div>
