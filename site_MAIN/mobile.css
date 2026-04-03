@@ -36,15 +36,22 @@
 /* Stack Map and Overlay */
 .map-viewer { flex-direction: column !important; min-height: auto !important; height: auto !important; }
 .map-ui-overlay { 
+  position: relative !important;
   width: 100% !important; 
   height: auto !important; 
   border-left: none !important; 
-  border-top: 1px solid rgba(255,255,255,0.2) !important; 
+  border-top: 3px solid var(--amber) !important; 
+  box-shadow: none !important;
 }
 #active-map-img { 
   width: 100% !important; 
   height: 350px !important; /* Fixed height for image area on mobile */
   flex-grow: 0 !important; 
+  object-fit: contain !important;
+}
+.map-svg-container {
+  inset: 0 0 auto 0 !important;
+  height: 350px !important;
 }
 
 .verdicts-inner, .bm-viewer {
@@ -251,11 +258,11 @@ p, .cyber-log, .data-block-content, .case-indictment-text, .hero-subtitle {
   margin-bottom: 0 !important;
 }
 
-/* Latest Posts - Force Desktop 3-Column Grid on Mobile */
+/* Latest Posts - Stacked Grid on Mobile */
 #reddit-uploads-container {
-  display: grid !important;
-  grid-template-columns: repeat(3, 1fr) !important; /* Forces 3 items side-by-side */
-  gap: 8px !important; /* Reduced gap to fit small screens */
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 16px !important;
   padding: 0 16px !important;
   box-sizing: border-box !important;
   width: 100% !important;
@@ -284,9 +291,11 @@ p, .cyber-log, .data-block-content, .case-indictment-text, .hero-subtitle {
 
 #page-mandate .bm-list {
   display: grid !important;
-  grid-template-columns: repeat(2, 1fr) !important; /* Creates a clean 2x2 grid */
+  grid-template-columns: 1fr 1fr !important; /* Creates a clean 2x2 grid */
   gap: 8px !important;
   margin-bottom: 0 !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
 }
 
 #page-mandate .bm-list-item {
