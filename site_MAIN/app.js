@@ -4,7 +4,7 @@
 ════════════════════════════════════════════ */
 
 const PAGE_MAP = {
-  mandate: 'page-mandate', nakba: 'page-nakba', icj: 'page-icj', hr: 'page-hr',
+  mandate: 'page-mandate', nakba: 'page-nakba', chronology: 'page-chronology', icj: 'page-icj', hr: 'page-hr',
   case: 'page-case', siege: 'page-siege', maps: 'page-maps', testimonies: 'page-testimonies',
   british: 'page-british', census: 'page-census', icc: 'page-icc', un: 'page-un',
   detention: 'page-detention', media: 'page-media', arms: 'page-arms', medical: 'page-medical',
@@ -96,7 +96,7 @@ function executeSwitch(id) {
   if (triggers[id]) setTimeout(triggers[id], 150);
   
   setTimeout(() => {
-    if (id === 'nakba') initTimelineFilter();
+    if (id === 'nakba' || id === 'chronology') initTimelineFilter();
     injectTableLabels();
     initAllStaticTables();
   }, 300);
@@ -309,15 +309,15 @@ function initTimelineFilter() {
       
       const show = (!q || text.includes(q)) && (d === 'all' || itemDecade === d) && (t === 'all' || itemType === t);
       if (show) { 
-        item.style.display = ''; 
+        item.style.setProperty('display', '', ''); 
         visible++; 
       } else { 
-        item.style.display = 'none'; 
+        item.style.setProperty('display', 'none', 'important'); 
       }
     });
     
     const noResults = document.getElementById('tl-no-results');
-    if (noResults) noResults.classList.toggle('visible', visible === 0);
+    if (noResults) noResults.style.setProperty('display', visible === 0 ? 'block' : 'none', 'important');
   }
 
   if (search) search.addEventListener('input', filterTimeline);
@@ -372,8 +372,10 @@ function buildAdvancedFilters(table, inputId) {
   }
   if (noFilterPages.includes(pageId) || noFilterContainers.includes(containerId)) {
     allowFilters = false; 
-    // Remove search specifically from Munitions, Detention, and System Integrations registries
-    disableSearch = ['page-arms', 'page-detention', 'page-surveillance', 'page-compliance'].includes(pageId); 
+    // Hide search for specific registry pages and the static table on the Movement page
+    // The API table on the Movement page uses the 'presences-api-container' ID and will keep its search bar
+    disableSearch = ['page-arms', 'page-detention', 'page-surveillance', 'page-compliance'].includes(pageId) || 
+                   (pageId === 'page-movement' && containerId !== 'presences-api-container');
   }
   if (containerId === 'media-api-container' || pageId === 'page-media') {
     allowedColumns = ['method of martyrdom', 'location'];
