@@ -1,20 +1,8 @@
 /* ══════════════════════════════════════════
    ISRAELI_VIOLENCE. — MONOLITH_OS APPLICATION
    app.js
-
-   REORGANIZED STRUCTURE:
-   1. CONFIGURATION & STATE
-   2. ROUTING & NAVIGATION
-   3. UI COMPONENTS & OVERLAYS
-   4. SEARCH & FILTERING
-   5. DATA STREAMS & APIS
-   6. AUDIO & TELEMETRY UTILITIES
-   7. INITIALIZATION & EVENTS
 ════════════════════════════════════════════ */
 
-/* ──────────────────────────────────────────
-   1. CONFIGURATION & STATE
-─────────────────────────────────────────── */
 const PAGE_MAP = {
   mandate: 'page-mandate', nakba: 'page-nakba', icj: 'page-icj', hr: 'page-hr',
   case: 'page-case', siege: 'page-siege', maps: 'page-maps', testimonies: 'page-testimonies',
@@ -30,26 +18,23 @@ const NAV_MAP = {
   case: 'nav-icj', icc: 'nav-icc'
 };
 
-const REDDIT_POLL_MS = 12 * 60 * 60 * 1000;
+const REDDIT_POLL_MS = 2 * 60 * 60 * 1000;
 
-// Global State Containers
+// Global State
 let tfpSummaryData = null;
 let audioContext;
 let displacementMapsData = [];
 let mapsApiInitialized = false;
 let cachedInfraData = null; 
+let cachedMartyrsData = null;
+let filteredMartyrsData = null;
+let martyrsCurrentPage = 1;
+const martyrsPageSize = 100;
+let martyrsSort = { col: null, dir: 'asc' };
+let infraSortDir = 'desc';
 
-
-/* ──────────────────────────────────────────
-   2. ROUTING & NAVIGATION
-─────────────────────────────────────────── */
-function showPage(id) {
-  executeSwitch(id);
-}
-
-function showLoader(id) {
-  executeSwitch(id); // no-op fallback
-}
+/* ── 1. ROUTING & NAVIGATION ── */
+function showPage(id) { executeSwitch(id); }
 
 function executeSwitch(id) {
   document.querySelectorAll('.page').forEach(p => { p.classList.remove('active'); p.style.display = ''; });
@@ -61,10 +46,13 @@ function executeSwitch(id) {
   if (pageEl) { pageEl.classList.add('active'); window.scrollTo(0, 0); }
   if (navEl) navEl.classList.add('active');
 
-  // UI State Reset
   const topnavWrap = document.querySelector('.topnav');
   if (topnavWrap) topnavWrap.classList.remove('expanded');
-  document.querySelectorAll('.sidebar').forEach(s => { s.classList.remove('active'); const clone = s.querySelector('.mobile-topnav-clone'); if (clone) clone.remove(); });
+  document.querySelectorAll('.sidebar').forEach(s => { 
+    s.classList.remove('active'); 
+    const clone = s.querySelector('.mobile-topnav-clone'); 
+    if (clone) clone.remove(); 
+  });
   document.body.style.overflow = '';
   document.body.classList.remove('mobile-menu-open');
 
@@ -72,10 +60,8 @@ function executeSwitch(id) {
   syncSidebars();
   syncSidebarHighlight(id);
   
-  // QOL: Live Telemetry Handshake
   if (typeof bindTfpData === 'function') bindTfpData();
   
-  // API Dispatcher
   const triggers = {
     'maps': () => initMapsApi(),
     'movement': () => initPresencesApi(1),
@@ -89,7 +75,6 @@ function executeSwitch(id) {
 
   if (triggers[id]) setTimeout(triggers[id], 150);
   
-  // Re-bind listeners & layout helpers after page injection
   setTimeout(() => {
     if (id === 'nakba') initTimelineFilter();
     injectTableLabels();
@@ -101,9 +86,7 @@ function syncSidebarHighlight(id) {
   document.querySelectorAll('.sidebar-nav a').forEach(a => {
     a.classList.remove('active');
     const attr = a.getAttribute('onclick') || '';
-    if (attr.includes(`'${id}'`) || attr.includes(`"${id}"`)) {
-      a.classList.add('active');
-    }
+    if (attr.includes(`'${id}'`) || attr.includes(`"${id}"`)) a.classList.add('active');
   });
 }
 
@@ -118,10 +101,7 @@ function switchMandateDoc(docId, element) {
   }
 }
 
-
-/* ──────────────────────────────────────────
-   3. UI COMPONENTS & OVERLAYS
-─────────────────────────────────────────── */
+/* ── 2. UI COMPONENTS & OVERLAYS ── */
 function toggleHeaderLinks() {
   const topnav = document.querySelector('.topnav');
   if (topnav) topnav.classList.toggle('expanded');
@@ -149,7 +129,6 @@ function syncSidebars() {
       if (!sb.children.length) sb.appendChild(tmpl.content.cloneNode(true));
     });
   }
-  
   const footerTmpl = document.getElementById('footer-template');
   if (footerTmpl) {
     document.querySelectorAll('.main').forEach(main => {
@@ -177,9 +156,7 @@ function openModal(lines, color) {
   });
 }
 
-function closeModal() {
-  document.getElementById('access-modal').classList.remove('active');
-}
+function closeModal() { document.getElementById('access-modal').classList.remove('active'); }
 
 function openLightbox(id, title, imgSrc) {
   const lb = document.getElementById('forensic-lightbox');
@@ -240,10 +217,7 @@ function initMapTooltips() {
   });
 }
 
-
-/* ──────────────────────────────────────────
-   4. SEARCH & FILTERING
-─────────────────────────────────────────── */
+/* ── 3. SEARCH & FILTERING ── */
 function initSearch() {
   const input = document.getElementById('global-search-input');
   const resultsBlock = document.getElementById('search-results');
@@ -292,10 +266,7 @@ function closeSearch() {
   if (input) { input.value = ''; input.dispatchEvent(new Event('input')); }
 }
 
-function executeSearchRoute(pageId) {
-  closeSearch();
-  showPage(pageId);
-}
+function executeSearchRoute(pageId) { closeSearch(); showPage(pageId); }
 
 function initTimelineFilter() {
   const search = document.getElementById('tl-search');
@@ -311,27 +282,13 @@ function initTimelineFilter() {
     
     document.querySelectorAll('.timeline-item').forEach(item => {
       const text = item.innerText.toLowerCase();
-      
       const itemYear = item.dataset.year;
-      let itemDecade = 'all';
-      if (itemYear) {
-        itemDecade = (Math.floor(parseInt(itemYear) / 10) * 10).toString();
-      } else if (item.dataset.decade) {
-        itemDecade = item.dataset.decade; 
-      }
-
+      let itemDecade = itemYear ? (Math.floor(parseInt(itemYear) / 10) * 10).toString() : (item.dataset.decade || 'all');
       const itemType = item.dataset.type || 'all';
       
-      const show = (!q || text.includes(q)) && 
-                   (d === 'all' || itemDecade === d) && 
-                   (t === 'all' || itemType === t);
-      
-      if (show) {
-        item.style.removeProperty('display');
-        visible++;
-      } else {
-        item.style.setProperty('display', 'none', 'important');
-      }
+      const show = (!q || text.includes(q)) && (d === 'all' || itemDecade === d) && (t === 'all' || itemType === t);
+      if (show) { item.style.removeProperty('display'); visible++; } 
+      else { item.style.setProperty('display', 'none', 'important'); }
     });
     
     const noResults = document.getElementById('tl-no-results');
@@ -341,15 +298,12 @@ function initTimelineFilter() {
   if (search) search.addEventListener('input', filterTimeline);
   if (decade) decade.addEventListener('change', filterTimeline);
   if (type) type.addEventListener('change', filterTimeline);
-  
-  if (resetBtn) {
-    resetBtn.addEventListener('click', () => {
-      if (search) search.value = '';
-      if (decade) decade.value = 'all';
-      if (type) type.value = 'all';
-      filterTimeline();
-    });
-  }
+  if (resetBtn) resetBtn.addEventListener('click', () => {
+    if (search) search.value = '';
+    if (decade) decade.value = 'all';
+    if (type) type.value = 'all';
+    filterTimeline();
+  });
 }
 
 function injectTableLabels() {
@@ -378,82 +332,25 @@ function buildAdvancedFilters(table, inputId) {
   let allowedColumns = null; 
   let disableSearch = false;
 
-  // 1. 1948 Depopulation Ledger (Remove filters, connect to native search bar)
-  if (tableId === 'census-master-table' || inputId === 'census-search') {
-    allowFilters = false;
-    inputId = 'census-search'; // Bind explicitly to existing HTML input
-  }
-
- // 1b. Child Names Frequency Table (Bypass completely to prevent overlapping search bars)
- if (containerId === 'child-names-api-container' || inputId === 'child-names-search') return;
-  
-  // 2. Names of Identified Martyrs (Bypass completely - handled by custom script below)
-  if (containerId === 'names-registry-container') return;
-  
-  // 3. Human Rights Investigations (Remove filters)
+  if (tableId === 'census-master-table' || inputId === 'census-search') { allowFilters = false; inputId = 'census-search'; }
+  if (containerId === 'child-names-api-container' || inputId === 'child-names-search' || containerId === 'names-registry-container') return;
   if (pageId === 'page-hr' || tableClass.includes('hr-table')) allowFilters = false;
-  
-  // 4. Movement & Access Control (Remove search and filters)
-  if (pageId === 'page-movement' || tableClass.includes('checkpoint-table') || containerId === 'presences-api-container') {
+  if (pageId === 'page-movement' || tableClass.includes('checkpoint-table') || containerId === 'presences-api-container' || pageId === 'page-detention' || tableClass.includes('detention-table') || containerId === 'infra-api-container' || pageId === 'page-infrastructure' || pageId === 'page-surveillance' || pageId === 'page-arms' || containerId === 'registry-api-container' || pageId === 'page-registry') {
     allowFilters = false; disableSearch = true;
   }
-  
-  // 5. Military Court & Detention Registry (Remove Search + Filters)
-  if (pageId === 'page-detention' || tableClass.includes('detention-table')) {
-    allowFilters = false; disableSearch = true;
-  }
-  
-  // 6. Civilian Infrastructure Damage (Remove Search + Filters)
-  if (containerId === 'infra-api-container' || pageId === 'page-infrastructure') {
-    allowFilters = false; disableSearch = true;
-  }
-  
-  // 7. Press Casualty Ledger (Keep Method of Martyrdom and Location)
-  if (containerId === 'media-api-container' || pageId === 'page-media') {
-    allowedColumns = ['method of martyrdom', 'location'];
-  }
-  
-  // 8. System Integrations Registry / Surveillance (Remove Search + Filters)
-  if (pageId === 'page-surveillance') {
-    allowFilters = false; disableSearch = true;
-  }
-  
-  // 9. Munitions Forensic Registry / Arms (Remove Search + Filters)
-  if (pageId === 'page-arms') {
-    allowFilters = false; disableSearch = true;
-  }
-  
-  // 10. Archive Registry (Remove Search + Filters)
-  if (containerId === 'registry-api-container' || pageId === 'page-registry') {
-    allowFilters = false; disableSearch = true;
-  }
+  if (containerId === 'media-api-container' || pageId === 'page-media') allowedColumns = ['method of martyrdom', 'location'];
 
-  // -- FIND OR CREATE SEARCH UI --
-  let ctrl = null;
-  let searchBox = null;
-  
-  if (inputId) {
-    searchBox = document.getElementById(inputId);
-    if (searchBox) ctrl = searchBox.closest('.table-header-ctrl');
-  }
+  let ctrl = null, searchBox = null;
+  if (inputId) { searchBox = document.getElementById(inputId); if (searchBox) ctrl = searchBox.closest('.table-header-ctrl'); }
 
-  // Aggressive DOM traversal to find existing search bars and prevent duplicates
   if (!ctrl) {
-    if (table.previousElementSibling?.classList.contains('table-header-ctrl')) {
-      ctrl = table.previousElementSibling;
-    } else if (table.parentElement?.previousElementSibling?.classList.contains('table-header-ctrl')) {
-      ctrl = table.parentElement.previousElementSibling;
-    } else {
-      const sibling = table.parentElement?.querySelector('.table-header-ctrl');
-      if (sibling) ctrl = sibling;
-    }
+    if (table.previousElementSibling?.classList.contains('table-header-ctrl')) ctrl = table.previousElementSibling;
+    else if (table.parentElement?.previousElementSibling?.classList.contains('table-header-ctrl')) ctrl = table.parentElement.previousElementSibling;
+    else { const sibling = table.parentElement?.querySelector('.table-header-ctrl'); if (sibling) ctrl = sibling; }
   }
   
-  if (ctrl && !searchBox) {
-    searchBox = ctrl.querySelector('input[type="text"], input[type="search"]');
-  }
+  if (ctrl && !searchBox) searchBox = ctrl.querySelector('input[type="text"], input[type="search"]');
 
-  // If this table is blacklisted from both search and filters, execute hide and abort
   if (!allowFilters && disableSearch) {
     if (ctrl) ctrl.style.display = 'none';
     else if (searchBox) searchBox.style.display = 'none';
@@ -463,7 +360,6 @@ function buildAdvancedFilters(table, inputId) {
   const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.innerText.trim());
   if (headers.length === 0) return;
 
-  // Build the search box natively if it wasn't disabled
   if (!ctrl && !disableSearch) {
     ctrl = document.createElement('div');
     ctrl.className = 'table-header-ctrl';
@@ -473,7 +369,6 @@ function buildAdvancedFilters(table, inputId) {
     const searchWrap = document.createElement('div');
     searchWrap.className = 'table-search-box';
     searchWrap.style.width = '100%';
-    searchWrap.style.maxWidth = '100%';
     
     searchBox = document.createElement('input');
     searchBox.type = 'text';
@@ -489,7 +384,6 @@ function buildAdvancedFilters(table, inputId) {
     else if (searchBox) searchBox.style.display = 'none';
   }
 
-  // Wrapper for generated dropdown filters
   const filterWrap = document.createElement('div');
   filterWrap.className = 'advanced-filters';
   filterWrap.style.display = 'flex';
@@ -497,56 +391,30 @@ function buildAdvancedFilters(table, inputId) {
   filterWrap.style.gap = '10px';
   filterWrap.style.marginTop = (ctrl?.querySelector('.table-search-box')?.style.display !== 'none' && !disableSearch) ? '12px' : '0';
   filterWrap.style.width = '100%';
-  filterWrap.style.alignItems = 'center';
 
   const rows = Array.from(table.querySelectorAll('tbody tr'));
   const colValues = headers.map(() => new Set());
   
   rows.forEach(tr => {
     const tds = tr.querySelectorAll('td');
-    tds.forEach((td, i) => {
-      if (td && td.innerText) colValues[i].add(td.innerText.trim());
-    });
+    tds.forEach((td, i) => { if (td && td.innerText) colValues[i].add(td.innerText.trim()); });
   });
 
   const selects = [];
-  
   if (allowFilters) {
     headers.forEach((header, i) => {
       const hMatch = header.toLowerCase();
-      
-      // Auto-exclude links or sources
       if (hMatch.includes('source') || hMatch.includes('link') || hMatch.includes('access')) return;
-
-      // Apply specific column inclusion constraints
-      if (allowedColumns) {
-        const isAllowed = allowedColumns.some(c => hMatch.includes(c.toLowerCase()));
-        if (!isAllowed) return;
-      }
+      if (allowedColumns && !allowedColumns.some(c => hMatch.includes(c.toLowerCase()))) return;
 
       if (colValues[i].size > 1 && colValues[i].size <= 25) {
         const select = document.createElement('select');
         select.className = 'filter-select column-filter';
         select.dataset.colIndex = i;
-        select.style.padding = '8px';
-        select.style.fontSize = '10px';
-        select.style.fontFamily = 'monospace';
-        select.style.border = '1px solid var(--border)';
-        select.style.background = '#fff';
-        select.style.color = 'var(--text)';
-        select.style.maxWidth = '200px';
+        select.style.cssText = 'padding:8px; font-size:10px; font-family:monospace; border:1px solid var(--border); background:#fff; max-width:200px;';
         
-        const defaultOpt = document.createElement('option');
-        defaultOpt.value = '';
-        defaultOpt.innerText = `ALL ${header.toUpperCase()}`;
-        select.appendChild(defaultOpt);
-
-        Array.from(colValues[i]).sort().forEach(val => {
-          const opt = document.createElement('option');
-          opt.value = val;
-          opt.innerText = val.length > 30 ? val.substring(0, 30) + '...' : val;
-          select.appendChild(opt);
-        });
+        select.appendChild(new Option(`ALL ${header.toUpperCase()}`, ''));
+        Array.from(colValues[i]).sort().forEach(val => select.appendChild(new Option(val.length > 30 ? val.substring(0, 30) + '...' : val, val)));
 
         filterWrap.appendChild(select);
         selects.push(select);
@@ -556,62 +424,30 @@ function buildAdvancedFilters(table, inputId) {
 
   if (selects.length > 0) {
     const resetBtn = document.createElement('button');
-    resetBtn.className = 'btn-outline border-darker'; // add border-darker class
+    resetBtn.className = 'btn-outline border-darker';
     resetBtn.innerText = 'RESET FILTERS';
-  
-    // Inline styles for text color (overrides btn-outline)
-    resetBtn.style.color = 'black';
-    resetBtn.style.padding = '8px 12px';
-    resetBtn.style.fontSize = '10px';
-    resetBtn.style.borderColor = 'black'; // slightly darker border
-  
-    resetBtn.onclick = () => {
-      if (searchBox) searchBox.value = '';
-      selects.forEach(s => s.value = '');
-      applyFilters();
-    };
-  
+    resetBtn.style.cssText = 'color:black; padding:8px 12px; font-size:10px; border-color:black;';
+    resetBtn.onclick = () => { if (searchBox) searchBox.value = ''; selects.forEach(s => s.value = ''); applyFilters(); };
     filterWrap.appendChild(resetBtn);
     if (ctrl) ctrl.appendChild(filterWrap);
   }
 
   function applyFilters() {
     const globalTerm = (searchBox ? searchBox.value.toUpperCase() : '');
-    
     rows.forEach(tr => {
       let match = true;
       const tds = tr.querySelectorAll('td');
-      
       for (let select of selects) {
-        const colIdx = select.dataset.colIndex;
-        const val = select.value;
-        if (val !== '' && tds[colIdx] && tds[colIdx].innerText.trim() !== val) {
-          match = false;
-          break;
-        }
+        if (select.value !== '' && tds[select.dataset.colIndex]?.innerText.trim() !== select.value) { match = false; break; }
       }
-
-      if (match && globalTerm) {
-        if (!tr.innerText.toUpperCase().includes(globalTerm)) {
-          match = false;
-        }
-      }
-
-      if (match) {
-        tr.style.removeProperty('display');
-      } else {
-        tr.style.setProperty('display', 'none', 'important');
-      }
+      if (match && globalTerm && !tr.innerText.toUpperCase().includes(globalTerm)) match = false;
+      tr.style.setProperty('display', match ? '' : 'none', match ? '' : 'important');
     });
   }
-
-  if (searchBox) {
-    searchBox.addEventListener('input', applyFilters);
-  }
+  if (searchBox) searchBox.addEventListener('input', applyFilters);
   selects.forEach(s => s.addEventListener('change', applyFilters));
 }
 
-// Override attachTableSearch to utilize advanced filtering
 function attachTableSearch(containerId, inputId) { 
   injectTableLabels(); 
   const container = document.getElementById(containerId);
@@ -621,31 +457,20 @@ function attachTableSearch(containerId, inputId) {
   }
 }
 
-// Function to automatically attach filters to native HTML tables (e.g. HR, Detainees)
 function initAllStaticTables() {
-  document.querySelectorAll('table').forEach(table => {
-    if (!table.dataset.filtersInjected) {
-      buildAdvancedFilters(table, null);
-    }
-  });
+  document.querySelectorAll('table').forEach(table => { if (!table.dataset.filtersInjected) buildAdvancedFilters(table, null); });
 }
 
-window.filterCensusTable = function() {}; // Prevent undefined error from old inline oninput
+window.filterCensusTable = function() {}; 
 
+/* ── 4. DATA STREAMS & APIS ── */
 
-/* ──────────────────────────────────────────
-   5. DATA STREAMS & APIS
-─────────────────────────────────────────── */
-
-// -- Tech for Palestine Summary --
 async function initTechForPalestineData() {
   try {
     const response = await fetch('https://data.techforpalestine.org/api/v3/summary.json');
     if (!response.ok) throw new Error('API_UNREACHABLE');
     tfpSummaryData = await response.json();
-    console.log("OS_STREAM: Live telemetry synchronized.");
   } catch (error) {
-    console.warn('OS_STREAM: Connection refused. Utilizing local archival cache.');
     tfpSummaryData = {
       gaza: { killed: { total: 43900, children: 17400, medical: 1047, press: 188, civil_defence: 85 }, injured: { total: 103890 }, last_update: "2024-ARCHIVE-CACHE" },
       west_bank: { killed: { total: 780 }, injured: { total: 6300 }, settler_attacks: 1500 },
@@ -675,7 +500,7 @@ function bindTfpData() {
   });
 }
 
-// -- Killed Children Names --
+// RESTORED: Child Names API
 async function initChildNamesApi() {
   const container = document.getElementById('child-names-api-container');
   if (!container) return;
@@ -684,24 +509,18 @@ async function initChildNamesApi() {
   try {
     const response = await fetch('https://data.techforpalestine.org/api/v2/killed-in-gaza/child-name-counts-en.json');
     if (!response.ok) throw new Error('API Error');
-    
     const rawData = await response.json();
     let records = [];
     
-    if (Array.isArray(rawData)) {
-      records = rawData;
-    } else if (rawData && typeof rawData === 'object') {
+    if (Array.isArray(rawData)) records = rawData;
+    else if (rawData && typeof rawData === 'object') {
       if (Array.isArray(rawData.boys) || Array.isArray(rawData.girls)) {
         if (Array.isArray(rawData.boys)) records = records.concat(rawData.boys);
         if (Array.isArray(rawData.girls)) records = records.concat(rawData.girls);
-      } else if (Array.isArray(rawData.data)) {
-        records = rawData.data;
-      } else {
-        records = Object.entries(rawData).map(([key, val]) => { return { name: key, count: (typeof val === 'number' ? val : val.count || 0) }; });
-      }
+      } else if (Array.isArray(rawData.data)) records = rawData.data;
+      else records = Object.entries(rawData).map(([key, val]) => { return { name: key, count: (typeof val === 'number' ? val : val.count || 0) }; });
     }
 
-    // Sort heavily to extract the true Top 100 combined
     records.sort((a, b) => {
       let countA = a.count !== undefined ? a.count : (a.value !== undefined ? a.value : a[1] || 0);
       let countB = b.count !== undefined ? b.count : (b.value !== undefined ? b.value : b[1] || 0);
@@ -710,7 +529,6 @@ async function initChildNamesApi() {
 
     if (!records || records.length === 0) throw new Error("No data extracted.");
 
-    // STRICT FILTER: Remove any phantom empty records before building table
     const validRecords = records.filter(rec => {
       let n = rec.name || rec.en_name || rec[0];
       let c = rec.count || rec.value || rec[1];
@@ -727,7 +545,6 @@ async function initChildNamesApi() {
       </div>
       <div style="width: 100%; margin-bottom: 16px;">
           <input type="text" id="child-names-search" placeholder="Search by Name..." style="border: none; padding: 12px 16px; width: 100%; font-family: 'IBM Plex Mono', monospace; font-size: 12px; text-align: left; box-sizing: border-box; background: transparent;">
-        </div>
       </div>
       <div style="max-height: 450px; overflow-y: auto; border-bottom: 1px solid var(--border); width: 100%; background: #fafafa;">
         <table class="census-table" style="width: 100%; border-collapse: collapse; margin-bottom: 0;">
@@ -747,9 +564,7 @@ async function initChildNamesApi() {
       
       html += `
         <tr style="border-bottom: ${borderBtm}; transition: background 0.2s;" onmouseover="this.style.background='#fff'" onmouseout="this.style.background='transparent'">
-          <td style="width: 40%; padding: 14px 16px; text-align: left;">
-            <strong style="color:var(--black); text-transform:uppercase; font-size: 13px; letter-spacing: 0.02em;">${rName}</strong>
-          </td>
+          <td style="width: 40%; padding: 14px 16px; text-align: left;"><strong style="color:var(--black); text-transform:uppercase; font-size: 13px; letter-spacing: 0.02em;">${rName}</strong></td>
           <td style="width: 60%; padding: 14px 16px; position: relative; text-align: left;">
             <div style="display: flex; align-items: center; width: 100%; height: 100%; justify-content: flex-start;">
               <div style="flex-grow: 1; background: rgba(0,0,0,0.04); height: 24px; border-radius: 2px; overflow: hidden; margin-right: 12px; position: relative; max-width: 80%;">
@@ -762,76 +577,24 @@ async function initChildNamesApi() {
     });
     
     html += `</tbody></table></div><div class="hr-header-text" style="font-size:10px; margin-top:12px; text-align: left;">*Displaying top 40 derived name frequencies.</div>`;
-      container.innerHTML = html;
+    container.innerHTML = html;
     
-      // Isolate the specific search logic for this customized layout
-      const searchInput = document.getElementById('child-names-search');
-      const tbody = container.querySelector('tbody');
-      if (searchInput && tbody) {
-        searchInput.addEventListener('input', (e) => {
-          const term = e.target.value.toUpperCase();
-          Array.from(tbody.querySelectorAll('tr')).forEach(tr => {
-            const match = tr.innerText.toUpperCase().includes(term);
-            tr.style.setProperty('display', match ? 'table-row' : 'none', 'important');
-          });
+    const searchInput = document.getElementById('child-names-search');
+    const tbody = container.querySelector('tbody');
+    if (searchInput && tbody) {
+      searchInput.addEventListener('input', (e) => {
+        const term = e.target.value.toUpperCase();
+        Array.from(tbody.querySelectorAll('tr')).forEach(tr => {
+          tr.style.setProperty('display', tr.innerText.toUpperCase().includes(term) ? 'table-row' : 'none', 'important');
         });
-      }
-    } catch (error) {
-    const fallback = [["Tariq", 120], ["Fatima", 105], ["Ahmed", 98], ["Nour", 80], ["Mohammed", 75]];
-    const maxCount = 120;
-    let html = `<div class="terminal-alert" style="border-color:var(--amber); color:var(--amber); margin-bottom: 16px;">WARNING: SECURE HANDSHAKE FAILED. DISPLAYING ARCHIVAL CACHE.</div>
-      <div class="un-header" style="margin-top: 60px; text-align: left;">
-        <h2 class="un-title" style="font-size: 24px;">Child Victim Name Frequency</h2>
-        <div class="hr-header-text" style="margin-bottom: 24px;">Statistical breakdown of the most common first names among documented child casualties.</div>
-      </div>
-      <div style="width: 100%; margin-bottom: 16px;">
-        <input type="text" id="child-names-search" placeholder="Search by Name..." style="width: 100%; box-sizing: border-box; padding: 12px 16px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; border: 1px solid var(--border); border-radius: 4px; outline: none; background: #fff; color: var(--black);">
-      </div>
-      <div style="max-height: 450px; overflow-y: auto; border-bottom: 1px solid var(--border); width: 100%; background: #fafafa;">
-        <table class="census-table" style="width: 100%; border-collapse: collapse; margin-bottom: 0;">
-          <thead style="position: sticky; top: 0; background: #fafafa; z-index: 10; box-shadow: 0 1px 0 var(--border);">
-            <tr>
-              <th style="text-align: left; padding: 16px; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: none;">First Name</th>
-              <th style="text-align: left; padding: 16px; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: none;">Frequency (Visualized)</th>
-            </tr>
-          </thead>
-          <tbody>`;
-    
-    fallback.forEach((rec, idx) => { 
-      let percentage = (rec[1] / maxCount) * 100;
-      let borderBtm = (idx === fallback.length - 1) ? 'none' : '1px solid rgba(0,0,0,0.05)';
-      html += `
-        <tr style="border-bottom: ${borderBtm}; transition: background 0.2s;" onmouseover="this.style.background='#fff'" onmouseout="this.style.background='transparent'">
-          <td style="width: 40%; padding: 14px 16px; text-align: left;"><strong style="color:var(--black); text-transform:uppercase; font-size: 13px; letter-spacing: 0.02em;">${rec[0]}</strong></td>
-          <td style="width: 60%; padding: 14px 16px; position: relative; text-align: left;">
-            <div style="display: flex; align-items: center; width: 100%; height: 100%; justify-content: flex-start;">
-              <div style="flex-grow: 1; background: rgba(0,0,0,0.04); height: 24px; border-radius: 2px; overflow: hidden; margin-right: 12px; position: relative; max-width: 80%;">
-                <div style="position: absolute; left: 0; top: 0; bottom: 0; width: ${percentage}%; background: var(--amber); opacity: 0.85;"></div>
-              </div>
-              <span style="color:var(--black); font-weight:bold; font-family: 'IBM Plex Mono', monospace; font-size: 13px; min-width: 40px; text-align: left;">${rec[1]}</span>
-            </div>
-          </td>
-        </tr>`;
-            });
-            html += `</tbody></table></div>`;
-            container.innerHTML = html;
-        
-            // Isolate the specific search logic for this customized layout
-            const searchInput = document.getElementById('child-names-search');
-            const tbody = container.querySelector('tbody');
-            if (searchInput && tbody) {
-              searchInput.addEventListener('input', (e) => {
-                const term = e.target.value.toUpperCase();
-                Array.from(tbody.querySelectorAll('tr')).forEach(tr => {
-                  const match = tr.innerText.toUpperCase().includes(term);
-                  tr.style.setProperty('display', match ? 'table-row' : 'none', 'important');
-                });
-              });
-            }
-          }
-        }
+      });
+    }
+  } catch (error) {
+    container.innerHTML = `<div class="terminal-alert">ERR_CHILD_NAMES_STREAM: CONNECTION FAILED</div>`;
+  }
+}
 
-// -- Geospatial / Maps --
+// RESTORED: Maps API
 async function initMapsApi() {
   if (mapsApiInitialized) return;
   const listEl = document.getElementById('map-order-list');
@@ -886,7 +649,7 @@ window.selectMapOrder = function(index) {
   }
 };
 
-// -- Military Presences --
+// RESTORED: Military Presences
 async function initPresencesApi(page = 1) {
   const container = document.getElementById('presences-api-container');
   const pagination = document.getElementById('presences-pagination');
@@ -940,7 +703,7 @@ async function initPresencesApi(page = 1) {
   }
 }
 
-// -- Media Casualties --
+// RESTORED: Media Casualties
 async function initMediaApi() {
   const container = document.getElementById('media-api-container');
   if (!container) return;
@@ -980,8 +743,7 @@ async function initMediaApi() {
   }
 }
 
-// -- Infrastructure Damage --
-let infraSortDir = 'desc';
+// RESTORED: Infrastructure Damage
 window.sortInfraTable = function() {
   infraSortDir = infraSortDir === 'desc' ? 'asc' : 'desc';
   initInfrastructureApi(1);
@@ -1009,7 +771,6 @@ async function initInfrastructureApi(page = 1) {
       cachedInfraData = uniqueData;
     }
 
-    // Apply Date Sorting
     cachedInfraData.sort((a, b) => {
       let dateA = new Date(a.report_date).getTime() || 0;
       let dateB = new Date(b.report_date).getTime() || 0;
@@ -1045,13 +806,7 @@ async function initInfrastructureApi(page = 1) {
   } catch (e) { container.innerHTML = `<div class="terminal-alert">ERR_INFRA_STREAM_OFFLINE: UNABLE TO SYNC SATELLITE TELEMETRY</div>`; }
 }
 
-// -- Martyrs Names Registry (Full Data, Client-Side Paginated & Sortable) --
-let cachedMartyrsData = null;
-let filteredMartyrsData = null;
-let martyrsCurrentPage = 1;
-const martyrsPageSize = 100;
-let martyrsSort = { col: null, dir: 'asc' };
-
+// RESTORED: Martyrs Names Registry
 async function initKilledNamesApi(page = 1) {
   const container = document.getElementById('names-registry-container');
   if (!container) return;
@@ -1068,7 +823,6 @@ async function initKilledNamesApi(page = 1) {
       return;
     }
   }
-
   martyrsCurrentPage = page;
   renderMartyrsTable();
 }
@@ -1110,7 +864,6 @@ function renderMartyrsTable() {
   }
   html += `</tbody></table>`;
 
-  // Preserve existing search input value
   const existingSearch = document.getElementById('martyrs-search');
   const currentSearchVal = existingSearch ? existingSearch.value : '';
 
@@ -1136,8 +889,6 @@ function renderMartyrsTable() {
       <span style="font-family:mono; font-size:10px; color:var(--muted); padding:0 10px;">PAGE ${martyrsCurrentPage} OF ${totalPages}</span>
       <button class="btn-outline" style="padding:8px 16px; border-color:var(--border); color: black;" onclick="initKilledNamesApi(${martyrsCurrentPage + 1})" ${martyrsCurrentPage >= totalPages ? 'disabled' : ''}>NEXT</button>`;
   }
-  
-  if (typeof injectTableLabels === 'function') injectTableLabels();
 }
 
 window.handleMartyrsSearch = function(val) {
@@ -1149,42 +900,33 @@ window.handleMartyrsSearch = function(val) {
            (rec.age !== null && String(rec.age) === term);
   });
   martyrsCurrentPage = 1;
-  
   if (martyrsSort.col) sortMartyrs(martyrsSort.col, true);
   else renderMartyrsTable();
 };
 
 window.sortMartyrs = function(col, preserveDir = false) {
   if (!preserveDir) {
-    if (martyrsSort.col === col) {
-      martyrsSort.dir = martyrsSort.dir === 'asc' ? 'desc' : 'asc';
-    } else {
-      martyrsSort.col = col;
-      martyrsSort.dir = 'asc';
-    }
+    if (martyrsSort.col === col) martyrsSort.dir = martyrsSort.dir === 'asc' ? 'desc' : 'asc';
+    else { martyrsSort.col = col; martyrsSort.dir = 'asc'; }
   }
 
   filteredMartyrsData.sort((a, b) => {
-    let valA = a[col];
-    let valB = b[col];
-
+    let valA = a[col]; let valB = b[col];
     if (col === 'age') {
       valA = valA !== null && valA !== undefined && valA !== '' ? Number(valA) : -1;
       valB = valB !== null && valB !== undefined && valB !== '' ? Number(valB) : -1;
       return martyrsSort.dir === 'asc' ? valA - valB : valB - valA;
     } else {
-      valA = valA ? String(valA).toLowerCase() : '';
-      valB = valB ? String(valB).toLowerCase() : '';
+      valA = valA ? String(valA).toLowerCase() : ''; valB = valB ? String(valB).toLowerCase() : '';
       if (valA < valB) return martyrsSort.dir === 'asc' ? -1 : 1;
       if (valA > valB) return martyrsSort.dir === 'asc' ? 1 : -1;
       return 0;
     }
   });
-
   renderMartyrsTable();
 };
 
-// -- Daily Casualty Logs --
+// RESTORED: Daily Casualty Logs
 async function initDailyCasualtiesApi() {
   const container = document.getElementById('daily-log-container');
   if (!container) return;
@@ -1201,7 +943,7 @@ async function initDailyCasualtiesApi() {
   } catch (e) { container.innerHTML = `<div class="terminal-alert">ERR_CASUALTY_STREAM_OFFLINE</div>`; }
 }
 
-// -- Archive Registry --
+// RESTORED: Archive Registry
 async function fetchRegistryData(category, btnEl) {
   const container = document.getElementById('registry-api-container');
   if (!container) return;
@@ -1239,22 +981,7 @@ async function fetchRegistryData(category, btnEl) {
   } catch (e) { container.innerHTML = `<div class="terminal-alert">ERR_REGISTRY_HANDSHAKE_FAILED</div>`; }
 }
 
-// -- Reddit Intelligence Stream --
-async function initRedditStream() {
-  const container = document.getElementById('reddit-uploads-container');
-  if (!container) return;
-
-  const lastFetch = localStorage.getItem('reddit_last_fetch');
-  const cachedData = localStorage.getItem('reddit_cache');
-
-  if (lastFetch && cachedData && (Date.now() - lastFetch < REDDIT_POLL_MS)) {
-    renderRedditCards(JSON.parse(cachedData));
-  } else {
-    fetchRedditData();
-  }
-  setInterval(fetchRedditData, REDDIT_POLL_MS);
-}
-
+// RESTORED: Reddit Intelligence Stream
 function fetchWithTimeout(url, options = {}, timeout = 8000) {
   return Promise.race([fetch(url, options), new Promise((_, reject) => setTimeout(() => reject(new Error('TIMEOUT')), timeout))]);
 }
@@ -1270,15 +997,28 @@ async function fetchRedditData() {
     
     localStorage.setItem('reddit_cache', JSON.stringify(limitedPosts));
     localStorage.setItem('reddit_last_fetch', Date.now());
-    
     renderRedditCards(limitedPosts);
   } catch (err) {
-    console.warn('OS_STREAM: Intelligence node unreachable:', err);
     if (container && !container.querySelector('.reddit-card')) {
       const errorType = err.message === 'TIMEOUT' ? 'ERR_STREAM_TIMEOUT' : 'ERR_NEWS_STREAM_OFFLINE';
       container.innerHTML = `<div class="terminal-alert" style="grid-column: span 3;">${errorType}: CONNECTION_FAILURE</div>`;
     }
   }
+}
+
+async function initRedditStream() {
+  const container = document.getElementById('reddit-uploads-container');
+  if (!container) return;
+
+  const lastFetch = localStorage.getItem('reddit_last_fetch');
+  const cachedData = localStorage.getItem('reddit_cache');
+
+  if (lastFetch && cachedData && (Date.now() - lastFetch < REDDIT_POLL_MS)) {
+    renderRedditCards(JSON.parse(cachedData));
+  } else {
+    fetchRedditData();
+  }
+  setInterval(fetchRedditData, REDDIT_POLL_MS);
 }
 
 function renderRedditCards(posts) {
@@ -1316,9 +1056,7 @@ function renderRedditCards(posts) {
 }
 
 
-/* ──────────────────────────────────────────
-   6. AUDIO & TELEMETRY UTILITIES
-─────────────────────────────────────────── */
+/* ── 5. AUDIO & TELEMETRY UTILITIES ── */
 function initAudio() {
   if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
   if (audioContext.state === 'suspended') audioContext.resume();
@@ -1328,8 +1066,7 @@ function playAudio(btn) {
   initAudio();
   const playerUi = btn.parentElement.querySelector('.audio-ui');
   if (!playerUi) return;
-  const timerDisplay = playerUi.querySelector('.audio-timer');
-
+  
   btn.style.display = 'none';
   playerUi.classList.add('active', 'playing');
 
@@ -1339,45 +1076,30 @@ function playAudio(btn) {
 
   oscillator.type = 'sawtooth';
   oscillator.frequency.setValueAtTime(40, audioContext.currentTime);
-  filter.type = 'lowpass';
-  filter.frequency.value = 400;
+  filter.type = 'lowpass'; filter.frequency.value = 400;
 
-  oscillator.connect(filter);
-  filter.connect(gainNode);
-  gainNode.connect(audioContext.destination);
+  oscillator.connect(filter); filter.connect(gainNode); gainNode.connect(audioContext.destination);
   gainNode.gain.setValueAtTime(0.015, audioContext.currentTime);
   oscillator.start();
 
-  playerUi._oscillator = oscillator;
-  playerUi._gain = gainNode;
-
+  playerUi._oscillator = oscillator; playerUi._gain = gainNode;
+  
   let seconds = 0;
-  const intervalId = setInterval(() => {
+  playerUi._intervalId = setInterval(() => {
     seconds++;
     oscillator.frequency.linearRampToValueAtTime(Math.random() * 60 + 30, audioContext.currentTime + 0.5);
-    const m = Math.floor(seconds / 60).toString().padStart(2, '0');
-    const s = (seconds % 60).toString().padStart(2, '0');
-    if (timerDisplay) timerDisplay.innerText = `${m}:${s}`;
+    const timerDisplay = playerUi.querySelector('.audio-timer');
+    if (timerDisplay) timerDisplay.innerText = `${Math.floor(seconds / 60).toString().padStart(2, '0')}:${(seconds % 60).toString().padStart(2, '0')}`;
     if (seconds >= 15) stopAudio(playerUi.querySelector('.audio-btn-stop'));
   }, 1000);
-
-  playerUi._intervalId = intervalId;
 }
 
 function stopAudio(stopBtn) {
   const playerUi = stopBtn.closest('.audio-ui');
   if (!playerUi) return;
-
   clearInterval(playerUi._intervalId);
-  if (playerUi._oscillator) {
-    try { playerUi._oscillator.stop(); playerUi._oscillator.disconnect(); } catch (e) {}
-    playerUi._oscillator = null;
-  }
-  if (playerUi._gain) {
-    try { playerUi._gain.disconnect(); } catch (e) {}
-    playerUi._gain = null;
-  }
-
+  if (playerUi._oscillator) { try { playerUi._oscillator.stop(); playerUi._oscillator.disconnect(); } catch (e) {} }
+  if (playerUi._gain) { try { playerUi._gain.disconnect(); } catch (e) {} }
   playerUi.classList.remove('playing', 'active');
   const playBtn = playerUi.parentElement?.querySelector('.btn-audio');
   if (playBtn) playBtn.style.display = 'inline-flex';
@@ -1396,76 +1118,45 @@ function pingMapSite(type, siteId) {
   console.log(`OS_TELEMETRY: Site Ping [${type}] - ID: ${siteId}`);
 }
 
-
-/* ──────────────────────────────────────────
-   7. INITIALIZATION & EVENTS
-─────────────────────────────────────────── */
+/* ── 6. INITIALIZATION & EVENTS ── */
 function handleGlobalClicks(e) {
   const spaLink = e.target.closest('a[href^="#"]');
   if (spaLink) {
     const targetId = spaLink.getAttribute('href').substring(1);
-    if (PAGE_MAP[targetId]) {
-      e.preventDefault();
-      showPage(targetId);
-      return;
-    }
+    if (PAGE_MAP[targetId]) { e.preventDefault(); showPage(targetId); return; }
   }
 
   const btn = e.target.closest('.btn-request, .siege-card-action, .btn-view-register, .urgent-link, .proc-download, .tl-btn, .hr-btn, .evidence-item, .un-res-action, .detention-btn, .cyber-log-btn');
   if (!btn) return;
 
-  if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes('showPage')) {
+  if (btn.getAttribute('onclick')?.includes('showPage')) {
     if (btn.tagName === 'A' && btn.getAttribute('href') === '#') e.preventDefault();
     return;
   }
-
-  if (!(btn.tagName === 'A' && btn.getAttribute('target') === '_blank')) {
-    e.preventDefault();
-  }
-
-  if (btn.classList.contains('btn-request')) return;
-
+  if (!(btn.tagName === 'A' && btn.getAttribute('target') === '_blank')) e.preventDefault();
+  
   if (btn.classList.contains('evidence-item')) {
-    const exId = btn.querySelector('.evidence-ex-id')?.innerText.replace('Exhibit ', '').trim() || 'NULL';
-    const exTitle = btn.querySelector('.evidence-ex-title')?.innerText || '';
-    const imgEl = btn.querySelector('.evidence-img');
-    const imgSrc = imgEl ? imgEl.src : null;
-    openLightbox(exId, exTitle, imgSrc);
+    openLightbox(
+        btn.querySelector('.evidence-ex-id')?.innerText.replace('Exhibit ', '').trim() || 'NULL', 
+        btn.querySelector('.evidence-ex-title')?.innerText || '', 
+        btn.querySelector('.evidence-img')?.src
+    );
   }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  syncSidebars();
-  initQolFeatures();
-  initTechForPalestineData(); 
-  initRedditStream();        
-  initTimelineFilter();
-  initSearch();
-  initMapTooltips();
-  injectRealImages();
+  syncSidebars(); initQolFeatures(); initTechForPalestineData(); initRedditStream(); initTimelineFilter(); initSearch(); initMapTooltips(); injectRealImages();
   document.body.addEventListener('click', handleGlobalClicks);
 
   const firstMandate = document.querySelector('.bm-list-item');
   if (firstMandate) firstMandate.click();
 
   document.addEventListener('click', (e) => {
-    if (document.body.classList.contains('mobile-menu-open')) {
-      const isClickInsideMenu = e.target.closest('.topnav-links') || e.target.closest('.sidebar') || e.target.closest('.mobile-menu-btn');
-      if (!isClickInsideMenu) toggleMobileMenu();
-    }
+    if (document.body.classList.contains('mobile-menu-open') && !e.target.closest('.topnav-links') && !e.target.closest('.sidebar') && !e.target.closest('.mobile-menu-btn')) toggleMobileMenu();
   });
 
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      closeModal();
-      closeSearch();
-      closeLightbox();
-    }
-    if ((e.key === 's' || e.key === 'S') && !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
-      e.preventDefault();
-      openSearch();
-    }
+    if (e.key === 'Escape') { closeModal(); closeSearch(); closeLightbox(); }
+    if ((e.key === 's' || e.key === 'S') && !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) { e.preventDefault(); openSearch(); }
   });
-
-  console.log('ISRAELI_VIOLENCE. // MONOLITH_OS: OPERATIONAL');
 });
