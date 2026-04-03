@@ -1060,16 +1060,48 @@ footer { padding: 40px; border-top: 1px solid var(--border); display: flex; flex
 
 .bm-list-item { text-align: left; background: transparent; border: 1px solid var(--border); padding: 16px 20px; cursor: pointer; transition: all var(--transition-fast); border-left: 3px solid transparent; }
 .bm-list-item:hover { background: #fff; border-color: var(--black); transform: translateX(4px); }
-.bm-list-item.active { background: var(--black); border-color: var(--black); border-left: 3px solid var(--red); box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+.bm-list-item.active { background: transparent; border-color: var(--border); border-left: 3px solid var(--red); box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
 
 .bm-item-year { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--red); margin-bottom: 6px; font-weight: 600; letter-spacing: 0.15em; }
-.bm-list-item.active .bm-item-year { color: var(--amber); }
+.bm-list-item.active .bm-item-year { color: var(--red); }
 
 .bm-item-title { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 800; color: var(--black); margin-bottom: 4px; }
-.bm-list-item.active .bm-item-title { color: var(--cream); }
+.bm-list-item.active .bm-item-title { color: var(--black); }
 
 .bm-item-desc { font-size: 11px; color: var(--muted); line-height: 1.5; }
-.bm-list-item.active .bm-item-desc { color: rgba(255,255,255,0.6); }
+.bm-list-item.active .bm-item-desc { color: var(--text); }
+
+/* --- AID SEEKERS SECTION --- */
+.aid-seekers-card, .aid-seekers-killed, .aid-seekers-injured, [class*="aid-seekers"] {
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--red);
+  background: #fff;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+  transition: transform var(--transition-smooth), box-shadow var(--transition-smooth), border-color var(--transition-fast);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+.aid-seekers-card:hover, .aid-seekers-killed:hover, .aid-seekers-injured:hover, [class*="aid-seekers"]:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.08);
+  border-top-color: var(--black);
+}
+
+/* --- BUTTON & SPACING FIXES --- */
+.btn-reset-filters, .timeline-filters button[type="reset"], #page-infrastructure .btn-view-register, #page-infrastructure .infra-btn {
+  border: 1px solid var(--black) !important;
+  color: var(--black) !important;
+  background: transparent !important;
+}
+.btn-reset-filters:hover, .timeline-filters button[type="reset"]:hover, #page-infrastructure .btn-view-register:hover, #page-infrastructure .infra-btn:hover {
+  background: var(--black) !important;
+  color: var(--cream) !important;
+}
+
+.legal-threshold-met, [data-id="LEGAL-THRESHOLD-MET"] { margin-bottom: 48px !important; }
+.satellite-analysis, [data-id="SAT-ANALYSIS-BUFFER"] { margin-top: 48px !important; }
 
 /* ── TERMINAL MODAL ── */
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 20000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s; backdrop-filter: blur(4px); }
@@ -1185,8 +1217,15 @@ footer { padding: 40px; border-top: 1px solid var(--border); display: flex; flex
   .section { padding: 40px 20px; }
   .hero { padding: 0 20px 40px; text-align: center; }
   .hero-actions { justify-content: center; }
-  .timeline-item { grid-template-columns: 1fr; }
-  .tl-content-left { text-align: center; padding-right: 0; }
+  .timeline-item { 
+    display: flex !important; 
+    flex-direction: column !important; 
+    align-items: center !important; 
+    text-align: center !important; 
+    gap: 16px !important; 
+  }
+  .tl-content-left, .tl-content-right { text-align: center !important; padding: 0 !important; width: 100% !important; }
+  .tl-img { max-width: 100% !important; height: auto !important; margin: 0 auto !important; }
   .tl-center { display: none; }
   .icj-exhibits, .evidence-row, .folder-card-bottom, .detention-stats-grid { grid-template-columns: 1fr; }
   .table-header-ctrl { flex-direction: column; gap: 12px; }
@@ -1472,4 +1511,7 @@ footer { padding: 40px; border-top: 1px solid var(--border); display: flex; flex
 .timeline-filters input, .timeline-filters select {
   min-width: 160px;
   width: 100%;
+}
+.icj-exhibits {
+  margin-top: 20px; /* adds space above all icj-exhibits blocks */
 }

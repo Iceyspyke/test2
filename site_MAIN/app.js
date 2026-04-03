@@ -556,17 +556,21 @@ function buildAdvancedFilters(table, inputId) {
 
   if (selects.length > 0) {
     const resetBtn = document.createElement('button');
-    resetBtn.className = 'btn-outline';
+    resetBtn.className = 'btn-outline border-darker'; // add border-darker class
     resetBtn.innerText = 'RESET FILTERS';
+  
+    // Inline styles for text color (overrides btn-outline)
+    resetBtn.style.color = 'black';
     resetBtn.style.padding = '8px 12px';
     resetBtn.style.fontSize = '10px';
-    resetBtn.style.borderColor = 'var(--border)';
-    resetBtn.style.color = 'var(--black)';
+    resetBtn.style.borderColor = 'black'; // slightly darker border
+  
     resetBtn.onclick = () => {
       if (searchBox) searchBox.value = '';
       selects.forEach(s => s.value = '');
       applyFilters();
     };
+  
     filterWrap.appendChild(resetBtn);
     if (ctrl) ctrl.appendChild(filterWrap);
   }
@@ -757,7 +761,7 @@ async function initChildNamesApi() {
         </tr>`;
     });
     
-    html += `</tbody></table></div><div class="hr-header-text" style="font-size:10px; margin-top:12px; text-align: left;">*Displaying top 100 derived name frequencies.</div>`;
+    html += `</tbody></table></div><div class="hr-header-text" style="font-size:10px; margin-top:12px; text-align: left;">*Displaying top 40 derived name frequencies.</div>`;
       container.innerHTML = html;
     
       // Isolate the specific search logic for this customized layout
@@ -925,7 +929,7 @@ async function initPresencesApi(page = 1) {
       const currentPage = pageData.current_page || page;
       const lastPage = pageData.last_page || (records.length >= 100 ? currentPage + 1 : currentPage);
       let btnHtml = '';
-      if (currentPage > 1) btnHtml += `<button class="btn-outline" style="color:var(--black); border-color:var(--border); padding:8px 16px;" onclick="initPresencesApi(${currentPage - 1})">PREV PAGE</button>`;
+      if (currentPage > 1) btnHtml += `<button class="btn-outline" style="color: black !important; border-color: black !important; padding:8px 16px;" onclick="initPresencesApi(${currentPage - 1})">PREV PAGE</button>`;
       btnHtml += `<span style="font-family:'IBM Plex Mono', monospace; font-size:10px; padding:10px; color:var(--muted); font-weight:600;">PAGE ${currentPage} ${pageData.last_page ? 'OF ' + lastPage : ''}</span>`;
       if (currentPage < lastPage) btnHtml += `<button class="btn-outline" style="color:var(--black); border-color:var(--border); padding:8px 16px;" onclick="initPresencesApi(${currentPage + 1})">NEXT PAGE</button>`;
       pagination.innerHTML = btnHtml;
@@ -1034,9 +1038,9 @@ async function initInfrastructureApi(page = 1) {
 
     if (pagination) {
       pagination.innerHTML = `
-        <button class="btn-outline" style="padding:8px 16px; border-color:var(--border);" onclick="initInfrastructureApi(${page - 1})" ${page <= 1 ? 'disabled' : ''}>PREV</button>
-        <span style="font-family:mono; font-size:10px; color:var(--muted);">PAGE ${page} OF ${totalPages}</span>
-        <button class="btn-outline" style="padding:8px 16px; border-color:var(--border);" onclick="initInfrastructureApi(${page + 1})" ${page >= totalPages ? 'disabled' : ''}>NEXT</button>`;
+        <button class="btn-outline" style="padding:8px 16px; border-color:black !important;" onclick="initInfrastructureApi(${page - 1})" ${page <= 1 ? 'disabled' : ''}>PREV</button>
+        <span style="font-family:mono; font-size:10px; color:black !important;">PAGE ${page} OF ${totalPages}</span>
+        <button class="btn-outline" style="padding:8px 16px; border-color: black !important;" onclick="initInfrastructureApi(${page + 1})" ${page >= totalPages ? 'disabled' : ''}>NEXT</button>`;
     }
   } catch (e) { container.innerHTML = `<div class="terminal-alert">ERR_INFRA_STREAM_OFFLINE: UNABLE TO SYNC SATELLITE TELEMETRY</div>`; }
 }

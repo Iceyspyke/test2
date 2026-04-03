@@ -217,10 +217,60 @@ p, .cyber-log, .data-block-content, .case-indictment-text, .hero-subtitle {
 
 /* Convert Flex rows to columns to prevent squishing text side-by-side */
 .icj-meta, .exhibit-meta, .testimony-meta, .bm-doc-meta, .bm-viewer-meta,
-.icj-stats, .case-evidence-header {
+.case-evidence-header {
   flex-direction: column !important;
   align-items: flex-start !important;
   gap: 12px !important;
+}
+
+/* Evidence of State Crimes - Display 3 metrics horizontally */
+.icj-stats {
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: space-between !important;
+  align-items: flex-start !important;
+  width: 100% !important;
+  gap: 8px !important;
+}
+.icj-stats .icj-stat {
+  flex: 1 !important;
+  text-align: center !important;
+}
+
+/* British Mandate - Compact Grid Layout */
+.bm-sidebar {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 8px !important;
+  width: 100% !important;
+}
+.bm-sidebar .bm-list-item {
+  padding: 10px !important;
+  font-size: 11px !important;
+  text-align: center !important;
+  margin-bottom: 0 !important;
+}
+
+/* Latest Posts - Force Desktop 3-Column Grid on Mobile */
+#reddit-uploads-container {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important; /* Forces 3 items side-by-side */
+  gap: 8px !important; /* Reduced gap to fit small screens */
+  padding: 0 16px !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+}
+
+.reddit-card {
+  width: 100% !important;
+  min-width: 0 !important; /* Crucial: Allows the cards to shrink instead of pushing out of bounds */
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+
+/* Optional: Adjust internal card padding so text fits in the squished cards */
+.reddit-card > div {
+  padding: 12px !important;
 }
 
 .case-no-block { text-align: left !important; }
@@ -350,14 +400,21 @@ input[type="text"], input[type="search"], select, textarea {
 /* 5. Archive Registry / Timeline Button Wrap Fix */
 .timeline-filters {
   display: flex !important;
-  flex-wrap: wrap !important;
-  gap: 10px !important;
-  justify-content: space-between !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 12px !important;
+  width: 100% !important;
+}
+.timeline-filters .filter-group {
+  width: 100% !important;
+  align-items: center !important;
 }
 .timeline-filters button, .timeline-filters select, .timeline-filters input {
-  flex: 1 1 calc(50% - 10px) !important;
-  min-width: 120px !important;
-  margin: 0 !important;
+  width: 100% !important;
+  max-width: 300px !important;
+  margin: 0 auto !important;
+  text-align: center !important;
 }
 
 /* 6. Preserve Table Headers for Clickable Sorting on Mobile */
