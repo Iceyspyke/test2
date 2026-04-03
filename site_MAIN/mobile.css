@@ -38,9 +38,13 @@
 .map-viewer { display: flex !important; flex-direction: column !important; height: auto !important; min-height: auto !important; background: transparent !important; }
 #active-map-img { 
   width: 100% !important; 
+  min-width: 0 !important; /* Overrides the 770px min-width from desktop styles */
   height: auto !important; 
-  max-height: 70vh !important;
+  min-height: 300px !important; /* Overrides the 550px min-height from desktop */
+  max-height: 60vh !important;
+  max-width: 200vh !important;
   object-fit: contain !important;
+  object-position: center !important;
   flex: none !important;
   display: block !important;
 }
@@ -52,13 +56,6 @@
   border-top: 3px solid var(--amber) !important; 
   box-shadow: none !important;
   flex: none !important;
-}
-#active-map-img { 
-  width: 100% !important; 
-  height: 400px !important; 
-  object-fit: contain !important;
-  flex: none !important;
-  display: block !important;
 }
 .map-svg-container {
   inset: 0 0 auto 0 !important;

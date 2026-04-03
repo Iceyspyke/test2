@@ -290,10 +290,13 @@ function closeSearch() {
 function executeSearchRoute(pageId) { closeSearch(); showPage(pageId); }
 
 function initTimelineFilter() {
-  const search = document.getElementById('tl-search');
-  const decade = document.getElementById('tl-decade');
-  const type   = document.getElementById('tl-type');
-  const resetBtn = document.getElementById('tl-reset');
+  const activePage = document.querySelector('.page.active');
+  if (!activePage) return;
+
+  const search = activePage.querySelector('input[id*="search"]');
+  const decade = activePage.querySelector('select[id*="decade"]');
+  const type   = activePage.querySelector('select[id*="type"]');
+  const resetBtn = activePage.querySelector('button[id*="reset"]');
 
   function filterTimeline() {
     const q = search ? search.value.toLowerCase().trim() : '';
@@ -301,7 +304,7 @@ function initTimelineFilter() {
     const t = type ? type.value : 'all';
     let visible = 0;
     
-    document.querySelectorAll('.timeline-item').forEach(item => {
+    activePage.querySelectorAll('.timeline-item').forEach(item => {
       const text = item.innerText.toLowerCase();
       const itemYear = item.dataset.year;
       const itemDecade = itemYear ? (Math.floor(parseInt(itemYear) / 10) * 10).toString() : (item.dataset.decade || 'all');
@@ -316,19 +319,20 @@ function initTimelineFilter() {
       }
     });
     
-    const noResults = document.getElementById('tl-no-results');
+    const noResults = activePage.querySelector('[id*="no-results"]');
     if (noResults) noResults.style.setProperty('display', visible === 0 ? 'block' : 'none', 'important');
   }
 
-  if (search) search.addEventListener('input', filterTimeline);
-  if (decade) decade.addEventListener('change', filterTimeline);
-  if (type) type.addEventListener('change', filterTimeline);
-  if (resetBtn) resetBtn.addEventListener('click', () => {
+  // Using assignments overrides previous listeners to prevent memory leaks during SPA navigation
+  if (search) search.oninput = filterTimeline;
+  if (decade) decade.onchange = filterTimeline;
+  if (type) type.onchange = filterTimeline;
+  if (resetBtn) resetBtn.onclick = () => {
     if (search) search.value = '';
     if (decade) decade.value = 'all';
     if (type) type.value = 'all';
     filterTimeline();
-  });
+  };
 }
 
 function injectTableLabels() {
@@ -970,13 +974,28 @@ async function initDailyCasualtiesApi() {
   try {
     const response = await fetch('https://data.techforpalestine.org/api/v2/casualties_daily.json');
     const data = await response.json();
-    const recent = data.slice(-15).reverse();
-    let html = `<table class="census-table"><thead><tr><th>Report Date</th><th>Killed (Cum)</th><th>Injured (Cum)</th><th>Children</th></tr></thead><tbody>`;
-    recent.forEach(day => {
-      html += `<tr><td>${day.report_date}</td><td style="color:var(--red); font-weight:bold;">${day.killed_cum.toLocaleString()}</td><td>${day.injured_cum.toLocaleString()}</td><td>${day.killed_children_cum?.toLocaleString() || '--'}</td></tr>`;
+    
+    // Display all historical data, reversed so newest is at the top
+    const allDays = data.reverse(); 
+    
+    let html = `<div class="table-scroll-wrapper"><table class="census-table" style="margin-bottom:0;"><thead><tr><th>Report Date</th><th>Killed (Cum)</th><th>Injured (Cum)</th><th>Children</th></tr></thead><tbody>`;
+    
+    allDays.forEach(day => {
+      // Add safe fallbacks in case older JSON entries are missing data fields
+      const killed = day.killed_cum ? day.killed_cum.toLocaleString() : '--';
+      const injured = day.injured_cum ? day.injured_cum.toLocaleString() : '--';
+      const children = day.killed_children_cum ? day.killed_children_cum.toLocaleString() : '--';
+      
+      html += `<tr><td><span style="font-family:'IBM Plex Mono', monospace; font-size:11px;">${day.report_date || '--'}</span></td><td style="color:var(--red); font-weight:bold;">${killed}</td><td>${injured}</td><td>${children}</td></tr>`;
     });
-    container.innerHTML = html + `</tbody></table>`;
-  } catch (e) { setApiError(container, 'ERR_CASUALTY_STREAM_OFFLINE'); }
+    
+    container.innerHTML = html + `</tbody></table></div>`;
+    
+    // Attach the search and filter functions to the newly rendered table
+    attachTableSearch('daily-log-container');
+  } catch (e) { 
+    setApiError(container, 'ERR_CASUALTY_STREAM_OFFLINE'); 
+  }
 }
 
 // RESTORED: Archive Registry
