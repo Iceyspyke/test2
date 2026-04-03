@@ -682,63 +682,95 @@ footer { padding: 40px; border-top: 1px solid var(--border); display: flex; flex
 .siege-card-action:hover { color: var(--cream); }
 .siege-img { width: 100%; height: 140px; object-fit: cover; filter: grayscale(0.5) contrast(1.1); margin-bottom: 16px; opacity: 0.7; }
 
-/* ── MAPS ── */
-#page-maps .main { display: flex; flex-direction: column; min-height: 100vh; padding: 0; }
-.map-header { padding: 24px 40px; border-bottom: 1px solid var(--border); background: var(--cream); z-index: 10; }
-.map-title { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 800; margin-bottom: 4px; }
+/* ── MAPS (DASHBOARD LAYOUT) ── */
+#page-maps .main { 
+  display: flex !important; 
+  flex-direction: column !important; 
+  height: calc(100vh - 70px) !important; 
+  padding: 0 !important; 
+  overflow: hidden !important; 
+}
+
+.map-header { 
+  padding: 20px 32px; 
+  border-bottom: 1px solid var(--border); 
+  background: var(--cream); 
+  flex-shrink: 0; 
+  z-index: 10; 
+}
+
+.map-title { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 800; margin-bottom: 2px; }
 .map-subtitle { font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
 
 .map-layout { 
   display: flex; 
   flex: 1; 
-  height: calc(100vh - 120px); 
-  max-height: calc(100vh - 120px); /* Strictly lock container height to the viewport */
+  width: 100%;
   background: var(--cream); 
-  align-items: flex-start; /* Stop right box from stretching to list height */
+  align-items: stretch; 
+  overflow: hidden;
+  min-height: 0;
 }
 
 .map-order-list { 
-  width: 300px; 
-  height: 100%; /* Force list to scroll within layout bounds */
+  width: 320px; 
+  flex: 0 0 320px; 
+  height: 100%; 
   background: #fff; 
-  border-right: 1px solid var(--border); 
+  border-right: 0px solid var(--border); 
   overflow-y: auto; 
-  flex-shrink: 0; 
+  display: block !important; /* Ensure it stays a list and not a table row */
 }
 
-.map-order-item { padding: 16px 20px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background var(--transition-fast); border-left: 3px solid transparent; }
+.map-order-item { 
+  padding: 20px; 
+  border-bottom: 1px solid var(--border); 
+  cursor: pointer; 
+  transition: background var(--transition-fast); 
+  border-left: 4px solid transparent;
+  display: block !important;
+}
+
 .map-order-item:hover { background: rgba(0,0,0,0.02); }
-.map-order-item.active { background: rgba(0,0,0,0.04); border-left-color: var(--red); }
+.map-order-item.active { background: #f9f9f9; border-left-color: var(--red); }
 .map-order-date { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 800; color: var(--black); margin-bottom: 4px; }
 .map-order-meta { font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); line-height: 1.4; }
 
 .map-viewer { 
-  flex-grow: 1; 
+  flex: 1; 
   height: 100%; 
-  background: #111; 
+  background: var(--cream); 
   position: relative; 
   display: flex; 
   flex-direction: row; 
-  align-items: stretch; 
-  justify-content: flex-start; 
+  align-items: center; 
+  justify-content: center;
   overflow: hidden;
+  min-width: 0;
 }
 
 #active-map-img {
-  flex-grow: 1;
-  width: 0;
+  flex: 0 1 auto;
+  width: auto;
+  max-width: 65%;          /* Prevent very wide images from breaking the layout */
+  min-width: 770px;         /* new: enforce minimum width */
   height: 100%;
-  object-fit: contain;
+  min-height: 550px;        /* new: enforce minimum height */
+  object-fit: contain;      
+  object-position: left center; 
+  z-index: 2;
 }
 
 .map-ui-overlay {
   position: relative;
   background: rgba(10, 10, 10, 0.95);
-  border-left: 1px solid var(--border);
+  border-left: 0px solid var(--border);
   border-top: 3px solid var(--amber);
-  padding: 20px;
-  width: 320px;
-  flex-shrink: 0;
+  padding: 24px 20px;
+  width: auto;
+  flex: 1 1 auto;        /* stretch in flex layout */
+  height: 100%;          /* take all available height */
+  max-height: 100vh;     /* optional: prevent overflowing viewport */
   color: var(--cream);
   z-index: 10;
   box-shadow: -10px 0 30px rgba(0,0,0,0.5);

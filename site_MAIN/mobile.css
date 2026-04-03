@@ -30,11 +30,20 @@
 }
 
 /* API Map Layout Restructuring for Mobile */
-.map-layout { flex-direction: column !important; overflow-y: auto !important; height: auto !important; max-height: none !important; }
-.map-order-list { width: 100% !important; height: 250px !important; border-right: none !important; border-bottom: 1px solid var(--border) !important; }
+#page-maps .main { height: auto !important; overflow: visible !important; }
+.map-layout { display: flex !important; flex-direction: column !important; height: auto !important; overflow: visible !important; }
+.map-order-list { width: 100% !important; height: 300px !important; border-right: none !important; border-bottom: 1px solid var(--border) !important; flex: none !important; }
 
 /* Stack Map and Overlay */
-.map-viewer { flex-direction: column !important; min-height: auto !important; height: auto !important; }
+.map-viewer { display: flex !important; flex-direction: column !important; height: auto !important; min-height: auto !important; background: transparent !important; }
+#active-map-img { 
+  width: 100% !important; 
+  height: auto !important; 
+  max-height: 70vh !important;
+  object-fit: contain !important;
+  flex: none !important;
+  display: block !important;
+}
 .map-ui-overlay { 
   position: relative !important;
   width: 100% !important; 
@@ -42,12 +51,14 @@
   border-left: none !important; 
   border-top: 3px solid var(--amber) !important; 
   box-shadow: none !important;
+  flex: none !important;
 }
 #active-map-img { 
   width: 100% !important; 
-  height: 350px !important; /* Fixed height for image area on mobile */
-  flex-grow: 0 !important; 
+  height: 400px !important; 
   object-fit: contain !important;
+  flex: none !important;
+  display: block !important;
 }
 .map-svg-container {
   inset: 0 0 auto 0 !important;
@@ -293,33 +304,41 @@ p, .cyber-log, .data-block-content, .case-indictment-text, .hero-subtitle {
   display: grid !important;
   grid-template-columns: 1fr 1fr !important; /* Creates a clean 2x2 grid */
   gap: 8px !important;
-  margin-bottom: 0 !important;
+  margin: 0 !important; /* Fix: Reset default UL margins */
+  padding: 0 !important; /* Fix: Reset default UL padding */
+  list-style: none !important; /* Fix: Remove list bullets */
   width: 100% !important;
   box-sizing: border-box !important;
 }
 
 #page-mandate .bm-list-item {
   width: 100% !important;
-  border-left: 1px solid var(--border) !important;
+  min-height: 54px !important; /* Fix: Enforce height to keep grid perfectly aligned */
+  border: 1px solid var(--border) !important; /* Fix: Box outline for visual alignment */
   border-bottom: 3px solid transparent !important;
   text-align: center !important;
-  padding: 10px 4px !important;
-  margin-bottom: 0 !important;
-  font-size: 9px !important;
+  padding: 6px 4px !important;
+  margin: 0 !important;
+  font-size: 10px !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  line-height: 1.2 !important;
+  line-height: 1.1 !important;
+  text-transform: uppercase !important;
+  background: rgba(0,0,0,0.02) !important;
+  box-sizing: border-box !important;
 }
 
 #page-mandate .bm-list-item.active {
-  border-left-color: var(--border) !important;
+  border-color: var(--border) !important;
   border-bottom-color: var(--red) !important;
+  background: rgba(200,55,58,0.05) !important;
 }
 
 /* Fix Global Search Overlay */
 .search-overlay { padding: 70px 16px 16px !important; }
 .search-prompt { font-size: 16px !important; margin-right: 8px !important; }
+.kb-shortcut { display: none !important; } /* Disable keyboard shortcut hints on touch devices */
 
 /* ── 4. TABLE TO CARD CONVERSION ── */
 .hr-table thead, .detention-table thead, .compliance-table thead, 
