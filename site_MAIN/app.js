@@ -5,6 +5,7 @@
 
 const PAGE_MAP = {
   wb: 'page-wb', westbank: 'page-wb', gaza: 'page-gaza', mandate: 'page-mandate', nakba: 'nav-nakba', chronology: 'page-chronology', icj: 'page-icj', hr: 'page-hr',
+  levant: 'page-levant', contact: 'page-legal',
   case: 'page-case', siege: 'page-siege', maps: 'page-maps', testimonies: 'page-testimonies',
   british: 'page-british', census: 'page-census', icc: 'page-icc', un: 'page-un',
   detention: 'page-detention', media: 'page-media', arms: 'page-arms', medical: 'page-medical',
@@ -15,10 +16,11 @@ const PAGE_MAP = {
 
 const NAV_MAP = {
   wb: 'nav-wb', gaza: 'nav-gaza', mandate: 'nav-mandate', nakba: 'nav-nakba', icj: 'nav-icj', hr: 'nav-hr',
+  levant: 'nav-levant', legal: 'nav-legal',
   case: 'nav-icj', icc: 'nav-icc', westbank: 'nav-wb'
 };
 
-const REDDIT_POLL_MS = 2 * 60 * 60 * 1000;
+const REDDIT_POLL_MS = 12 * 60 * 60 * 1000;
 
 // Global State
 let tfpSummaryData = null;
