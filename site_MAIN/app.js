@@ -1093,16 +1093,16 @@ async function fetchRegistryData(category, btnEl) {
       records = cache[category] || [];
     }
     let html = `<table class="census-table"><thead><tr>`;
-    if (category === 'organizations') {
-      html += `<th>Organization</th><th>Description</th><th>Focus</th><th>Access</th></tr></thead><tbody>`;
-      records.forEach(rec => { html += `<tr><td><strong style="color:var(--black);">${rec.name}</strong></td><td>${rec.description || '-'}</td><td><span class="exhibit-tag">${rec.type || 'NGO'}</span></td><td><a href="${rec.link}" target="_blank" class="detention-btn">Link</a></td></tr>`; });
-    } else {
-      html += `<th>Title</th><th>Creator</th><th>Access</th></tr></thead><tbody>`;
-      records.forEach(rec => { html += `<tr><td><strong style="color:var(--black);">${rec.title}</strong></td><td>${rec.author || rec.director || '-'}</td><td><a href="${rec.link}" target="_blank" class="detention-btn">View</a></td></tr>`; });
+        if (category === 'organizations') {
+          html += `<th>Organization</th><th>Description</th><th>Focus</th><th>Access</th></tr></thead><tbody>`;
+          records.forEach(rec => { html += `<tr><td><strong style="color:var(--black);">${rec.name}</strong></td><td>${rec.description || '-'}</td><td><span class="exhibit-tag">${rec.type || 'NGO'}</span></td><td><a href="${rec.link}" target="_blank" class="detention-btn">Link</a></td></tr>`; });
+        } else {
+          html += `<th>Title</th><th>Creator</th><th>Access</th></tr></thead><tbody>`;
+          records.forEach(rec => { html += `<tr><td><strong style="color:var(--black);">${rec.title}</strong></td><td>${rec.author || rec.director || '-'}</td><td><a href="${rec.link}" target="_blank" class="detention-btn">View</a></td></tr>`; });
+        }
+        container.innerHTML = html + `</tbody></table>`;
+      } catch (e) { setApiError(container, 'ERR_REGISTRY_HANDSHAKE_FAILED'); }
     }
-    container.innerHTML = html + `</tbody></table>`;
-  } catch (e) { setApiError(container, 'ERR_REGISTRY_HANDSHAKE_FAILED'); }
-}
 
 // RESTORED: Reddit Intelligence Stream
 function fetchWithTimeout(url, options = {}, timeout = 8000) {

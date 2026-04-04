@@ -3,7 +3,7 @@
   <div class="main">
 	<div class="un-header">
 	  <h1 class="un-title">Infrastructure Damage Registry</h1>
-	  <div class="un-subtitle">Satellite Assessment // Sectoral Collapse Metrics</div>
+	  <div class="un-subtitle"></div>
 	  <p class="hr-header-text" style="margin-top: 16px;">Forensic quantification of the systematic destruction of civilian objects. Data verified via UNOSAT satellite imagery, World Bank damage assessments, FAO-UNOSAT agricultural surveys, and municipal utility logs.</p>
 	</div>
 
@@ -23,59 +23,71 @@
 	  <div class="hr-header-text" style="margin-top: 12px; font-size: 11px; font-style: italic;">[!] ZOOM TO OBSERVE SECTORAL DAMAGE DENSITY // LIVE SATELLITE FEED OVERLAY</div>
 	</section>
 
-	<!-- PRIMARY STATS -->
-	<div class="detention-stats-grid" style="margin-top: 40px; margin-bottom: 16px;">
+<section class="section" style="margin-top: 40px; padding: 0;">
+	  <h2 class="section-title">Statistics</h2>
+
+	<div class="detention-stats-grid" style="margin-top: 40px; margin-bottom: 40px;">
+	
 	  <div class="detention-stat-box" style="border-top-color: var(--red);">
 		<div class="detention-stat-label">Structures Damaged or Destroyed</div>
 		<div class="detention-stat-val">81%</div>
 	  </div>
-	  <div class="detention-stat-box" style="border-top-color: var(--red);">
+	
+	  <div class="detention-stat-box" style="border-top-color: var(--amber);">
 		<div class="detention-stat-label">Housing Units Damaged</div>
 		<div class="detention-stat-val">320,622</div>
 	  </div>
-	  <div class="detention-stat-box" style="border-top-color: var(--amber);">
+	
+	  <div class="detention-stat-box" style="border-top-color: var(--red);">
 		<div class="detention-stat-label">Water Network Functionality</div>
 		<div class="detention-stat-val">04%</div>
 	  </div>
-	  <div class="detention-stat-box" style="border-top-color: var(--red);">
+	
+	  <div class="detention-stat-box" style="border-top-color: var(--amber);">
 		<div class="detention-stat-label">Power Grid Status</div>
 		<div class="detention-stat-val">OFFLINE</div>
 	  </div>
-	  <div class="detention-stat-box" style="border-top-color: var(--amber);">
+	
+	  <div class="detention-stat-box" style="border-top-color: var(--red);">
 		<div class="detention-stat-label">Commercial Facilities</div>
 		<div class="detention-stat-val">80%+</div>
 	  </div>
-	  <div class="detention-stat-box" style="border-top-color: var(--red);">
+	
+	  <div class="detention-stat-box" style="border-top-color: var(--amber);">
 		<div class="detention-stat-label">Road Networks Damaged</div>
 		<div class="detention-stat-val">68%</div>
 	  </div>
-	  <div class="detention-stat-box" style="border-top-color: var(--black);">
+	
+	  <div class="detention-stat-box" style="border-top-color: var(--red);">
 		<div class="detention-stat-label">Telecom Connectivity</div>
 		<div class="detention-stat-val">FAILING</div>
 	  </div>
-	  <div class="detention-stat-box" style="border-top-color: var(--red);">
+	
+	  <div class="detention-stat-box" style="border-top-color: var(--amber);">
 		<div class="detention-stat-label">Estimated Rebuild Cost</div>
 		<div class="detention-stat-val">$70B</div>
 	  </div>
-	</div>
-	<!-- SECONDARY STATS -->
-	<div class="detention-stats-grid" style="margin-bottom: 40px;">
+	
 	  <div class="detention-stat-box" style="border-top-color: var(--red);">
 		<div class="detention-stat-label">Hospitals Damaged or Destroyed</div>
 		<div class="detention-stat-val">94%</div>
 	  </div>
+	
 	  <div class="detention-stat-box" style="border-top-color: var(--amber);">
 		<div class="detention-stat-label">WASH Facilities Destroyed</div>
 		<div class="detention-stat-val">80%+</div>
 	  </div>
+	
 	  <div class="detention-stat-box" style="border-top-color: var(--red);">
 		<div class="detention-stat-label">Cropland Damaged</div>
 		<div class="detention-stat-val">87%</div>
 	  </div>
-	  <div class="detention-stat-box" style="border-top-color: var(--black);">
+	
+	  <div class="detention-stat-box" style="border-top-color: var(--green-light);">
 		<div class="detention-stat-label">Tons of Rubble (est.)</div>
 		<div class="detention-stat-val">55M</div>
 	  </div>
+	
 	</div>
 
 	<h2 class="infra-title" style="margin-top: 20px;">Civilian Infrastructure Damage</h2>
@@ -238,6 +250,15 @@
 	  <div class="data-block-header"><span>UNOSAT — STRUCTURAL DAMAGE TRAJECTORY</span><span>Oct 11, 2025</span></div>
 	  <div class="data-block-content">The October 2025 UNOSAT multi-sensor analysis marks a 4% increase in total affected structures and an 18% increase in destroyed structures compared to the July 2025 assessment — indicating accelerating destruction even as ceasefire negotiations were ongoing. An estimated 320,622 housing units have been damaged, 12% more than on 8 July 2025. The Governorates of Gaza City and North Gaza experienced the largest increases in newly affected structures (4,243 and 1,442 respectively). The compound destruction trajectory across the full 24-month assessment period is without documented precedent in the UNOSAT multi-sensor conflict database. <a href="https://www.un.org/unispal/document/unosat-gaza-strip-damage-assessment-31oct25/" target="_blank" rel="noopener noreferrer" style="color:var(--amber);">Read Full UNOSAT Report →</a></div>
 	</div>
+
+	<section class="section" style="padding: 10px 0;">
+	  <h2 class="section-title">Forensic Evidence & Infrastructure</h2>
+	  <div class="section-rule" style="margin-bottom: 15px;"></div>
+	  
+	  <p class="hr-header-text" style="margin-bottom: 10px;">Satellite infrastructure assessment and structural telemetry.</p>
+	  <div id="infra-api-container"></div>
+	  <div id="infra-pagination" style="display:flex; gap:10px; align-items:center; justify-content:center; flex-wrap:wrap; margin-top:15px;"></div>
+	</section>
 
 	<footer>
 	  <div class="footer-brand">ISRAELI_VIOLENCE. <span>© 2026 ISRAELI_VIOLENCE.</span></div>
