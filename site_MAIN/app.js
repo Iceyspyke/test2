@@ -4,7 +4,7 @@
 ════════════════════════════════════════════ */
 
 const PAGE_MAP = {
-  wb: 'page-wb', westbank: 'page-wb', gaza: 'page-gaza', mandate: 'page-mandate', nakba: 'nav-nakba', chronology: 'page-chronology', icj: 'page-icj', hr: 'page-hr',
+  wb: 'page-wb', westbank: 'page-wb', gaza: 'page-gaza', mandate: 'page-mandate', nakba: 'page-nakba', chronology: 'page-chronology', icj: 'page-icj', hr: 'page-hr',
   levant: 'page-levant', contact: 'page-legal',
   case: 'page-case', siege: 'page-siege', maps: 'page-maps', testimonies: 'page-testimonies',
   british: 'page-british', census: 'page-census', icc: 'page-icc', un: 'page-un',
